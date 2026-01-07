@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Everest</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Header -->
+<div class="navbar">
+  <h2 class="logo">Everest</h2>
+
+  <div class="top-icons">
+    <i class="fa-solid fa-plus"></i>
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-bell"></i>
+    <i class="fa-brands fa-facebook-messenger"></i>
+  </div>
+</div>
+
+<!-- Menu bar (FB style) -->
+<div class="menu-bar">
+  <i class="fa-solid fa-house active"></i>
+  <i class="fa-solid fa-video"></i>
+  <i class="fa-solid fa-user-group"></i>
+  <i class="fa-solid fa-bars"></i>
+</div>
+
+<!-- Post Box -->
+<div class="post-box">
+  <div class="post-input">
+    <label for="profileUpload">
+      <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
+    </label>
+
+    <label class="mind" for="imageInput">
+      What's on your mind?
+    </label>
+
+    <button id="postBtn">Post</button>
+  </div>
+</div>
+
+<input type="file" id="profileUpload" accept="image/*" hidden>
+<input type="file" id="imageInput" accept="image/*" hidden>
+
+<!-- Feed -->
+<div id="feed"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
