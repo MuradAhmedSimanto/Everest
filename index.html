@@ -3,21 +3,10 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- ONLY REQUIRED FOR MOBILE -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Everest</title>
   <link rel="stylesheet" href="style.css">
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-
-  <!-- ONLY REQUIRED FOR MOBILE -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Everest</title>
-  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -26,18 +15,28 @@
 <div class="navbar">
   <h2 class="logo">Everest</h2>
 
-<div class="top-icons">
-  <a href="https://tinyurl.com/Murad-Ai" target="_blank">
-    <i class="fa fa-globe"></i>
-  </a>
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <i class="fa-solid fa-bell"></i>
-  <i class="fa-brands fa-facebook-messenger"></i>
+  <div class="top-icons">
+
+    <a href="https://tinyurl.com/Murad-Ai" target="_blank">
+  <i class="fa-solid fa-bolt"></i>
+</a>
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-bell"></i>
+
+    <!-- 3-dot menu -->
+    <div class="menu-wrapper">
+      <i class="fa-solid fa-ellipsis-vertical" id="menuBtn"></i>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="#">Profile</a>
+        <a href="#">Signup</a>
+        <a href="#">Settings</a>
+        <a href="#" class="logout">Logout</a>
+      </div>
+    </div>
+  </div>
 </div>
 
-</div>
-
-<!-- Menu bar (FB style) -->
+<!-- Menu bar -->
 <div class="menu-bar">
   <i class="fa-solid fa-house active"></i>
   <i class="fa-solid fa-video"></i>
@@ -66,7 +65,20 @@
 <!-- Feed -->
 <div id="feed"></div>
 
-<script src="script.js"></script>
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+
+  menuBtn.onclick = () => {
+    dropdownMenu.classList.toggle("show");
+  };
+
+  window.onclick = (e) => {
+    if (!e.target.matches('#menuBtn')) {
+      dropdownMenu.classList.remove("show");
+    }
+  };
+</script>
+
 </body>
 </html>
-
