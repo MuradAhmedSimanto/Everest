@@ -22,11 +22,15 @@ body {
   z-index: 100;
 }
 
+/* Logo */
 .logo {
   margin: 0;
-  color: #1877f2;
+  color: #0a3dff;
   font-size: 20px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Top icons */
@@ -35,26 +39,83 @@ body {
   align-items: center;
 }
 
-.top-icons a {
-  text-decoration: none;
-  margin-left: 12px;
-}
-
-.top-icons img {
-  width: 32px;
-  height: 32px;
-  background: #e4e6eb;
-  border-radius: 50%;
-  padding: 6px;
-  object-fit: contain;
-  cursor: pointer;
-}
-
 .top-icons i {
   font-size: 18px;
   color: #0b1f4d;
   cursor: pointer;
   margin-left: 12px;
+  transition: color 0.2s ease;
+}
+
+.top-icons i:hover {
+  color: #0a3dff;
+}
+
+/* ⚡ AI icon */
+.top-icons i.fa-bolt {
+  color: #f39c12;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.top-icons i.fa-bolt:hover {
+  transform: scale(1.2) rotate(15deg);
+  color: #ffdd59;
+}
+
+/* 3-dot menu wrapper */
+.menu-wrapper {
+  position: relative;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background: white;
+  width: 180px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 200;
+  font-size: 14px;
+}
+
+/* Dropdown menu items */
+.dropdown-menu a {
+  padding: 10px 14px;
+  text-decoration: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.dropdown-menu a:hover {
+  background: #f0f2f5;
+}
+
+.dropdown-menu a i {
+  width: 20px;
+  text-align: center;
+  color: #0a3dff;
+}
+
+.dropdown-menu .logout i {
+  color: red;
+}
+
+.dropdown-menu .logout {
+  color: red;
+}
+
+.dropdown-menu.show {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Menu bar */
@@ -69,11 +130,12 @@ body {
 .menu-bar i {
   font-size: 22px;
   color: #65676b;
+  cursor: pointer;
 }
 
 .menu-bar .active {
-  color: #1877f2;
-  border-bottom: 2px solid #1877f2;
+  color: #0a3dff;
+  border-bottom: 2px solid #0a3dff;
   padding-bottom: 6px;
 }
 
@@ -97,6 +159,7 @@ body {
   border-radius: 50%;
 }
 
+/* What's on your mind */
 .mind {
   flex: 1;
   background: #f0f2f5;
@@ -106,14 +169,19 @@ body {
   color: #65676b;
 }
 
+/* Post button */
 #postBtn {
-  background: #1877f2;
+  background: #0a3dff;
   color: white;
   border: none;
   padding: 7px 12px;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
+}
+
+#postBtn:hover {
+  opacity: 0.9;
 }
 
 /* Feed post */
@@ -159,5 +227,13 @@ body {
   color: #65676b;
 }
 
-
-
+/* Mobile responsive */
+@media (max-width: 500px) {
+  .dropdown-menu {
+    width: 150px;
+    font-size: 13px;
+  }
+  .dropdown-menu a i {
+    width: 18px;
+  }
+}
