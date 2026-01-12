@@ -7,8 +7,6 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   background: #f0f2f5;
-
-  /* navbar + menu-bar full space */
   padding-top: 108px;
 }
 
@@ -31,7 +29,6 @@ body {
   transition: transform 0.3s ease;
 }
 
-/* Hide navbar on scroll */
 .navbar.fb-hide {
   transform: translateY(-100%);
 }
@@ -46,7 +43,7 @@ body {
   border-bottom: 1px solid #e4e6eb;
 
   position: fixed;
-  top: 54px; /* normal position */
+  top: 54px;
   left: 0;
   width: 100%;
   height: 54px;
@@ -55,7 +52,6 @@ body {
   transition: top 0.3s ease;
 }
 
-/* 🔥 navbar hide হলে menu-bar উপরে উঠবে */
 .navbar.fb-hide + .menu-bar {
   top: 0;
 }
@@ -66,15 +62,16 @@ body {
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .menu-bar i:hover {
   background: #f0f2f5;
 }
 
-.menu-bar .active {
-  color: #0a3dff;
-  background: rgba(10, 61, 255, 0.1);
+.menu-bar i.active {
+  color: gold;
+  background: rgba(255, 215, 0, 0.18);
 }
 
 /* ================= LOGO & ICONS ================= */
@@ -205,8 +202,67 @@ body {
   background: #f0f2f5;
 }
 
+/* ================= PROFILE PAGE ================= */
+#profilePage {
+  background: #fff;
+  padding-bottom: 30px;
+}
+
+/* COVER */
+#coverPic {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+/* PROFILE WRAPPER */
+.profile-wrapper {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* PROFILE IMAGE */
+#profilePicBig {
+  position: absolute;
+  left: 20px;
+  top: -75px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  background: #fff;
+}
+
+/* PROFILE CAMERA */
+#profileCam {
+  position: absolute;
+  left: 130px;
+  top: 40px;
+}
+
+/* BIO AREA */
+#profilePage p,
+#profilePage textarea,
+#profilePage button {
+  margin-left: 20px;
+}
+
 /* ================= MOBILE ================= */
 @media (max-width: 768px) {
-  .logo { font-size: 18px; }
-  .menu-bar i { font-size: 20px; }
+  #coverPic {
+    height: 180px;
+  }
+
+  #profilePicBig {
+    width: 120px;
+    height: 120px;
+    top: -60px;
+    left: 16px;
+  }
+
+  #profileCam {
+    left: 105px;
+    top: 30px;
+  }
 }
