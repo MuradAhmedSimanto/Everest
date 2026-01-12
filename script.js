@@ -1,65 +1,196 @@
-const imageInput = document.getElementById("imageInput");
-const feed = document.getElementById("feed");
-const profileUpload = document.getElementById("profileUpload");
-const profilePic = document.getElementById("profilePic");
-const postBtn = document.getElementById("postBtn");
+* {
+  box-sizing: border-box;
+}
 
-let currentProfilePic = profilePic.src;
-let selectedImage = null;
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f0f2f5;
+}
 
-/* Change profile pic */
-profileUpload.addEventListener("change", () => {
-  const file = profileUpload.files[0];
-  if (!file) return;
+/* ================= HEADER / SEARCH ================= */
+.navbar {
+  background: #fff;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e4e6eb;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    profilePic.src = reader.result;
-    currentProfilePic = reader.result;
-  };
-  reader.readAsDataURL(file);
-});
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 
-/* Select post image */
-imageInput.addEventListener("change", () => {
-  selectedImage = imageInput.files[0];
-});
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
 
-/* Create post */
-postBtn.addEventListener("click", () => {
-  if (!selectedImage) {
-    alert("Please select a photo");
-    return;
-  }
+/* 🔽 FB style soft hide */
+.navbar.fb-hide {
+  transform: translateY(-22px);
+  opacity: 0.88;
+}
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const post = document.createElement("div");
-    post.className = "post";
+.logo {
+  color: #0a3dff;
+  font-size: 20px;
+  font-weight: 700;
+}
 
-    post.innerHTML = `
-      <div class="post-header">
-        <img src="${currentProfilePic}">
-        <b>Everest User</b>
-      </div>
+/* ================= TOP ICONS ================= */
+.top-icons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-      <img src="${reader.result}" class="post-img">
+.top-icons i {
+  font-size: 18px;
+  cursor: pointer;
+}
 
-      <div class="post-actions">
-        <button onclick="like(this)">👍 Like</button>
-        <button onclick="alert('Comment demo')">💬 Comment</button>
-        <button onclick="alert('Share demo')">↗ Share</button>
-      </div>
-    `;
+/* ================= MENU BAR ================= */
+.menu-bar {
+  background: #fff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e4e6eb;
 
-    feed.prepend(post);
-    selectedImage = null;
-  };
+  position: sticky;
+  top: 54px;
+  z-index: 999;
+}
 
-  reader.readAsDataURL(selectedImage);
-});
+.menu-bar i {
+  font-size: 22px;
+  color: #65676b;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
 
-/* Like */
-function like(btn) {
-  btn.innerText = "❤️ Liked";
+.menu-bar i:hover {
+  background: #f0f2f5;
+}
+
+.menu-bar .active {
+  color: #0a3dff;
+  background: rgba(10, 61, 255, 0.1);
+}
+
+/* ================= DROPDOWN MENU ================= */
+.dropdown-menu {
+  position: fixed;
+  right: 12px;
+  top: 112px;
+  width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  display: none;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.dropdown-menu.show {
+  display: flex;
+}
+
+.dropdown-menu a {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #050505;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+  background: #f0f2f5;
+}
+
+/* ================= POST BOX ================= */
+.post-box {
+  background: #fff;
+  margin: 10px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.post-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-input img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.mind {
+  flex: 1;
+  background: #f0f2f5;
+  padding: 10px 16px;
+  border-radius: 20px;
+  color: #65676b;
+}
+
+#postBtn {
+  background: #0a3dff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ================= FEED ================= */
+#feed {
+  padding-bottom: 80px;
+}
+
+/* ================= POST ================= */
+.post {
+  background: #fff;
+  margin: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.post img,
+.post video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ================= POST ACTIONS ================= */
+.post-actions {
+  display: flex;
+  border-top: 1px solid #e4e6eb;
+}
+
+.post-actions button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #65676b;
+  cursor: pointer;
+}
+
+.post-actions button:hover {
+  background: #f0f2f5;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .logo { font-size: 18px; }
+  .menu-bar i { font-size: 20px; }
 }
