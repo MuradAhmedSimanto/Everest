@@ -2,60 +2,78 @@
 const menuBtn = document.getElementById("menuBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 
-if (menuBtn && dropdownMenu) {
-  menuBtn.onclick = () => {
-    dropdownMenu.classList.toggle("show");
-  };
+menuBtn.onclick = () => {
+  dropdownMenu.classList.toggle("show");
+};
 
-  window.addEventListener("click", (e) => {
-    if (!e.target.closest(".menu-wrapper")) {
-      dropdownMenu.classList.remove("show");
-    }
-  });
-}
-
-/* ================= POST SYSTEM ================= */
-const imageInput = document.getElementById("imageInput");
-const feed = document.getElementById("feed");
-const postBtn = document.getElementById("postBtn");
-
-let selectedFile = null;
-
-imageInput.addEventListener("change", () => {
-  selectedFile = imageInput.files[0];
+window.addEventListener("click", (e) => {
+  if (!e.target.closest(".menu-wrapper")) {
+    dropdownMenu.classList.remove("show");
+  }
 });
 
+/* ================= POST SYSTEM ================= */
+const postBtn = document.getElementById("postBtn");
+const imageInput = document.getElementById("imageInput");
+const feed = document.getElementById("feed");
+
 postBtn.addEventListener("click", () => {
-  if (!selectedFile) {
-    imageInput.click();
-    return;
-  }
+  imageInput.click();
+});
+
+imageInput.addEventListener("change", () => {
+  const file = imageInput.files[0];
+  if (!file) return;
 
   const reader = new FileReader();
   reader.onload = () => {
     const post = document.createElement("div");
     post.className = "post";
 
-    let mediaHTML = selectedFile.type.startsWith("image")
+    let mediaHTML = file.type.startsWith("image")
       ? `<img src="${reader.result}">`
       : `<video controls><source src="${reader.result}"></video>`;
 
     post.innerHTML = `
       ${mediaHTML}
+
       <div class="post-actions">
-        <button>👍 Like</button>
-        <button>💬 Comment</button>
-        <button>↗ Share</button>
+        <button onclick="like(this)">
+          <i class="fa-regular fa-thumbs-up"></i> Like
+        </button>
+
+        <button onclick="toggleComment(this)">
+          <i class="fa-regular fa-comment"></i> Comment
+        </button>
+
+        <button>
+          <i class="fa-solid fa-share"></i> Share
+        </button>
+      </div>
+
+      <div class="comment-box" style="display:none;">
+        <input type="text" placeholder="Write a comment...">
       </div>
     `;
 
     feed.prepend(post);
-    selectedFile = null;
     imageInput.value = "";
   };
 
-  reader.readAsDataURL(selectedFile);
+  reader.readAsDataURL(file);
 });
+
+/* ================= LIKE ================= */
+function like(btn) {
+  btn.innerHTML = '<i class="fa-solid fa-heart"></i> Liked';
+}
+
+/* ================= COMMENT TOGGLE ================= */
+function toggleComment(btn) {
+  const post = btn.closest(".post");
+  const box = post.querySelector(".comment-box");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+}
 
 /* ================= FB STYLE SCROLL ================= */
 const navbar = document.querySelector(".navbar");
