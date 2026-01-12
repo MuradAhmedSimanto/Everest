@@ -45,115 +45,18 @@
   </div>
 </div>
 
-
 <!-- Post Box -->
 <div class="post-box">
   <div class="post-input">
-
-    <!-- Profile pic (NO gallery) -->
     <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
-
-    <!-- Whats on your mind (NO gallery) -->
-    <div class="mind">
-      What's on your mind?
-    </div>
-
-    <!-- Post button (ONLY this opens gallery) -->
+    <div class="mind">What's on your mind?</div>
     <button id="postBtn" type="button">Post</button>
   </div>
 </div>
 
-<!-- Hidden file input (used ONLY by Post button) -->
 <input type="file" id="imageInput" accept="image/*,video/*" hidden>
-
 <div id="feed"></div>
 
-<script>
-  /* Menu */
-  const menuBtn = document.getElementById("menuBtn");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  menuBtn.onclick = () => {
-    dropdownMenu.classList.toggle("show");
-  };
-
-  window.onclick = (e) => {
-    if (!e.target.closest(".menu-wrapper")) {
-      dropdownMenu.classList.remove("show");
-    }
-  };
-
-  /* Post system */
-  const postBtn = document.getElementById("postBtn");
-  const imageInput = document.getElementById("imageInput");
-  const feed = document.getElementById("feed");
-
-  /* ONLY post button opens gallery */
-  postBtn.addEventListener("click", () => {
-    imageInput.click();
-  });
-
-  imageInput.addEventListener("change", () => {
-    const file = imageInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const post = document.createElement("div");
-      post.className = "post";
-
-      let mediaHTML = "";
-      if (file.type.startsWith("image")) {
-        mediaHTML = `<img src="${reader.result}">`;
-      } else {
-        mediaHTML = `
-          <video controls>
-            <source src="${reader.result}">
-          </video>
-        `;
-      }
-
-      post.innerHTML = `
-        ${mediaHTML}
-
-        <div class="post-actions">
-          <button onclick="like(this)">
-            <i class="fa-regular fa-thumbs-up"></i> Like
-          </button>
-
-          <button onclick="toggleComment(this)">
-            <i class="fa-regular fa-comment"></i> Comment
-          </button>
-
-          <button>
-            <i class="fa-solid fa-share"></i> Share
-          </button>
-        </div>
-
-        <div class="comment-box" style="display:none;">
-          <input type="text" placeholder="Write a comment...">
-        </div>
-      `;
-
-      feed.prepend(post);
-      imageInput.value = "";
-    };
-
-    reader.readAsDataURL(file);
-  });
-
-  /* Like */
-  function like(btn) {
-    btn.innerHTML = '<i class="fa-solid fa-heart"></i> Liked';
-  }
-
-  /* Comment toggle */
-  function toggleComment(btn) {
-    const post = btn.closest(".post");
-    const box = post.querySelector(".comment-box");
-    box.style.display = box.style.display === "block" ? "none" : "block";
-  }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
