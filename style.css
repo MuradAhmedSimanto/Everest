@@ -2,13 +2,17 @@
   box-sizing: border-box;
 }
 
+/* ================= BODY ================= */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   background: #f0f2f5;
+
+  /* navbar + menu-bar full space */
+  padding-top: 108px;
 }
 
-/* ================= HEADER / SEARCH ================= */
+/* ================= NAVBAR ================= */
 .navbar {
   background: #fff;
   padding: 10px 14px;
@@ -17,35 +21,19 @@ body {
   align-items: center;
   border-bottom: 1px solid #e4e6eb;
 
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
+  height: 54px;
   z-index: 1000;
 
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
-/* 🔽 FB style soft hide */
+/* Hide navbar on scroll */
 .navbar.fb-hide {
-  transform: translateY(-22px);
-  opacity: 0.88;
-}
-
-.logo {
-  color: #0a3dff;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-/* ================= TOP ICONS ================= */
-.top-icons {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.top-icons i {
-  font-size: 18px;
-  cursor: pointer;
+  transform: translateY(-100%);
 }
 
 /* ================= MENU BAR ================= */
@@ -57,9 +45,19 @@ body {
   padding: 8px 0;
   border-bottom: 1px solid #e4e6eb;
 
-  position: sticky;
-  top: 54px;
+  position: fixed;
+  top: 54px; /* normal position */
+  left: 0;
+  width: 100%;
+  height: 54px;
   z-index: 999;
+
+  transition: top 0.3s ease;
+}
+
+/* 🔥 navbar hide হলে menu-bar উপরে উঠবে */
+.navbar.fb-hide + .menu-bar {
+  top: 0;
 }
 
 .menu-bar i {
@@ -79,7 +77,25 @@ body {
   background: rgba(10, 61, 255, 0.1);
 }
 
-/* ================= DROPDOWN MENU ================= */
+/* ================= LOGO & ICONS ================= */
+.logo {
+  color: #0a3dff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.top-icons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.top-icons i {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ================= DROPDOWN ================= */
 .dropdown-menu {
   position: fixed;
   right: 12px;
