@@ -8,7 +8,7 @@ body {
   background: #f0f2f5;
 }
 
-/* ================= HEADER ================= */
+/* ================= HEADER / SEARCH ================= */
 .navbar {
   background: #fff;
   padding: 10px 14px;
@@ -16,6 +16,18 @@ body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e4e6eb;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 🔽 FB style soft hide */
+.navbar.fb-hide {
+  transform: translateY(-22px);
+  opacity: 0.88;
 }
 
 .logo {
@@ -34,35 +46,6 @@ body {
 .top-icons i {
   font-size: 18px;
   cursor: pointer;
-  transition: transform 0.25s ease, color 0.25s ease;
-}
-
-.top-icons i:hover {
-  transform: scale(1.15);
-  color: #0a3dff;
-}
-
-/* ⚡ AI animation */
-.ai {
-  color: #f5a623;
-}
-.ai:hover {
-  transform: scale(1.25) rotate(15deg);
-}
-
-/* ================= MESSAGE PREMIUM ================= */
-.msg-wrapper {
-  position: relative;
-}
-
-.msg-dot {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: #ff3040;
-  border-radius: 50%;
 }
 
 /* ================= MENU BAR ================= */
@@ -73,6 +56,10 @@ body {
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #e4e6eb;
+
+  position: sticky;
+  top: 54px;
+  z-index: 999;
 }
 
 .menu-bar i {
@@ -81,7 +68,6 @@ body {
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
-  transition: background 0.2s;
 }
 
 .menu-bar i:hover {
@@ -93,11 +79,11 @@ body {
   background: rgba(10, 61, 255, 0.1);
 }
 
-/* ================= DROPDOWN MENU (100% FIXED) ================= */
+/* ================= DROPDOWN MENU ================= */
 .dropdown-menu {
   position: fixed;
   right: 12px;
-  top: 112px; /* navbar + menubar height */
+  top: 112px;
   width: 200px;
   background: #fff;
   border-radius: 14px;
@@ -116,7 +102,6 @@ body {
   text-decoration: none;
   color: #050505;
   display: flex;
-  align-items: center;
   gap: 12px;
   font-size: 14px;
 }
@@ -125,19 +110,7 @@ body {
   background: #f0f2f5;
 }
 
-.dropdown-menu a i {
-  color: #0a3dff;
-}
-
-.dropdown-menu .logout {
-  color: #e41e3f;
-}
-
-.dropdown-menu .logout i {
-  color: #e41e3f;
-}
-
-/* ================= POST ================= */
+/* ================= POST BOX ================= */
 .post-box {
   background: #fff;
   margin: 10px;
@@ -172,4 +145,52 @@ body {
   padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* ================= FEED ================= */
+#feed {
+  padding-bottom: 80px;
+}
+
+/* ================= POST ================= */
+.post {
+  background: #fff;
+  margin: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.post img,
+.post video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ================= POST ACTIONS ================= */
+.post-actions {
+  display: flex;
+  border-top: 1px solid #e4e6eb;
+}
+
+.post-actions button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #65676b;
+  cursor: pointer;
+}
+
+.post-actions button:hover {
+  background: #f0f2f5;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .logo { font-size: 18px; }
+  .menu-bar i { font-size: 20px; }
 }
