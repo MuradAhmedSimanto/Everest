@@ -10,10 +10,9 @@
 </head>
 <body>
 
-<!-- Header -->
+<!-- ================= HEADER ================= -->
 <div class="navbar">
   <h2 class="logo">Everest</h2>
-
   <div class="top-icons">
     <a href="https://tinyurl.com/Murad-Ai" target="_blank">
       <i class="fa-solid fa-bolt"></i>
@@ -24,12 +23,12 @@
   </div>
 </div>
 
-<!-- Menu bar -->
+<!-- ================= MENU BAR ================= -->
 <div class="menu-bar">
-  <i class="fa-solid fa-house active"></i>
-  <i class="fa-solid fa-user"></i>
-  <i class="fa-solid fa-video"></i>
-  <i class="fa-solid fa-user-group"></i>
+  <i class="fa-solid fa-house menu-icon active" id="homeIcon"></i>
+  <i class="fa-solid fa-user menu-icon" id="profileIcon"></i>
+  <i class="fa-solid fa-video menu-icon"></i>
+  <i class="fa-solid fa-user-group menu-icon"></i>
 
   <div class="menu-wrapper">
     <i class="fa-solid fa-bars" id="menuBtn"></i>
@@ -45,17 +44,57 @@
   </div>
 </div>
 
-<!-- Post Box -->
-<div class="post-box">
-  <div class="post-input">
-    <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
-    <div class="mind">What's on your mind?</div>
-    <button id="postBtn" type="button">Post</button>
+<!-- ================= HOME PAGE ================= -->
+<div id="homePage">
+
+  <!-- POST BOX -->
+  <div class="post-box">
+    <div class="post-input">
+      <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
+      <div class="mind">What's on your mind?</div>
+      <button id="postBtn" type="button">Post</button>
+    </div>
   </div>
+
+  <input type="file" id="imageInput" accept="image/*,video/*" hidden>
+  <div id="feed"></div>
+
 </div>
 
-<input type="file" id="imageInput" accept="image/*,video/*" hidden>
-<div id="feed"></div>
+<!-- ================= PROFILE PAGE ================= -->
+<div id="profilePage" style="display:none;">
+
+  <!-- COVER -->
+  <div style="position:relative;">
+    <img id="coverPic"
+         src="https://i.imgur.com/9QZ7R0B.jpg"
+         style="width:100%;height:230px;object-fit:cover;">
+
+    <i class="fa-solid fa-camera"
+       id="coverCam"
+       style="position:absolute;right:15px;bottom:15px;
+              background:#fff;padding:10px;border-radius:50%;
+              cursor:pointer;"></i>
+  </div>
+
+  <!-- PROFILE PIC -->
+  <div style="position:relative;width:150px;margin:-75px auto 0;">
+    <img id="profilePicBig"
+         src="https://i.imgur.com/6VBx3io.png"
+         style="width:150px;height:150px;border-radius:50%;
+                border:5px solid white;background:#fff;">
+
+    <i class="fa-solid fa-camera"
+       id="profileCam"
+       style="position:absolute;right:8px;bottom:8px;
+              background:#fff;padding:8px;border-radius:50%;
+              cursor:pointer;"></i>
+  </div>
+
+  <input type="file" id="profileInput" hidden accept="image/*">
+  <input type="file" id="coverInput" hidden accept="image/*">
+
+</div>
 
 <script src="script.js"></script>
 </body>
