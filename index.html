@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Everest</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<!-- ================= HEADER ================= -->
+<!-- ================= NAVBAR ================= -->
 <div class="navbar">
   <h2 class="logo">Everest</h2>
   <div class="top-icons">
@@ -37,9 +37,7 @@
       <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
       <a href="#"><i class="fa-solid fa-user-plus"></i> Signup</a>
       <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
-      <a href="#" class="logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </a>
+      <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
   </div>
 </div>
@@ -47,7 +45,6 @@
 <!-- ================= HOME PAGE ================= -->
 <div id="homePage">
 
-  <!-- POST BOX -->
   <div class="post-box">
     <div class="post-input">
       <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
@@ -89,6 +86,19 @@
        style="position:absolute;right:8px;bottom:8px;
               background:#fff;padding:8px;border-radius:50%;
               cursor:pointer;"></i>
+  </div>
+
+  <!-- BIO -->
+  <div style="text-align:center;margin-top:15px;">
+    <p id="bioText" style="color:#65676b;">Add your bio</p>
+
+    <textarea id="bioInput"
+      placeholder="Write something about yourself..."
+      style="width:90%;height:70px;display:none;"></textarea>
+
+    <br>
+    <button id="editBioBtn">Edit Bio</button>
+    <button id="saveBioBtn" style="display:none;">Save</button>
   </div>
 
   <input type="file" id="profileInput" hidden accept="image/*">
