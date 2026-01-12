@@ -6,7 +6,7 @@ menuBtn.onclick = () => {
   dropdownMenu.classList.toggle("show");
 };
 
-window.addEventListener("click", (e) => {
+window.addEventListener("click", e => {
   if (!e.target.closest(".menu-wrapper")) {
     dropdownMenu.classList.remove("show");
   }
@@ -60,6 +60,7 @@ imageInput.onchange = () => {
 
     feed.prepend(post);
   };
+
   reader.readAsDataURL(file);
   imageInput.value = "";
 };
@@ -96,6 +97,28 @@ coverInput.onchange = () => {
   const r = new FileReader();
   r.onload = () => coverPic.src = r.result;
   r.readAsDataURL(file);
+};
+
+/* ================= BIO ================= */
+const bioText = document.getElementById("bioText");
+const bioInput = document.getElementById("bioInput");
+const editBioBtn = document.getElementById("editBioBtn");
+const saveBioBtn = document.getElementById("saveBioBtn");
+
+editBioBtn.onclick = () => {
+  bioInput.value = bioText.textContent === "Add your bio" ? "" : bioText.textContent;
+  bioText.style.display = "none";
+  bioInput.style.display = "block";
+  editBioBtn.style.display = "none";
+  saveBioBtn.style.display = "inline";
+};
+
+saveBioBtn.onclick = () => {
+  bioText.textContent = bioInput.value || "Add your bio";
+  bioText.style.display = "block";
+  bioInput.style.display = "none";
+  editBioBtn.style.display = "inline";
+  saveBioBtn.style.display = "none";
 };
 
 /* ================= FB STYLE SCROLL ================= */
