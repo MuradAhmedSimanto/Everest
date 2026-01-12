@@ -12,16 +12,40 @@ window.addEventListener("click", (e) => {
   }
 });
 
+/* ================= ACTIVE ICON ================= */
+const icons = document.querySelectorAll(".menu-icon");
+
+function setActive(icon) {
+  icons.forEach(i => i.classList.remove("active"));
+  icon.classList.add("active");
+}
+
+/* ================= PAGE SWITCH ================= */
+const homeIcon = document.getElementById("homeIcon");
+const profileIcon = document.getElementById("profileIcon");
+const homePage = document.getElementById("homePage");
+const profilePage = document.getElementById("profilePage");
+
+homeIcon.onclick = () => {
+  homePage.style.display = "block";
+  profilePage.style.display = "none";
+  setActive(homeIcon);
+};
+
+profileIcon.onclick = () => {
+  homePage.style.display = "none";
+  profilePage.style.display = "block";
+  setActive(profileIcon);
+};
+
 /* ================= POST SYSTEM ================= */
 const postBtn = document.getElementById("postBtn");
 const imageInput = document.getElementById("imageInput");
 const feed = document.getElementById("feed");
 
-postBtn.addEventListener("click", () => {
-  imageInput.click();
-});
+postBtn.onclick = () => imageInput.click();
 
-imageInput.addEventListener("change", () => {
+imageInput.onchange = () => {
   const file = imageInput.files[0];
   if (!file) return;
 
@@ -30,63 +54,59 @@ imageInput.addEventListener("change", () => {
     const post = document.createElement("div");
     post.className = "post";
 
-    let mediaHTML = file.type.startsWith("image")
+    post.innerHTML = file.type.startsWith("image")
       ? `<img src="${reader.result}">`
       : `<video controls><source src="${reader.result}"></video>`;
 
-    post.innerHTML = `
-      ${mediaHTML}
-
-      <div class="post-actions">
-        <button onclick="like(this)">
-          <i class="fa-regular fa-thumbs-up"></i> Like
-        </button>
-
-        <button onclick="toggleComment(this)">
-          <i class="fa-regular fa-comment"></i> Comment
-        </button>
-
-        <button>
-          <i class="fa-solid fa-share"></i> Share
-        </button>
-      </div>
-
-      <div class="comment-box" style="display:none;">
-        <input type="text" placeholder="Write a comment...">
-      </div>
-    `;
-
     feed.prepend(post);
-    imageInput.value = "";
   };
-
   reader.readAsDataURL(file);
-});
+  imageInput.value = "";
+};
 
-/* ================= LIKE ================= */
-function like(btn) {
-  btn.innerHTML = '<i class="fa-solid fa-heart"></i> Liked';
-}
+/* ================= PROFILE & COVER ================= */
+const profileCam = document.getElementById("profileCam");
+const coverCam = document.getElementById("coverCam");
+const profileInput = document.getElementById("profileInput");
+const coverInput = document.getElementById("coverInput");
 
-/* ================= COMMENT TOGGLE ================= */
-function toggleComment(btn) {
-  const post = btn.closest(".post");
-  const box = post.querySelector(".comment-box");
-  box.style.display = box.style.display === "block" ? "none" : "block";
-}
+const profilePic = document.getElementById("profilePic");
+const profilePicBig = document.getElementById("profilePicBig");
+const coverPic = document.getElementById("coverPic");
+
+profileCam.onclick = () => profileInput.click();
+coverCam.onclick = () => coverInput.click();
+
+profileInput.onchange = () => {
+  const file = profileInput.files[0];
+  if (!file) return;
+
+  const r = new FileReader();
+  r.onload = () => {
+    profilePic.src = r.result;
+    profilePicBig.src = r.result;
+  };
+  r.readAsDataURL(file);
+};
+
+coverInput.onchange = () => {
+  const file = coverInput.files[0];
+  if (!file) return;
+
+  const r = new FileReader();
+  r.onload = () => coverPic.src = r.result;
+  r.readAsDataURL(file);
+};
 
 /* ================= FB STYLE SCROLL ================= */
 const navbar = document.querySelector(".navbar");
 let lastScrollY = window.scrollY;
 
 window.addEventListener("scroll", () => {
-  const currentScrollY = window.scrollY;
-
-  if (currentScrollY > lastScrollY && currentScrollY > 20) {
+  if (window.scrollY > lastScrollY && window.scrollY > 20) {
     navbar.classList.add("fb-hide");
   } else {
     navbar.classList.remove("fb-hide");
   }
-
-  lastScrollY = currentScrollY;
+  lastScrollY = window.scrollY;
 });
