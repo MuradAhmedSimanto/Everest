@@ -254,3 +254,82 @@ body {
     margin-left: 16px !important;
   }
 }
+
+/* ================= AUTH MODAL FIX (PREMIUM) ================= */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  backdrop-filter: blur(6px);
+}
+
+.auth-box {
+  background: #ffffff;
+  width: 92%;
+  max-width: 420px;
+  padding: 26px 22px;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+
+/* Title */
+.auth-box h3 {
+  margin: 0 0 18px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #050505;
+}
+
+/* Inputs & Select */
+.auth-box input,
+.auth-box select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  background: #f9f9f9;
+}
+
+.auth-box input:focus,
+.auth-box select:focus {
+  border-color: #0a3dff;
+  background: #fff;
+}
+
+/* Continue Button */
+#authSubmit {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, #0a3dff, #4f6bff);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#authSubmit:hover {
+  opacity: 0.95;
+}
+
+/* Error Message */
+#authMsg {
+  margin-top: 8px;
+  font-size: 13px;
+  color: red;
+  text-align: center;
+}
+
+/* ================= INITIAL PAGE FIX ================= */
+#profilePage {
+  display: none;
+}
