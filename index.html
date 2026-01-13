@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- NAVBAR -->
 <div class="navbar">
   <h2 class="logo">Everest</h2>
   <div class="top-icons">
@@ -23,7 +23,7 @@
   </div>
 </div>
 
-<!-- ================= MENU BAR ================= -->
+<!-- MENU BAR -->
 <div class="menu-bar">
   <i class="fa-solid fa-house menu-icon active" id="homeIcon"></i>
   <i class="fa-solid fa-user menu-icon" id="profileIcon"></i>
@@ -42,68 +42,43 @@
   </div>
 </div>
 
-<!-- ================= HOME PAGE ================= -->
+<!-- HOME PAGE -->
 <div id="homePage">
-
   <div class="post-box">
     <div class="post-input">
       <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
       <div class="mind">What's on your mind?</div>
-      <button id="postBtn" type="button">Post</button>
+      <button id="postBtn">Post</button>
     </div>
   </div>
 
   <input type="file" id="imageInput" accept="image/*,video/*" hidden>
   <div id="feed"></div>
-
 </div>
 
-<!-- ================= PROFILE PAGE ================= -->
-<div id="profilePage" style="display:none;">
+<!-- PROFILE PAGE -->
+<div id="profilePage">
 
-  <!-- COVER -->
-  <div style="position:relative;">
-    <img id="coverPic"
-         src="https://i.imgur.com/9QZ7R0B.jpg"
-         style="width:100%;height:230px;object-fit:cover;">
-
-    <i class="fa-solid fa-camera"
-       id="coverCam"
-       style="position:absolute;right:15px;bottom:15px;
-              background:#fff;padding:10px;border-radius:50%;
-              cursor:pointer;"></i>
+  <div class="cover-wrapper">
+    <img id="coverPic" src="https://i.imgur.com/9QZ7R0B.jpg">
+    <i class="fa-solid fa-camera" id="coverCam"></i>
   </div>
 
-  <!-- PROFILE PIC -->
-  <div style="position:relative;width:150px;margin:-75px auto 0;">
-    <img id="profilePicBig"
-         src="https://i.imgur.com/6VBx3io.png"
-         style="width:150px;height:150px;border-radius:50%;
-                border:5px solid white;background:#fff;">
-
-    <i class="fa-solid fa-camera"
-       id="profileCam"
-       style="position:absolute;right:8px;bottom:8px;
-              background:#fff;padding:8px;border-radius:50%;
-              cursor:pointer;"></i>
+  <div class="profile-pic-wrapper">
+    <img id="profilePicBig" src="https://i.imgur.com/6VBx3io.png">
+    <i class="fa-solid fa-camera" id="profileCam"></i>
   </div>
 
-  <!-- BIO -->
-  <div style="text-align:center;margin-top:15px;">
-    <p id="bioText" style="color:#65676b;">Add your bio</p>
-
-    <textarea id="bioInput"
-      placeholder="Write something about yourself..."
-      style="width:90%;height:70px;display:none;"></textarea>
-
+  <div class="bio-section">
+    <p id="bioText">Add your bio</p>
+    <textarea id="bioInput" placeholder="Write something about yourself..."></textarea>
     <br>
     <button id="editBioBtn">Edit Bio</button>
-    <button id="saveBioBtn" style="display:none;">Save</button>
+    <button id="saveBioBtn">Save</button>
   </div>
 
-  <input type="file" id="profileInput" hidden accept="image/*">
-  <input type="file" id="coverInput" hidden accept="image/*">
-
+  <input type="file" id="profileInput" hidden>
+  <input type="file" id="coverInput" hidden>
 </div>
 
 <script src="script.js"></script>
