@@ -35,7 +35,10 @@
 
     <div class="dropdown-menu" id="dropdownMenu">
       <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
-      <a href="#"><i class="fa-solid fa-user-plus"></i> Signup</a>
+      
+      <a href="#" id="signupBtn">
+ <i class="fa-solid fa-user-plus"></i> Signup</a>
+
       <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
       <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
@@ -79,6 +82,29 @@
 
   <input type="file" id="profileInput" hidden>
   <input type="file" id="coverInput" hidden>
+</div>
+<!-- AUTH MODAL -->
+<div id="authModal" class="auth-modal">
+  <div class="auth-box">
+    <h3>Signup</h3>
+
+    <input type="text" id="authContact" placeholder="Phone number or Email">
+
+    <input type="text" id="firstName" placeholder="First name">
+    <input type="text" id="lastName" placeholder="Last name">
+
+    <select id="gender">
+      <option value="">Select gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input type="date" id="dob">
+
+    <button id="authSubmit">Continue</button>
+    <p id="authMsg"></p>
+  </div>
 </div>
 
 <script src="script.js"></script>
