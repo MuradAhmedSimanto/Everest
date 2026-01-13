@@ -139,3 +139,52 @@ window.addEventListener("scroll", () => {
   lastScrollY = window.scrollY;
 });
 
+/* ================= AUTH SYSTEM ================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const signupBtn = document.getElementById("signupBtn");
+  const authModal = document.getElementById("authModal");
+  const authSubmit = document.getElementById("authSubmit");
+  const authMsg = document.getElementById("authMsg");
+
+  if (signupBtn && authModal) {
+    signupBtn.onclick = (e) => {
+      e.preventDefault();
+      authModal.style.display = "flex";
+    };
+
+    authModal.onclick = (e) => {
+      if (e.target === authModal) {
+        authModal.style.display = "none";
+      }
+    };
+  }
+
+  if (authSubmit) {
+    authSubmit.onclick = () => {
+      const contact = document.getElementById("authContact").value.trim();
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const gender = document.getElementById("gender").value;
+      const dob = document.getElementById("dob").value;
+
+      if (!contact || !firstName || !lastName || !gender || !dob) {
+        authMsg.textContent = "Please fill all fields";
+        return;
+      }
+
+      const user = {
+        contact,
+        firstName,
+        lastName,
+        gender,
+        dob,
+        everestId: "EV-" + Date.now()
+      };
+
+      localStorage.setItem("everestUser", JSON.stringify(user));
+      authModal.style.display = "none";
+    };
+  }
+
+});
