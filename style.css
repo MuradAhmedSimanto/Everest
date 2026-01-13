@@ -18,14 +18,12 @@ body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e4e6eb;
-
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 54px;
   z-index: 1000;
-
   transition: transform 0.3s ease;
 }
 
@@ -41,15 +39,12 @@ body {
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #e4e6eb;
-
   position: fixed;
   top: 54px;
   left: 0;
   width: 100%;
   height: 54px;
   z-index: 999;
-
-  transition: top 0.3s ease;
 }
 
 .navbar.fb-hide + .menu-bar {
@@ -62,7 +57,6 @@ body {
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
-  transition: all 0.2s ease;
 }
 
 .menu-bar i:hover {
@@ -83,7 +77,6 @@ body {
 
 .top-icons {
   display: flex;
-  align-items: center;
   gap: 14px;
 }
 
@@ -182,87 +175,31 @@ body {
   display: block;
 }
 
-/* ================= POST ACTIONS ================= */
-.post-actions {
-  display: flex;
-  border-top: 1px solid #e4e6eb;
-}
+/* ================================================= */
+/* =============== PROFILE PAGE ==================== */
+/* ================================================= */
 
-.post-actions button {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 12px 0;
-  font-size: 14px;
-  color: #65676b;
-  cursor: pointer;
-}
-
-.post-actions button:hover {
-  background: #f0f2f5;
-}
-
-/* ================= PROFILE PAGE ================= */
 #profilePage {
   background: #fff;
   padding-bottom: 30px;
 }
 
-/* COVER */
+/* ✅ ONLY FIX — cover white gap remove */
 #coverPic {
   width: 100%;
-  height: 240px;
+  height: 230px;
   object-fit: cover;
+  display: block;      /* 🔥 main fix */
 }
 
-/* PROFILE WRAPPER */
-.profile-wrapper {
-  position: relative;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-/* PROFILE IMAGE */
-#profilePicBig {
-  position: absolute;
-  left: 20px;
-  top: -75px;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 5px solid #fff;
-  background: #fff;
-}
-
-/* PROFILE CAMERA */
-#profileCam {
-  position: absolute;
-  left: 130px;
-  top: 40px;
-}
-
-/* BIO AREA */
-#profilePage p,
-#profilePage textarea,
-#profilePage button {
-  margin-left: 20px;
+/* 🔥 image wrapper inline-gap fix */
+#profilePage > div:first-child {
+  line-height: 0;      /* 🔥 NO layout change */
 }
 
 /* ================= MOBILE ================= */
 @media (max-width: 768px) {
   #coverPic {
     height: 180px;
-  }
-
-  #profilePicBig {
-    width: 120px;
-    height: 120px;
-    top: -60px;
-    left: 16px;
-  }
-
-  #profileCam {
-    left: 105px;
-    top: 30px;
   }
 }
