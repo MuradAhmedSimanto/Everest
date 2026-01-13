@@ -47,20 +47,12 @@ body {
   z-index: 999;
 }
 
-.navbar.fb-hide + .menu-bar {
-  top: 0;
-}
-
 .menu-bar i {
   font-size: 22px;
   color: #65676b;
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
-}
-
-.menu-bar i:hover {
-  background: #f0f2f5;
 }
 
 .menu-bar i.active {
@@ -158,15 +150,7 @@ body {
   padding-bottom: 80px;
 }
 
-/* ================= POST ================= */
-.post {
-  background: #fff;
-  margin: 10px;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
+/* ================= POST MEDIA ================= */
 .post img,
 .post video {
   width: 100%;
@@ -176,7 +160,7 @@ body {
 }
 
 /* ================================================= */
-/* =============== PROFILE PAGE ==================== */
+/* ================= PROFILE PAGE ================== */
 /* ================================================= */
 
 #profilePage {
@@ -184,55 +168,51 @@ body {
   padding-bottom: 30px;
 }
 
-/* cover */
+/* COVER */
+.cover-wrapper {
+  position: relative;
+}
+
 #coverPic {
   width: 100%;
-  height: 160px;!important;
+  height: 230px;
   object-fit: cover;
   display: block;
 }
 
-#profilePage > div:first-child {
-  line-height: 0;
+#coverCam {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-/* 🔥 PROFILE PIC LEFT (override inline center) */
-#profilePage > div:nth-child(2) {
-  margin: -75px 0 0 24px !important; /* LEFT */
-  width: fit-content !important;
+/* PROFILE PIC */
+.profile-pic-wrapper {
+  position: relative;
+  width: 150px;
+  margin: -75px 0 0 24px;
 }
 
-/* 🔥 BIO + NAME LEFT */
-#profilePage > div:nth-child(3) {
-  text-align: left !important;
-  margin-left: 24px !important;
+#profilePicBig {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 5px solid white;
+  background: #fff;
 }
 
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-  #coverPic {
-    height: 180px;
-  }
-
-  #profilePage > div:nth-child(2) {
-    margin: -60px 0 0 16px !important;
-  }
-
-  #profilePage > div:nth-child(3) {
-    margin-left: 16px !important;
-  }
-}
-
-
-/* 🔥 PROFILE HEADER LEFT ALIGN (FB STYLE) */
-#profilePage > div:nth-child(2),
-#profilePage > div:nth-child(3) {
-  margin-left: 24px !important; /* 👈 here control distance */
-}
-
-/* profile pic already left – keep it */
-#profilePage > div:nth-child(2) {
-  margin-top: -75px !important;
+#profileCam {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #fff;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* 🔥 NAME + BIO LEFT & UNDER PROFILE PIC */
@@ -245,8 +225,32 @@ body {
 #profilePage h1,
 #profilePage h2,
 #profilePage p {
-  padding-left: 20px !important; /* 👈 Everest একটু right */
+  padding-left: 20px !important;
   text-align: left !important;
 }
 
+/* BIO INPUT */
+#bioInput {
+  width: 90%;
+  height: 70px;
+  display: none;
+}
 
+#saveBioBtn {
+  display: none;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  #coverPic {
+    height: 180px;
+  }
+
+  .profile-pic-wrapper {
+    margin: -60px 0 0 16px;
+  }
+
+  #profilePage > div:nth-child(3) {
+    margin-left: 16px !important;
+  }
+}
