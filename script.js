@@ -139,52 +139,87 @@ window.addEventListener("scroll", () => {
   lastScrollY = window.scrollY;
 });
 
-/* ================= AUTH SYSTEM ================= */
-document.addEventListener("DOMContentLoaded", () => {
 
-  const signupBtn = document.getElementById("signupBtn");
-  const authModal = document.getElementById("authModal");
-  const authSubmit = document.getElementById("authSubmit");
-  const authMsg = document.getElementById("authMsg");
 
-  if (signupBtn && authModal) {
-    signupBtn.onclick = (e) => {
-      e.preventDefault();
-      authModal.style.display = "flex";
-    };
 
-    authModal.onclick = (e) => {
-      if (e.target === authModal) {
-        authModal.style.display = "none";
-      }
-    };
+
+
+/* ================= AUTH MODAL SYSTEM ================= */
+
+// ELEMENTS
+const authModal = document.getElementById("authModal");
+const authMsg = document.getElementById("authMsg");
+
+const stepOne = document.getElementById("stepOne");
+const stepTwo = document.getElementById("stepTwo");
+
+const continueBtn = document.getElementById("continueBtn");
+const authSubmit = document.getElementById("authSubmit");
+const signupBtn = document.getElementById("signupBtn");
+
+/* ================= OPEN MODAL ================= */
+signupBtn.onclick = (e) => {
+  e.preventDefault();
+  authModal.style.display = "flex";
+
+  // reset
+  stepOne.style.display = "block";
+  stepTwo.style.display = "none";
+  authMsg.textContent = "";
+};
+
+/* ================= CLOSE MODAL (OUTSIDE CLICK) ================= */
+authModal.onclick = (e) => {
+  if (e.target === authModal) {
+    authModal.style.display = "none";
+  }
+};
+
+/* ================= STEP 1 → CONTINUE ================= */
+continueBtn.onclick = () => {
+  const authContact = document.getElementById("authContact").value.trim();
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const gender = document.getElementById("gender").value;
+  const dob = document.getElementById("dob").value;
+
+  if (!authContact || !firstName || !lastName || !gender || !dob) {
+    authMsg.textContent = "Please fill all fields";
+    return;
   }
 
-  if (authSubmit) {
-    authSubmit.onclick = () => {
-      const contact = document.getElementById("authContact").value.trim();
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName = document.getElementById("lastName").value.trim();
-      const gender = document.getElementById("gender").value;
-      const dob = document.getElementById("dob").value;
+  authMsg.textContent = "";
+  stepOne.style.display = "none";
+  stepTwo.style.display = "block";
+};
 
-      if (!contact || !firstName || !lastName || !gender || !dob) {
-        authMsg.textContent = "Please fill all fields";
-        return;
-      }
+/* ================= STEP 2 → SIGNUP ================= */
+authSubmit.onclick = () => {
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
 
-      const user = {
-        contact,
-        firstName,
-        lastName,
-        gender,
-        dob,
-        everestId: "EV-" + Date.now()
-      };
-
-      localStorage.setItem("everestUser", JSON.stringify(user));
-      authModal.style.display = "none";
-    };
+  if (password.length < 5 || password.length > 10) {
+    authMsg.textContent = "Password must be 5 to 10 characters";
+    return;
   }
 
-});
+  if (password !== confirmPassword) {
+    authMsg.textContent = "Passwords do not match";
+    return;
+  }
+
+  const user = {
+    contact: document.getElementById("authContact").value,
+    firstName: document.getElementById("firstName").value,
+    lastName: document.getElementById("lastName").value,
+    gender: document.getElementById("gender").value,
+    dob: document.getElementById("dob").value,
+    password: password,
+    everestId: "EV-" + Date.now()
+  };
+
+  localStorage.setItem("everestUser", JSON.stringify(user));
+
+  authMsg.textContent = "";
+  authModal.style.display = "none";
+};
