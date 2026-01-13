@@ -30,6 +30,11 @@ homeIcon.onclick = () => {
   homePage.style.display = "block";
   profilePage.style.display = "none";
   setActive(homeIcon);
+   document.documentElement.scrollTo({
+  top: 0,
+  behavior: "smooth"
+});
+document.body.scrollTop = 0;
 };
 
 profileIcon.onclick = () => {
@@ -133,3 +138,4 @@ window.addEventListener("scroll", () => {
   }
   lastScrollY = window.scrollY;
 });
+
