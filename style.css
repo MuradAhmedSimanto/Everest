@@ -383,17 +383,26 @@ body {
 
 /* 🌟 FOLLOW BUTTON – BRIGHT GOLD */
 .follow-btn {
-  background: linear-gradient(135deg, #ffd700, #ffb800);
-  color: #2b2b2b;
+  background: #ff2d2d;   /* 🔥 Bright Red */
+  color: #ffffff;
+
   border: none;
-  padding: 9px 20px;
-  border-radius: 10px;
+  padding: 5px 20px;
+  border-radius: 7px;
+
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.55);
-  transition: all 0.2s ease;
+
+ box-shadow: none;
+filter: none;
+outline: none;
+
+
+  /* ❌ animation বন্ধ */
+  transition: none;
 }
+
 
 .follow-btn:hover {
   transform: translateY(-1px);
@@ -402,28 +411,24 @@ body {
 
 /* 🔥 MESSAGE BUTTON – RED + GOLD MIX */
 .message-btn {
-  background: linear-gradient(135deg, #ff3b3b, #ffb347);
-  color: #fff;
+ 
+background: #f0f2f5;        /* dark white */
+color: #050505;            /* text black */
+box-shadow: none;          /* glow remove */
+transition: none;          /* animation remove */
   border: none;
-  padding: 9px 20px;
-  border-radius: 10px;
+  padding: 5px 20px;
+  border-radius: 7px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(255, 75, 75, 0.5);
-  transition: all 0.2s ease;
-}
-
-.message-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(255, 75, 75, 0.65);
 }
 
 /* ⋯ MORE ICON – CLEAN & PREMIUM */
 .more-btn {
   font-size: 20px;
-  padding: 9px;
-  border-radius: 50%;
+  padding: 3px;
+  border-radius: 10%;
   cursor: pointer;
   color: #050505;
 
@@ -433,10 +438,6 @@ body {
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.more-btn:hover {
-  background: #e4e6eb;
-  transform: scale(1.05);
-}
 
 /* ================= FOLLOW INFO ================= */
 
