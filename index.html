@@ -34,7 +34,9 @@
     <i class="fa-solid fa-bars" id="menuBtn"></i>
 
     <div class="dropdown-menu" id="dropdownMenu">
-      <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="#" id="menuProfile">
+  <i class="fa-solid fa-user"></i> Profile
+</a>
 
       <a href="#" id="signupBtn">
  <i class="fa-solid fa-user-plus"></i> Signup</a>
@@ -72,13 +74,30 @@
     <i class="fa-solid fa-camera" id="profileCam"></i>
   </div>
 
-  <div class="bio-section">
+<!-- FOLLOW INFO -->
+<div class="follow-info">
+  <span><strong>0</strong> followers</span>
+  <span><strong>0</strong> following</span>
+</div>
+
+<!-- PROFILE ACTION BUTTONS -->
+<div class="profile-actions">
+  <button class="follow-btn">Follow</button>
+  <button class="message-btn">Message</button>
+  <i class="fa-solid fa-ellipsis more-btn"></i>
+</div>
+<div class="profile-header">
+  <div class="profile-text">
     <p id="bioText">Add your bio</p>
+
     <textarea id="bioInput" placeholder="Write something about yourself..."></textarea>
     <br>
-    <button id="editBioBtn">Edit Bio</button>
     <button id="saveBioBtn">Save</button>
   </div>
+
+  <button class="edit-bio-btn" id="editBioBtn">Edit Bio</button>
+</div>
+
 
   <input type="file" id="profileInput" hidden>
   <input type="file" id="coverInput" hidden>
@@ -117,8 +136,6 @@
     <p id="authMsg"></p>
   </div>
 </div>
-
-
 
 <script src="script.js"></script>
 </body>
