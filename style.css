@@ -1,7 +1,6 @@
 * {
   box-sizing: border-box;
 }
-
 /* ================= BODY ================= */
 body {
   margin: 0;
@@ -9,7 +8,6 @@ body {
   background: #f0f2f5;
   padding-top: 108px;
 }
-
 /* ================= NAVBAR ================= */
 .navbar {
   background: #fff;
@@ -26,11 +24,9 @@ body {
   z-index: 1000;
   transition: transform 0.3s ease;
 }
-
 .navbar.fb-hide {
   transform: translateY(-100%);
 }
-
 /* ================= MENU BAR ================= */
 .menu-bar {
   background: #fff;
@@ -46,7 +42,6 @@ body {
   height: 54px;
   z-index: 999;
 }
-
 .menu-bar i {
   font-size: 22px;
   color: #65676b;
@@ -54,19 +49,16 @@ body {
   padding: 6px 12px;
   border-radius: 8px;
 }
-
 .menu-bar i.active {
   color: gold;
   background: rgba(255, 215, 0, 0.18);
 }
-
 /* ================= LOGO & ICONS ================= */
 .logo {
   color: #0a3dff;
   font-size: 20px;
   font-weight: 700;
 }
-
 .top-icons {
   display: flex;
   gap: 14px;
@@ -166,6 +158,7 @@ body {
 #profilePage {
   background: #fff;
   padding-bottom: 30px;
+  display: none;
 }
 
 /* COVER */
@@ -216,11 +209,26 @@ body {
 }
 
 /* 🔥 NAME + BIO LEFT & UNDER PROFILE PIC */
-#profilePage > div:nth-child(3) {
-  text-align: left !important;
-  margin-top: 10px !important;
+.profile-header {
+  display: flex;
+  align-items: flex-start;
 }
+/* EDIT BIO BUTTON */
+#editBioBtn {
+  position: static;
+  margin-left: auto;
+  margin-right: 20px;
+  margin-top: -20px;
 
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #1877f2;
+  background: #fff;
+  color: #1877f2;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
 /* 🔥 TEXT POSITION FIX (REAL REASON) */
 #profilePage h1,
 #profilePage h2,
@@ -235,11 +243,6 @@ body {
   height: 70px;
   display: none;
 }
-
-#saveBioBtn {
-  display: none;
-}
-
 /* ================= MOBILE ================= */
 @media (max-width: 768px) {
   #coverPic {
@@ -254,145 +257,6 @@ body {
     margin-left: 16px !important;
   }
 }
-
-/* ================= INITIAL PAGE FIX ================= */
-#profilePage {
-  display: none;
-}
-
-
-
-
-/* ================= AUTH MODAL (GORGEOUS) ================= */
-.auth-modal {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    rgba(0,0,0,0.55),
-    rgba(0,0,0,0.75)
-  );
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  backdrop-filter: blur(8px);
-}
-
-/* AUTH BOX */
-.auth-box {
-  background: linear-gradient(180deg, #ffffff, #f7f8fa);
-  width: 94%;
-  max-width: 430px;
-  padding: 28px 24px 30px;
-  border-radius: 22px;
-  box-shadow:
-    0 25px 60px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.6);
-  animation: authPop 0.35s ease;
-}
-
-/* POP ANIMATION */
-@keyframes authPop {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* TITLE */
-.auth-box h3 {
-  margin: 0 0 20px;
-  font-size: 24px;
-  font-weight: 800;
-  text-align: center;
-  letter-spacing: 0.3px;
-  background: linear-gradient(135deg, #0a3dff, #6a7bff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* INPUTS & SELECT */
-.auth-box input,
-.auth-box select {
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  border-radius: 14px;
-  border: 1px solid #e0e3e8;
-  font-size: 14px;
-  background: #f4f6f9;
-  transition: all 0.25s ease;
-}
-
-.auth-box input::placeholder {
-  color: #8a8d91;
-}
-
-/* FOCUS EFFECT */
-.auth-box input:focus,
-.auth-box select:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #0a3dff;
-  box-shadow: 0 0 0 4px rgba(10,61,255,0.12);
-}
-
-/* CONTINUE / SIGNUP BUTTON */
-.auth-box button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 10px;
-  background: linear-gradient(135deg, #0a3dff, #4f6bff);
-  color: #ffffff;
-  border: none;
-  border-radius: 16px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 12px 28px rgba(10,61,255,0.35);
-}
-
-.auth-box button:active {
-  transform: scale(0.97);
-}
-
-.auth-box button:hover {
-  box-shadow: 0 16px 36px rgba(10,61,255,0.45);
-}
-
-/* ERROR MESSAGE */
-#authMsg {
-  margin-top: 12px;
-  font-size: 13px;
-  text-align: center;
-  color: #ff3b30;
-  font-weight: 600;
-}
-
-/* STEP TRANSITION */
-#stepOne,
-#stepTwo {
-  animation: stepFade 0.25s ease;
-}
-
-@keyframes stepFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-
 /* ================= AUTH MODAL (GORGEOUS PREMIUM) ================= */
 .auth-modal {
   position: fixed;
@@ -506,4 +370,120 @@ body {
     padding: 24px 20px;
     border-radius: 18px;
   }
+}
+/* ================= PROFILE ACTIONS (PREMIUM) ================= */
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 20px;
+  margin-top: 14px;
+}
+
+/* 🌟 FOLLOW BUTTON – BRIGHT GOLD */
+.follow-btn {
+  background: linear-gradient(135deg, #ffd700, #ffb800);
+  color: #2b2b2b;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.55);
+  transition: all 0.2s ease;
+}
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255, 215, 0, 0.7);
+}
+
+/* 🔥 MESSAGE BUTTON – RED + GOLD MIX */
+.message-btn {
+  background: linear-gradient(135deg, #ff3b3b, #ffb347);
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(255, 75, 75, 0.5);
+  transition: all 0.2s ease;
+}
+
+.message-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255, 75, 75, 0.65);
+}
+
+/* ⋯ MORE ICON – CLEAN & PREMIUM */
+.more-btn {
+  font-size: 20px;
+  padding: 9px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #050505;
+
+  /* 🔥 DARK WHITE BACKGROUND */
+  background: #f0f2f5;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.more-btn:hover {
+  background: #e4e6eb;
+  transform: scale(1.05);
+}
+
+/* ================= FOLLOW INFO ================= */
+
+.follow-info {
+  display: flex;
+  gap: 14px;
+  padding-left: 20px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #65676b;
+}
+
+.follow-info strong {
+  color: #050505;
+  font-weight: 600;
+} 
+/* 💎 PREMIUM SAVE BIO BUTTON */
+#saveBioBtn {
+  display: none; /* 🔥 inline-block না */
+
+  margin-top: 10px;
+  padding: 8px 20px;
+
+  background: linear-gradient(135deg, #1877f2, #4f8cff);
+  color: #fff;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(24, 119, 242, 0.45);
+  transition: all 0.25s ease;
+}
+
+/* ✨ HOVER EFFECT */
+#saveBioBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(24, 119, 242, 0.6);
+}
+
+/* 🔘 ACTIVE PRESS */
+#saveBioBtn:active {
+  transform: scale(0.97);
 }
