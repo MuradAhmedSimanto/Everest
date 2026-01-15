@@ -488,3 +488,10 @@ transition: none;          /* animation remove */
 #saveBioBtn:active {
   transform: scale(0.97);
 }
+.signup-success {
+  display: none;
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+}
