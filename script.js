@@ -237,9 +237,6 @@ continueBtn.onclick = () => {
 };*/
 
 
-
-
-
 document.getElementById("authSubmit").addEventListener("click", function () {
   const contact = document.getElementById("authContact").value.trim();
   const password = document.getElementById("password").value;
@@ -259,44 +256,57 @@ document.getElementById("authSubmit").addEventListener("click", function () {
     return;
   }
 
-  // phone or email → fake email logic
-  let fakeEmail;
-  if (contact.includes("@")) {
-    fakeEmail = contact;
-  } else {
-    fakeEmail = contact + "@everest.app";
-  }
+  let fakeEmail = contact.includes("@")
+    ? contact
+    : contact + "@everest.app";
 
-  firebase.auth().createUserWithEmailAndPassword(fakeEmail, password)
+  firebase.auth()
+    .createUserWithEmailAndPassword(fakeEmail, password)
+
     .then((userCredential) => {
       const user = userCredential.user;
 
-      return firebase.firestore().collection("users").doc(user.uid).set({
-        contact: contact,
-        firstName: firstName,
-        lastName: lastName,
-        gender: gender,
-        dob: dob,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      return firebase.firestore()
+        .collection("users")
+        .doc(user.uid)
+        .set({
+          contact,
+          firstName,
+          lastName,
+          gender,
+          dob,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
     })
-    .then(() => {
-      // save name locally
-localStorage.setItem("everestProfileName", firstName + " " + lastName);
-  const successMsg = document.getElementById("signupSuccess");
-  successMsg.style.display = "block";
 
-  // চাইলে 2.5 সেকেন্ড পরে modal বন্ধ
-  setTimeout(() => {
-    document.getElementById("authModal").style.display = "none";
-    successMsg.style.display = "none";
-  }, 2500);
-})
+    .then(() => {
+      const fullName = firstName + " " + lastName;
+
+      // save locally
+      localStorage.setItem("everestProfileName", fullName);
+
+      // instant UI update
+      document.getElementById("profileName").innerText = fullName;
+
+      // page switch fix
+      homePage.style.display = "none";
+      profilePage.style.display = "block";
+      setActive(profileIcon);
+
+      const successMsg = document.getElementById("signupSuccess");
+      successMsg.style.display = "block";
+
+      setTimeout(() => {
+        document.getElementById("authModal").style.display = "none";
+        successMsg.style.display = "none";
+      }, 1000);
+    })
 
     .catch((error) => {
       alert(error.message);
     });
 });
+
 
 const profileName = document.getElementById("profileName");
 const savedName = localStorage.getItem("everestProfileName");
@@ -304,3 +314,13 @@ const savedName = localStorage.getItem("everestProfileName");
 if (savedName && profileName) {
   profileName.textContent = savedName;
 }
+
+window.addEventListener("load", () => {
+  const savedName = localStorage.getItem("everestProfileName");
+  if (savedName) {
+    const profileNameEl = document.getElementById("profileName");
+    if (profileNameEl) {
+      profileNameEl.innerText = savedName;
+    }
+  }
+});
