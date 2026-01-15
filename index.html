@@ -64,42 +64,45 @@
 <!-- PROFILE PAGE -->
 <div id="profilePage">
 
+  <!-- COVER -->
   <div class="cover-wrapper">
     <img id="coverPic" src="https://i.imgur.com/9QZ7R0B.jpg">
     <i class="fa-solid fa-camera" id="coverCam"></i>
   </div>
 
+  <!-- PROFILE PIC -->
   <div class="profile-pic-wrapper">
     <img id="profilePicBig" src="https://i.imgur.com/6VBx3io.png">
     <i class="fa-solid fa-camera" id="profileCam"></i>
   </div>
 
-<!-- FOLLOW INFO -->
-<div class="follow-info">
-  <span><strong>0</strong> followers</span>
-  <span><strong>0</strong> following</span>
-</div>
+  <!-- NAME -->
+  <h3 id="profileName">Your Name</h3>
 
-<!-- PROFILE ACTION BUTTONS -->
-<div class="profile-actions">
-  <button class="follow-btn">Follow</button>
-  <button class="message-btn">Message</button>
-  <i class="fa-solid fa-ellipsis more-btn"></i>
-</div>
-
-
-<div class="profile-header">
-  <div class="profile-text">
-    
- <p id="bioText">add your bio </p>
-    <textarea id="bioInput" placeholder="Write something about yourself..."></textarea>
-    <br>
-    <button id="saveBioBtn">Save</button>
+  <!-- FOLLOW INFO -->
+  <div class="follow-info">
+    <span><strong>0</strong> followers</span>
+    <span><strong>0</strong> following</span>
   </div>
 
-  <button class="edit-bio-btn" id="editBioBtn">Edit Bio</button>
-</div>
+  <!-- BIO -->
+  <div class="profile-header">
+    <div class="profile-text">
+      <p id="bioText"> </p>
+      <textarea id="bioInput" placeholder="Write something about yourself..."></textarea>
+      <button id="saveBioBtn">Save</button>
+    </div>
+    <button class="edit-bio-btn" id="editBioBtn">Edit Bio</button>
+  </div>
 
+  <!-- ACTION BUTTONS -->
+  <div class="profile-actions">
+    <button class="follow-btn">Follow</button>
+    <button class="message-btn">Message</button>
+    <i class="fa-solid fa-ellipsis more-btn"></i>
+  </div>
+
+</div>
 
   <input type="file" id="profileInput" hidden>
   <input type="file" id="coverInput" hidden>
