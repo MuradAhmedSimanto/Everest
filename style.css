@@ -232,6 +232,7 @@ body {
 /* 🔥 TEXT POSITION FIX (REAL REASON) */
 #profilePage h1,
 #profilePage h2,
+#profilePage h3,
 #profilePage p {
   padding-left: 20px !important;
   text-align: left !important;
@@ -378,7 +379,7 @@ body {
   align-items: center;
   gap: 14px;
   padding-left: 20px;
-  margin-top: 14px;
+  margin-top: 2px;
 }
 
 /* 🌟 FOLLOW BUTTON – BRIGHT GOLD */
@@ -488,10 +489,67 @@ transition: none;          /* animation remove */
 #saveBioBtn:active {
   transform: scale(0.97);
 }
+
+
+
+
 .signup-success {
   display: none;
   color: #28a745;
   font-weight: 600;
   margin-top: 12px;
   text-align: center;
+}
+
+
+
+#profileName {
+  padding-left: 20px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+
+/* Remove extra gap before bio */
+.profile-header {
+  margin-top: 6px !important;
+  padding-top: 0;
+}
+
+/* Bio text spacing */
+#bioText {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Follow info spacing */
+.follow-info {
+  margin-bottom: 4px;
+}
+
+
+/* ================= PROFILE SPACING FIX (FINAL) ================= */
+
+/* Remove extra gap before bio */
+.profile-header {
+  margin-top: -8px !important;
+  padding-top: 0 !important;
+}
+
+/* Bio text spacing */
+#bioText {
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Follow info spacing */
+.follow-info {
+  margin-bottom: 4px !important;
 }
