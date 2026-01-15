@@ -1,3 +1,20 @@
+// 🔥 FIREBASE INIT (REQUIRED)
+const firebaseConfig = {
+  apiKey: "AIzaSyA1R9taxrRnPJw7GzNDJ9vyz0MZelnNLi4",
+  authDomain: "everest-c9a99.firebaseapp.com",
+  projectId: "everest-c9a99",
+  storageBucket: "everest-c9a99.firebasestorage.app",
+  messagingSenderId: "978178022660",
+  appId: "1:978178022660:web:9c210ca91c07cabb400451"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
+
 /* ================= MENU ================= */
 const menuBtn = document.getElementById("menuBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
@@ -194,7 +211,7 @@ continueBtn.onclick = () => {
 };
 
 /* ================= STEP 2 → SIGNUP ================= */
-authSubmit.onclick = () => {
+/*authSubmit.onclick = () => {
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
@@ -222,4 +239,65 @@ authSubmit.onclick = () => {
 
   authMsg.textContent = "";
   authModal.style.display = "none";
-};
+};*/
+
+
+
+
+
+document.getElementById("authSubmit").addEventListener("click", function () {
+  const contact = document.getElementById("authContact").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const gender = document.getElementById("gender").value;
+  const dob = document.getElementById("dob").value;
+
+  if (!contact || !password || !confirmPassword) {
+    alert("All fields required");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  // phone or email → fake email logic
+  let fakeEmail;
+  if (contact.includes("@")) {
+    fakeEmail = contact;
+  } else {
+    fakeEmail = contact + "@everest.app";
+  }
+
+  firebase.auth().createUserWithEmailAndPassword(fakeEmail, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+
+      return firebase.firestore().collection("users").doc(user.uid).set({
+        contact: contact,
+        firstName: firstName,
+        lastName: lastName,
+        gender: gender,
+        dob: dob,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(() => {
+  const successMsg = document.getElementById("signupSuccess");
+  successMsg.style.display = "block";
+
+  // চাইলে 2.5 সেকেন্ড পরে modal বন্ধ
+  setTimeout(() => {
+    document.getElementById("authModal").style.display = "none";
+    successMsg.style.display = "none";
+  }, 2500);
+})
+
+    .catch((error) => {
+      alert(error.message);
+    });
+});
+
