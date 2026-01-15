@@ -156,11 +156,6 @@ window.addEventListener("scroll", () => {
   lastScrollY = window.scrollY;
 });
 
-
-
-
-
-
 /* ================= AUTH MODAL SYSTEM ================= */
 
 // ELEMENTS
@@ -286,6 +281,8 @@ document.getElementById("authSubmit").addEventListener("click", function () {
       });
     })
     .then(() => {
+      // save name locally
+localStorage.setItem("everestProfileName", firstName + " " + lastName);
   const successMsg = document.getElementById("signupSuccess");
   successMsg.style.display = "block";
 
@@ -301,3 +298,9 @@ document.getElementById("authSubmit").addEventListener("click", function () {
     });
 });
 
+const profileName = document.getElementById("profileName");
+const savedName = localStorage.getItem("everestProfileName");
+
+if (savedName && profileName) {
+  profileName.textContent = savedName;
+}
