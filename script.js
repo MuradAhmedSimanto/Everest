@@ -61,31 +61,66 @@ profileIcon.onclick = () => {
 };
 
 /* ================= POST SYSTEM ================= */
+
 const postBtn = document.getElementById("postBtn");
 const imageInput = document.getElementById("imageInput");
 const feed = document.getElementById("feed");
+const profilePic = document.getElementById("profilePic");
 
-postBtn.onclick = () => imageInput.click();
+postBtn.addEventListener("click", () => {
+  imageInput.click();
+});
 
-imageInput.onchange = () => {
+imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   if (!file) return;
 
   const reader = new FileReader();
+
   reader.onload = () => {
     const post = document.createElement("div");
     post.className = "post";
 
-    post.innerHTML = file.type.startsWith("image")
-      ? `<img src="${reader.result}">`
-      : `<video controls><source src="${reader.result}"></video>`;
+    const userName =
+      localStorage.getItem("everestProfileName") || "Everest User";
+
+
+post.innerHTML = `
+  <div class="post-header">
+    <div class="post-user-left">
+      <img src="${profilePic.src}" class="post-user-pic">
+      <div class="post-user-name">${userName}</div>
+    </div>
+
+    <div class="post-menu">⋯</div>
+  </div>
+
+  <div class="post-media">
+    ${
+      file.type.startsWith("image")
+        ? `<img src="${reader.result}">`
+        : `<video src="${reader.result}" controls></video>`
+    }
+  </div>
+
+  <div class="post-actions">
+    <span>👍 Like</span>
+    <span>💬 Comment</span>
+    <span>↗️ Share</span>
+  </div>
+`;
+
+
 
     feed.prepend(post);
   };
 
   reader.readAsDataURL(file);
   imageInput.value = "";
-};
+});
+
+
+
 
 /* ================= PROFILE & COVER ================= */
 const profileCam = document.getElementById("profileCam");
@@ -93,7 +128,7 @@ const coverCam = document.getElementById("coverCam");
 const profileInput = document.getElementById("profileInput");
 const coverInput = document.getElementById("coverInput");
 
-const profilePic = document.getElementById("profilePic");
+
 const profilePicBig = document.getElementById("profilePicBig");
 const coverPic = document.getElementById("coverPic");
 
