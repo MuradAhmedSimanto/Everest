@@ -553,3 +553,65 @@ transition: none;          /* animation remove */
 .follow-info {
   margin-bottom: 4px !important;
 }
+
+
+
+
+
+
+/* ===== FORCE PERFECT CIRCLE PROFILE PIC ===== */
+/* ================= POST ================= */
+.post {
+  background: #fff;
+  margin: 10px;
+  border-radius: 14px;
+}
+
+/* ================= POST HEADER ================= */
+.post-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+/* left side */
+.post-user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* profile pic */
+.post-user-pic {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* user name */
+.post-user-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* 3-dot */
+.post-menu {
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+  color: #65676b;
+}
+
+/* ================= ACTIONS ================= */
+.post-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #e4e6eb;
+  font-size: 14px;
+  color: #65676b;
+}
