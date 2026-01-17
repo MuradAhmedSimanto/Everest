@@ -615,3 +615,8 @@ transition: none;          /* animation remove */
   font-size: 14px;
   color: #65676b;
 }
+
+.post-update-text{
+  font-size: 12px;
+  color: #65676b;
+}
