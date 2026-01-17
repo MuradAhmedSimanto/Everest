@@ -57,7 +57,7 @@ body {
 .logo {
  color: #e60023;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1px;
 }
 .top-icons {
@@ -621,4 +621,5 @@ transition: none;          /* animation remove */
   font-size: 12px;
   color: #65676b;
 }
+
 
