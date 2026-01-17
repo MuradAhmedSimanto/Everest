@@ -466,3 +466,20 @@ imageInput.onchange = () => {
   // reset input
   imageInput.value = "";
 };
+     /*menu bar*/
+const menuBar = document.querySelector(".menu-bar");
+let lastScroll = window.scrollY;
+
+window.addEventListener("scroll", () => {
+  const currentScroll = window.scrollY;
+
+  if (currentScroll > lastScroll && currentScroll > 80) {
+    // scroll down → hide
+    menuBar.classList.add("hide");
+  } else {
+    // scroll up → show
+    menuBar.classList.remove("hide");
+  }
+
+  lastScroll = currentScroll;
+});
