@@ -1,3 +1,14 @@
+// ================= LOCAL STORAGE KEYS =================
+const LS_POSTS = "everest_posts";
+const LS_PROFILE_PIC = "everest_profile_pic";
+const LS_COVER_PIC = "everest_cover_pic";
+
+
+
+
+
+
+
 // 🔥 FIREBASE INIT (REQUIRED)
 const firebaseConfig = {
   apiKey: "AIzaSyA1R9taxrRnPJw7GzNDJ9vyz0MZelnNLi4",
@@ -62,62 +73,75 @@ profileIcon.onclick = () => {
 
 /* ================= POST SYSTEM ================= */
 
-const postBtn = document.getElementById("postBtn");
-const imageInput = document.getElementById("imageInput");
-const feed = document.getElementById("feed");
-const profilePic = document.getElementById("profilePic");
+function createPost({
+  type,
+  media,
+  isProfileUpdate = false,
+  updateType = "",
+  skipSave = false
+}) {
+  const feed = document.getElementById("feed");
+  const profilePic = document.getElementById("profilePic");
+  if (!feed || !profilePic) return;
 
-postBtn.addEventListener("click", () => {
-  imageInput.click();
-});
+  const userName =
+    localStorage.getItem("everestProfileName") || "Everest User";
 
-imageInput.addEventListener("change", () => {
-  const file = imageInput.files[0];
-  if (!file) return;
+  let updateText = "";
+  if (isProfileUpdate && updateType === "profile") {
+    updateText = "updated profile picture";
+  }
+  if (isProfileUpdate && updateType === "cover") {
+    updateText = "updated cover photo";
+  }
 
-  const reader = new FileReader();
+  const post = document.createElement("div");
+  post.className = "post";
 
-  reader.onload = () => {
-    const post = document.createElement("div");
-    post.className = "post";
-
-    const userName =
-      localStorage.getItem("everestProfileName") || "Everest User";
-
-
-post.innerHTML = `
-  <div class="post-header">
-    <div class="post-user-left">
-      <img src="${profilePic.src}" class="post-user-pic">
-      <div class="post-user-name">${userName}</div>
+  post.innerHTML = `
+    <div class="post-header">
+      <div class="post-user-left">
+        <img src="${profilePic.src}" class="post-user-pic">
+        <div>
+          <div class="post-user-name">${userName}</div>
+          ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
+        </div>
+      </div>
+      <div class="post-menu">⋯</div>
     </div>
 
-    <div class="post-menu">⋯</div>
-  </div>
+    <div class="post-media">
+      ${
+        type === "image"
+          ? `<img src="${media}">`
+          : `<video src="${media}" controls></video>`
+      }
+    </div>
 
-  <div class="post-media">
-    ${
-      file.type.startsWith("image")
-        ? `<img src="${reader.result}">`
-        : `<video src="${reader.result}" controls></video>`
-    }
-  </div>
+    <div class="post-actions">
+      <span>👍 Like</span>
+      <span>💬 Comment</span>
+      <span>↗️ Share</span>
+    </div>
+  `;
 
-  <div class="post-actions">
-    <span>👍 Like</span>
-    <span>💬 Comment</span>
-    <span>↗️ Share</span>
-  </div>
-`;
+  feed.prepend(post);
+
+  if (skipSave) return;
+
+  const saved = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
+  saved.unshift({
+    type,
+    media,
+    isProfileUpdate,
+    updateType,
+    time: Date.now()
+  });
+  localStorage.setItem(LS_POSTS, JSON.stringify(saved));
+}
 
 
-
-    feed.prepend(post);
-  };
-
-  reader.readAsDataURL(file);
-  imageInput.value = "";
-});
+  
 
 
 
@@ -135,6 +159,7 @@ const coverPic = document.getElementById("coverPic");
 profileCam.onclick = () => profileInput.click();
 coverCam.onclick = () => coverInput.click();
 
+
 profileInput.onchange = () => {
   const file = profileInput.files[0];
   if (!file) return;
@@ -143,18 +168,44 @@ profileInput.onchange = () => {
   r.onload = () => {
     profilePic.src = r.result;
     profilePicBig.src = r.result;
+    localStorage.setItem(LS_PROFILE_PIC, r.result);
+
+    createPost({
+      type: "image",
+      media: r.result,
+      isProfileUpdate: true,
+      updateType: "profile"
+    });
   };
   r.readAsDataURL(file);
 };
+
+
+
 
 coverInput.onchange = () => {
   const file = coverInput.files[0];
   if (!file) return;
 
   const r = new FileReader();
-  r.onload = () => coverPic.src = r.result;
+  r.onload = () => {
+    coverPic.src = r.result;
+    localStorage.setItem(LS_COVER_PIC, r.result);
+
+    createPost({
+      type: "image",
+      media: r.result,
+      isProfileUpdate: true,
+      updateType: "cover"
+    });
+  };
   r.readAsDataURL(file);
 };
+
+
+
+
+
 
 /* ================= BIO ================= */
 const bioText = document.getElementById("bioText");
@@ -350,12 +401,68 @@ if (savedName && profileName) {
   profileName.textContent = savedName;
 }
 
+
+
+
+
+
+
+
+
+
+
 window.addEventListener("load", () => {
-  const savedName = localStorage.getItem("everestProfileName");
-  if (savedName) {
-    const profileNameEl = document.getElementById("profileName");
-    if (profileNameEl) {
-      profileNameEl.innerText = savedName;
-    }
+  const savedProfile = localStorage.getItem(LS_PROFILE_PIC);
+  if (savedProfile) {
+    profilePic.src = savedProfile;
+    profilePicBig.src = savedProfile;
   }
+
+  const savedCover = localStorage.getItem(LS_COVER_PIC);
+  if (savedCover) {
+    coverPic.src = savedCover;
+  }
+
+  const savedPosts = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
+
+  savedPosts.reverse().forEach(p => {
+    createPost({
+      type: p.type,
+      media: p.media,
+      isProfileUpdate: p.isProfileUpdate,
+      updateType: p.updateType,
+      skipSave: true
+    });
+  });
 });
+
+
+
+
+
+
+
+
+const postBtn = document.getElementById("postBtn");
+const imageInput = document.getElementById("imageInput");
+
+postBtn.onclick = () => {
+  imageInput.click();
+};
+
+imageInput.onchange = () => {
+  const file = imageInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    createPost({
+      type: file.type.startsWith("image") ? "image" : "video",
+      media: reader.result
+    });
+  };
+  reader.readAsDataURL(file);
+
+  // reset input
+  imageInput.value = "";
+};
