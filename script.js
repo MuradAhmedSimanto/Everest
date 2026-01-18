@@ -81,6 +81,11 @@ function createPost({
   skipSave = false
 }) {
   const feed = document.getElementById("feed");
+
+
+const profileFeed = document.getElementById("profileFeed"); // new code
+
+  
   const profilePic = document.getElementById("profilePic");
   if (!feed || !profilePic) return;
 
@@ -127,6 +132,12 @@ function createPost({
 
   feed.prepend(post);
 
+  
+if (profileFeed) {
+  profileFeed.insertAdjacentHTML("afterbegin", postHTML); //new code 2
+}
+
+  
   if (skipSave) return;
 
   const saved = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
@@ -483,3 +494,4 @@ window.addEventListener("scroll", () => {
 
   lastScroll = currentScroll;
 });
+
