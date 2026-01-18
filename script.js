@@ -1,7 +1,11 @@
-// ================= LOCAL STORAGE KEYS =================
-const LS_POSTS = "everest_posts";
+
+
+// ===== LOCAL STORAGE KEYS =====
 const LS_PROFILE_PIC = "everest_profile_pic";
-const LS_COVER_PIC = "everest_cover_pic";
+const LS_COVER_PIC   = "everest_cover_pic";
+const LS_POSTS       = "everest_posts";
+
+
 
 
 
@@ -57,6 +61,9 @@ const profilePage = document.getElementById("profilePage");
 homeIcon.onclick = () => {
   homePage.style.display = "block";
   profilePage.style.display = "none";
+ messagePage.style.display = "none";
+ notificationPage.style.display = "none"; // ✅ THIS WAS MISSING
+
   setActive(homeIcon);
    document.documentElement.scrollTo({
   top: 0,
@@ -65,11 +72,46 @@ homeIcon.onclick = () => {
 document.body.scrollTop = 0;
 };
 
+
+
+
+
+
+
+
 profileIcon.onclick = () => {
   homePage.style.display = "none";
   profilePage.style.display = "block";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
   setActive(profileIcon);
+  
+  const profileFeed = document.getElementById("profileFeed");
+  profileFeed.innerHTML = "";
+
+  const savedPosts = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
+
+  savedPosts.forEach(p => {
+    createPost({
+      type: p.type,
+      media: p.media,
+      isProfileUpdate: p.isProfileUpdate,
+      updateType: p.updateType,
+      skipSave: true,
+      target: "profile" // 🔥 ONLY profile
+    });
+  });
+
+  window.scrollTo(0, 0);
 };
+
+
+
+
+
+
+
+
 
 /* ================= POST SYSTEM ================= */
 
@@ -78,77 +120,63 @@ function createPost({
   media,
   isProfileUpdate = false,
   updateType = "",
-  skipSave = false
+  skipSave = false,
+  target = "both" // 👈 NEW
 }) {
   const feed = document.getElementById("feed");
+  const profileFeed = document.getElementById("profileFeed");
 
-
-
-
-  
   const profilePic = document.getElementById("profilePic");
-  if (!feed || !profilePic) return;
+  if (!profilePic) return;
 
   const userName =
     localStorage.getItem("everestProfileName") || "Everest User";
 
   let updateText = "";
-  if (isProfileUpdate && updateType === "profile") {
-    updateText = "updated profile picture";
-  }
-  if (isProfileUpdate && updateType === "cover") {
-    updateText = "updated cover photo";
-  }
+  if (isProfileUpdate && updateType === "profile") updateText = "updated profile picture";
+  if (isProfileUpdate && updateType === "cover") updateText = "updated cover photo";
 
-  const post = document.createElement("div");
-  post.className = "post";
-
-  post.innerHTML = `
-    <div class="post-header">
-      <div class="post-user-left">
-        <img src="${profilePic.src}" class="post-user-pic">
-        <div>
-          <div class="post-user-name">${userName}</div>
-          ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
+  const postHTML = `
+    <div class="post">
+      <div class="post-header">
+        <div class="post-user-left">
+          <img src="${profilePic.src}" class="post-user-pic">
+          <div>
+            <div class="post-user-name">${userName}</div>
+            ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
+          </div>
         </div>
+        <div class="post-menu">⋯</div>
       </div>
-      <div class="post-menu">⋯</div>
-    </div>
 
-    <div class="post-media">
-      ${
-        type === "image"
+      <div class="post-media">
+        ${type === "image"
           ? `<img src="${media}">`
-          : `<video src="${media}" controls></video>`
-      }
-    </div>
+          : `<video src="${media}" controls></video>`}
+      </div>
 
-    <div class="post-actions">
-      <span>👍 Like</span>
-      <span>💬 Comment</span>
-      <span>↗️ Share</span>
+      <div class="post-actions">
+        <span>👍 Like</span>
+        <span>💬 Comment</span>
+        <span>↗️ Share</span>
+      </div>
     </div>
   `;
 
-  feed.prepend(post);
+  if ((target === "both" || target === "home") && feed) {
+    feed.insertAdjacentHTML("afterbegin", postHTML);
+  }
 
-  
+  if ((target === "both" || target === "profile") && profileFeed) {
+    profileFeed.insertAdjacentHTML("afterbegin", postHTML);
+  }
 
-
-  
   if (skipSave) return;
 
   const saved = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
-  saved.unshift({
-    type,
-    media,
-    isProfileUpdate,
-    updateType,
-    time: Date.now()
-  });
+  saved.unshift({ type, media, isProfileUpdate, updateType });
   localStorage.setItem(LS_POSTS, JSON.stringify(saved));
 }
-
 
   
 
@@ -167,6 +195,8 @@ const coverPic = document.getElementById("coverPic");
 
 profileCam.onclick = () => profileInput.click();
 coverCam.onclick = () => coverInput.click();
+
+
 
 
 profileInput.onchange = () => {
@@ -434,16 +464,17 @@ window.addEventListener("load", () => {
 
   const savedPosts = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
 
-  savedPosts.reverse().forEach(p => {
-    createPost({
-      type: p.type,
-      media: p.media,
-      isProfileUpdate: p.isProfileUpdate,
-      updateType: p.updateType,
-      skipSave: true
-    });
+ savedPosts.reverse().forEach(p => {
+  createPost({
+    type: p.type,
+    media: p.media,
+    isProfileUpdate: p.isProfileUpdate,
+    updateType: p.updateType,
+    skipSave: true
   });
+ });
 });
+
 
 
 
@@ -492,5 +523,55 @@ window.addEventListener("scroll", () => {
 
   lastScroll = currentScroll;
 });
+
+
+
+
+
+
+//notification
+const notificationIcon = document.getElementById("notificationIcon");
+const notificationPage = document.getElementById("notificationPage");
+
+notificationIcon.onclick = () => {
+  // hide others
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  messagePage.style.display = "none";
+  // show notification
+  notificationPage.style.display = "block";
+
+  // active icon remove
+  icons.forEach(i => i.classList.remove("active"));
+
+  // scroll top
+  window.scrollTo(0, 0);
+};
+
+
+
+//message
+const messageIcon = document.getElementById("messageIcon");
+const messagePage = document.getElementById("messagePage");
+
+messageIcon.onclick = () => {
+  // hide others
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  messagePage.style.display = "none";
+  notificationPage.style.display = "none";
+  // show message page
+  messagePage.style.display = "block";
+
+  // active remove
+  icons.forEach(i => i.classList.remove("active"));
+
+  window.scrollTo(0, 0);
+};
+
+
+
+
+
 
 
