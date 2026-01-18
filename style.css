@@ -57,7 +57,7 @@ body {
 .logo {
  color: #e60023;
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 1200;
   letter-spacing: 1px;
 }
 .top-icons {
@@ -635,6 +635,7 @@ transition: none;          /* animation remove */
 .menu-bar.hide {
   transform: translateY(-120%);
 }
+
 
 
 
