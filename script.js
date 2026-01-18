@@ -83,7 +83,7 @@ function createPost({
   const feed = document.getElementById("feed");
 
 
-const profileFeed = document.getElementById("profileFeed"); // new code
+
 
   
   const profilePic = document.getElementById("profilePic");
@@ -133,9 +133,7 @@ const profileFeed = document.getElementById("profileFeed"); // new code
   feed.prepend(post);
 
   
-if (profileFeed) {
-  profileFeed.insertAdjacentHTML("afterbegin", postHTML); //new code 2
-}
+
 
   
   if (skipSave) return;
@@ -494,4 +492,5 @@ window.addEventListener("scroll", () => {
 
   lastScroll = currentScroll;
 });
+
 
