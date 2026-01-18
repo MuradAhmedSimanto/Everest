@@ -17,9 +17,16 @@
     <a href="https://tinyurl.com/Murad-Ai" target="_blank">
       <i class="fa-solid fa-bolt"></i>
     </a>
+    
     <i class="fa-solid fa-magnifying-glass"></i>
-    <i class="fa-solid fa-bell"></i>
-    <i class="fa-solid fa-message"></i>
+
+
+    <i class="fa-solid fa-bell" id="notificationIcon"></i>
+
+
+<i class="fa-solid fa-message" id="messageIcon"></i>
+
+    
   </div>
 </div>
 
@@ -46,6 +53,57 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
+<!-- NOTIFICATION PAGE -->
+<div id="notificationPage" style="display:none;">
+  <div class="notification-header">
+    <h2>Notifications</h2>
+    <i class="fa-solid fa-magnifying-glass" id="notifSearch"></i>
+  </div>
+
+  <div class="notification-list">
+    <div class="notification-item">
+      <strong>Murad</strong> liked your post
+    </div>
+
+    <div class="notification-item">
+      <strong>Everest</strong> started following you
+    </div>
+  </div>
+</div>
+
+
+<!-- MESSAGE PAGE -->
+<div id="messagePage" style="display:none;">
+  <div class="message-header">
+    <h2>E-text</h2>
+   <input
+      class="message-search"
+      placeholder="Search messages..."
+    />
+    <i class="fa-solid fa-bars" id="messageIcon"></i>
+
+  </div>
+  <div class="message-list">
+    <div class="message-item">
+    </div>
+    <div class="message-item">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
 
 <!-- HOME PAGE -->
 <div id="homePage">
@@ -103,6 +161,7 @@
     <i class="fa-solid fa-ellipsis more-btn"></i>
   </div>
   
+<div id="profileFeed"></div>
 
 
 </div>
