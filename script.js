@@ -7,12 +7,6 @@ const LS_POSTS       = "everest_posts";
 
 
 
-
-
-
-
-
-
 // 🔥 FIREBASE INIT (REQUIRED)
 const firebaseConfig = {
   apiKey: "AIzaSyA1R9taxrRnPJw7GzNDJ9vyz0MZelnNLi4",
@@ -72,13 +66,6 @@ homeIcon.onclick = () => {
 document.body.scrollTop = 0;
 };
 
-
-
-
-
-
-
-
 profileIcon.onclick = () => {
   homePage.style.display = "none";
   profilePage.style.display = "block";
@@ -91,7 +78,7 @@ profileIcon.onclick = () => {
 
   const savedPosts = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
 
-  savedPosts.forEach(p => {
+  savedPosts.reverse().forEach(p => {
     createPost({
       type: p.type,
       media: p.media,
@@ -104,13 +91,6 @@ profileIcon.onclick = () => {
 
   window.scrollTo(0, 0);
 };
-
-
-
-
-
-
-
 
 
 /* ================= POST SYSTEM ================= */
@@ -178,10 +158,6 @@ function createPost({
   localStorage.setItem(LS_POSTS, JSON.stringify(saved));
 }
 
-  
-
-
-
 
 /* ================= PROFILE & COVER ================= */
 const profileCam = document.getElementById("profileCam");
@@ -240,10 +216,6 @@ coverInput.onchange = () => {
   };
   r.readAsDataURL(file);
 };
-
-
-
-
 
 
 /* ================= BIO ================= */
@@ -444,12 +416,6 @@ if (savedName && profileName) {
 
 
 
-
-
-
-
-
-
 window.addEventListener("load", () => {
   const savedProfile = localStorage.getItem(LS_PROFILE_PIC);
   if (savedProfile) {
@@ -465,6 +431,7 @@ window.addEventListener("load", () => {
   const savedPosts = JSON.parse(localStorage.getItem(LS_POSTS)) || [];
 
  savedPosts.reverse().forEach(p => {
+ 
   createPost({
     type: p.type,
     media: p.media,
@@ -474,12 +441,6 @@ window.addEventListener("load", () => {
   });
  });
 });
-
-
-
-
-
-
 
 
 
@@ -524,11 +485,6 @@ window.addEventListener("scroll", () => {
   lastScroll = currentScroll;
 });
 
-
-
-
-
-
 //notification
 const notificationIcon = document.getElementById("notificationIcon");
 const notificationPage = document.getElementById("notificationPage");
@@ -568,9 +524,6 @@ messageIcon.onclick = () => {
 
   window.scrollTo(0, 0);
 };
-
-
-
 
 
 
