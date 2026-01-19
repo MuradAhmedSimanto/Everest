@@ -391,11 +391,11 @@ body {
   color: #ffffff;
 
   border: none;
-  padding: 5px 20px;
-  border-radius: 7px;
+  padding: 3px 25px;
+  border-radius: 6px;
 
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   cursor: pointer;
 
  box-shadow: none;
@@ -421,10 +421,10 @@ color: #050505;            /* text black */
 box-shadow: none;          /* glow remove */
 transition: none;          /* animation remove */
   border: none;
-  padding: 5px 20px;
-  border-radius: 7px;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 3px 25px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -639,10 +639,6 @@ transition: none;          /* animation remove */
 }
 
 
-
-
-
-
 /* NOTIFICATION PAGE */
 #notificationPage {
   background: #fff;
@@ -682,12 +678,6 @@ transition: none;          /* animation remove */
   font-size: 14px;
 }
 
-
-
-
-
-
-
 /* MESSAGE PAGE */
 #messagePage {
   min-height: 100vh;
@@ -713,9 +703,6 @@ transition: none;          /* animation remove */
   white-space: nowrap;
 }
 
-
-
-
 /* SEARCH BOX */
 .message-search {
   flex: 1;
@@ -733,6 +720,25 @@ transition: none;          /* animation remove */
   cursor: pointer;
   color: #050505;
 }
+
+/* MAS logo */
+.dropdown-menu a.logo-item {
+  justify-content: center;
+  padding: 14px 0;
+  border-top: 1px solid #e4e6eb;
+}
+
+.dropdown-menu a.logo-item img {
+  width: 55px;
+  display: block;
+}
+
+/* post of inter gap */
+#profileFeed .post {
+  border-bottom: 3px solid #c5c9cf;
+}
+
+
 
 
 
