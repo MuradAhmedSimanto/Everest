@@ -141,7 +141,7 @@ body {
 
 /* ================= FEED ================= */
 #feed {
-  padding-bottom: 80px;
+  padding-bottom: 10px;
 }
 
 /* ================= POST MEDIA ================= */
@@ -566,8 +566,8 @@ transition: none;          /* animation remove */
 /* ================= POST ================= */
 .post {
   background: #fff;
-  margin: 10px;
-  border-radius: 14px;
+  margin: 0px;
+  border-radius: 0px;
 }
 
 /* ================= POST HEADER ================= */
@@ -738,14 +738,17 @@ transition: none;          /* animation remove */
   border-bottom: 3px solid #c5c9cf;
 }
 
+/* 🏠 HOME PAGE POST GAP */
+#feed .post {
+  border-bottom: 3px solid #c5c9cf;
+}
 
-
-
-
-
-
-
-
+/* 🔥 PROFILE HEADER → POST GAP (FB STYLE) */
+#profileFeed {
+  margin-top: 10px;
+  border-top: 5px solid #c5c9cf; /* dark white line */
+  padding-top: 10px;
+}
 
 
 
