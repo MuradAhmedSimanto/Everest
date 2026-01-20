@@ -528,3 +528,60 @@ messageIcon.onclick = () => {
 
 
 
+
+// ===== TEXT POST SYSTEM =====
+const mindBox = document.querySelector(".mind");
+const textPostModal = document.getElementById("textPostModal");
+const textPostInput = document.getElementById("textPostInput");
+const textPostBtn = document.getElementById("textPostBtn");
+
+// open modal
+mindBox.onclick = () => {
+  textPostInput.value = "";
+  textPostModal.style.display = "flex";
+};
+
+// close outside
+textPostModal.onclick = (e) => {
+  if (e.target === textPostModal) {
+    textPostModal.style.display = "none";
+  }
+};
+
+// post text
+textPostBtn.onclick = () => {
+  const text = textPostInput.value.trim();
+  if (!text) return;
+
+  const profilePic = document.getElementById("profilePic").src;
+  const userName =
+    localStorage.getItem("everestProfileName") || "Everest User";
+
+  const postHTML = `
+    <div class="post">
+      <div class="post-header">
+        <div class="post-user-left">
+          <img src="${profilePic}" class="post-user-pic">
+          <div class="post-user-name">${userName}</div>
+        </div>
+        <div class="post-menu">⋯</div>
+      </div>
+
+      <div class="post-text">${text}</div>
+
+      <div class="post-actions">
+        <span>👍 Like</span>
+        <span>💬 Comment</span>
+        <span>↗️ Share</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("feed")
+    .insertAdjacentHTML("afterbegin", postHTML);
+
+  document.getElementById("profileFeed")
+    .insertAdjacentHTML("afterbegin", postHTML);
+
+  textPostModal.style.display = "none";
+};
