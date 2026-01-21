@@ -1,4 +1,8 @@
 
+// ===== CLOUDINARY CONFIG =====
+const CLOUD_NAME = "ddn8et0q4";
+const UPLOAD_PRESET = "everest_user";
+
 
 // ===== LOCAL STORAGE KEYS =====
 const LS_PROFILE_PIC = "everest_profile_pic";
@@ -302,36 +306,7 @@ continueBtn.onclick = () => {
   stepTwo.style.display = "block";
 };
 
-/* ================= STEP 2 → SIGNUP ================= */
-/*authSubmit.onclick = () => {
-  const password = document.getElementById("password").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
 
-  if (password.length < 5 || password.length > 10) {
-    authMsg.textContent = "Password must be 5 to 10 characters";
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    authMsg.textContent = "Passwords do not match";
-    return;
-  }
-
-  const user = {
-    contact: document.getElementById("authContact").value,
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    gender: document.getElementById("gender").value,
-    dob: document.getElementById("dob").value,
-    password: password,
-    everestId: "EV-" + Date.now()
-  };
-
-  localStorage.setItem("everestUser", JSON.stringify(user));
-
-  authMsg.textContent = "";
-  authModal.style.display = "none";
-};*/
 
 
 document.getElementById("authSubmit").addEventListener("click", function () {
@@ -444,6 +419,55 @@ window.addEventListener("load", () => {
 
 
 
+
+function loadAllPosts() {
+  const feed = document.getElementById("feed");
+  const profileFeed = document.getElementById("profileFeed");
+
+  db.collection("posts")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      feed.innerHTML = "";
+      profileFeed.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const p = doc.data();
+
+        const postHTML = `
+          <div class="post">
+            <div class="post-header">
+              <div class="post-user-left">
+                <img src="${p.profilePic}" class="post-user-pic">
+                <div class="post-user-name">${p.name}</div>
+              </div>
+            </div>
+
+            ${
+              p.type === "text"
+                ? `<div class="post-text">${p.text}</div>`
+                : p.type === "image"
+                ? `<img src="${p.media}">`
+                : `<video src="${p.media}" controls></video>`
+            }
+
+            <div class="post-actions">
+              <span>👍 Like</span>
+              <span>💬 Comment</span>
+              <span>↗️ Share</span>
+            </div>
+          </div>
+        `;
+
+        feed.insertAdjacentHTML("beforeend", postHTML);
+        profileFeed.insertAdjacentHTML("beforeend", postHTML);
+      });
+    });
+}
+
+
+
+
+
 const postBtn = document.getElementById("postBtn");
 const imageInput = document.getElementById("imageInput");
 
@@ -451,22 +475,20 @@ postBtn.onclick = () => {
   imageInput.click();
 };
 
-imageInput.onchange = () => {
+imageInput.onchange = async () => {
   const file = imageInput.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    createPost({
-      type: file.type.startsWith("image") ? "image" : "video",
-      media: reader.result
-    });
-  };
-  reader.readAsDataURL(file);
+  const url = await uploadToCloudinary(file);
 
-  // reset input
+  await savePostToDB({
+    type: file.type.startsWith("image") ? "image" : "video",
+    mediaUrl: url
+  });
+
   imageInput.value = "";
 };
+
      /*menu bar*/
 const menuBar = document.querySelector(".menu-bar");
 let lastScroll = window.scrollY;
@@ -549,39 +571,57 @@ textPostModal.onclick = (e) => {
 };
 
 // post text
-textPostBtn.onclick = () => {
+textPostBtn.onclick = async () => {
   const text = textPostInput.value.trim();
   if (!text) return;
 
-  const profilePic = document.getElementById("profilePic").src;
-  const userName =
-    localStorage.getItem("everestProfileName") || "Everest User";
-
-  const postHTML = `
-    <div class="post">
-      <div class="post-header">
-        <div class="post-user-left">
-          <img src="${profilePic}" class="post-user-pic">
-          <div class="post-user-name">${userName}</div>
-        </div>
-        <div class="post-menu">⋯</div>
-      </div>
-
-      <div class="post-text">${text}</div>
-
-      <div class="post-actions">
-        <span>👍 Like</span>
-        <span>💬 Comment</span>
-        <span>↗️ Share</span>
-      </div>
-    </div>
-  `;
-
-  document.getElementById("feed")
-    .insertAdjacentHTML("afterbegin", postHTML);
-
-  document.getElementById("profileFeed")
-    .insertAdjacentHTML("afterbegin", postHTML);
+  await savePostToDB({
+    type: "text",
+    mediaUrl: "",
+    text
+  });
 
   textPostModal.style.display = "none";
 };
+
+
+
+
+
+
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  const data = await res.json();
+  return data.secure_url;
+}
+async function savePostToDB({ type, mediaUrl, text = "" }) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  await db.collection("posts").add({
+    uid: user.uid,
+    name: localStorage.getItem("everestProfileName") || "Everest User",
+    profilePic: document.getElementById("profilePic").src,
+    type,
+    media: mediaUrl,
+    text,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+window.addEventListener("load", () => {
+  loadAllPosts();
+});
+
+
