@@ -1048,3 +1048,35 @@ transition: none;          /* animation remove */
   margin-top: 4px;
   display: inline-block;
 }
+
+
+
+
+
+
+
+/* ===== POST FULL WIDTH (FB STYLE) ===== */
+
+.feed,
+#feed,
+#profileFeed {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.post {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.post-media img,
+.post-media video {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: cover;
+  display: block;
+}
+
