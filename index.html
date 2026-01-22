@@ -87,7 +87,7 @@
       class="message-search"
       placeholder="Search messages..."
     />
-    <i class="fa-solid fa-bars" id="messageIcon"></i>
+    
 
   </div>
   <div class="message-list">
@@ -173,13 +173,17 @@
 
 </div>
 
-  <input type="file" id="profileInput" hidden>
-  <input type="file" id="coverInput" hidden>
+<input type="file" id="profileInput" hidden>
+<input type="file" id="coverInput" hidden>
+
+
 </div>
+
 <!-- AUTH MODAL -->
 <div class="auth-modal" id="authModal">
   <div class="auth-box">
-    <h3 id="authTitle">Signup</h3>
+
+    <h3>Signup</h3>
 
     <!-- STEP 1 -->
     <div id="stepOne">
@@ -196,7 +200,7 @@
 
       <input type="date" id="dob">
 
-      <button id="continueBtn">Continue</button>
+      <button id="continueBtn" type="button">Continue</button>
     </div>
 
     <!-- STEP 2 -->
@@ -204,23 +208,52 @@
       <input type="password" id="password" placeholder="Enter password">
       <input type="password" id="confirmPassword" placeholder="Confirm password">
 
-      <button id="authSubmit">Signup</button>
+      <button id="authSubmit" type="button">Signup</button>
     </div>
- <p id="signupSuccess" class="signup-success">
-    Your signup successful
-  </p>
-</div>
+
+    <p id="signupSuccess" class="signup-success">
+      Your signup successful
+    </p>
+
     <p id="authMsg"></p>
   </div>
 </div>
 
 
+
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+
+  <!-- MEDIA CAPTION MODAL -->
+  <div id="mediaCaptionModal" class="auth-modal" style="display:none;">
+    <div class="auth-box">
+
+      <h3>Create post</h3>
+
+      <textarea
+        id="mediaCaptionInput"
+        placeholder="Write a caption..."
+      ></textarea>
+
+      <img id="mediaPreview" style="display:none; width:100%; border-radius:8px;">
+      <video id="videoPreview" controls style="display:none; width:100%; border-radius:8px;"></video>
+
+      <button id="mediaPostBtn">Post</button>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
 <script src="script.js"></script>
 
 </body>
+
+
+
 </html>
