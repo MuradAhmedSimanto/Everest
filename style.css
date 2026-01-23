@@ -57,7 +57,7 @@ body {
 /* ================= LOGO & ICONS ================= */
 .logo {
  color: #e60023;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 1200;
   letter-spacing: 1px;
 }
@@ -1079,4 +1079,5 @@ transition: none;          /* animation remove */
   object-fit: cover;
   display: block;
 }
+
 
