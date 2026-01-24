@@ -1,11 +1,36 @@
+let MEMORY_POSTS = [];
+
+
+let MEMORY_PROFILE_NAME = "";
+
+//caption secton
+function formatCaption(text) {
+  const words = text.split(/\s+/).filter(w => w);
+
+  if (words.length <= 50) {
+    return {
+      preview: text,
+      full: text,
+      showReadMore: false
+    };
+  }
+
+  const preview = words.slice(0, 40).join(" ");
+
+  return {
+    preview: preview,
+    full: text,
+    showReadMore: true
+  };
+}
+
+
+
+
 let posts = [];
 
 
-/* ================== TEMP MEMORY (NO SAVE) ================== */
-let MEMORY_POSTS = [];
-let MEMORY_PROFILE_NAME = "";
-let MEMORY_PROFILE_PIC = "";
-let MEMORY_COVER_PIC = "";
+
 
 /* ================= MENU ================= */
 const menuBtn = document.getElementById("menuBtn");
@@ -51,9 +76,11 @@ profileIcon.onclick = () => {
   messagePage.style.display = "none";
   setActive(profileIcon);
 
+
+
   const profileFeed = document.getElementById("profileFeed");
   profileFeed.innerHTML = "";
-  MEMORY_POSTS.forEach(p => createPost({ ...p, skipSave: true, target: "profile" }));
+  
   window.scrollTo(0, 0);
 };
 
@@ -79,17 +106,19 @@ messageIcon.onclick = () => {
 function createPost({
   type,
   media,
-   caption = "",
+  caption = "",
+  userName,
+  userPhoto,
   isProfileUpdate = false,
   updateType = "",
   skipSave = false,
   target = "both"
 }) {
+
   const feed = document.getElementById("feed");
   const profileFeed = document.getElementById("profileFeed");
   const profilePic = document.getElementById("profilePic");
 
-  const userName = MEMORY_PROFILE_NAME || "Everest User";
 
   let updateText = "";
   if (isProfileUpdate && updateType === "profile") updateText = "updated profile picture";
@@ -100,7 +129,8 @@ function createPost({
 
       <div class="post-header">
         <div class="post-user-left">
-          <img src="${profilePic.src}" class="post-user-pic">
+          <img src="${userPhoto}" class="post-user-pic">
+
           <div>
             <div class="post-user-name">${userName}</div>
             ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
@@ -120,10 +150,19 @@ function createPost({
 
       </div>
 
-${caption ? `
-  <div class="post-text collapsed">${caption}</div>
-  <span class="read-more">Read more</span>
-` : ""}
+
+${caption ? (() => {
+  const c = formatCaption(caption);
+
+  return `
+    <div class="post-text ${c.showReadMore ? "collapsed" : ""}"
+         data-full="${c.full}">
+      ${c.preview}
+    </div>
+    ${c.showReadMore ? `<span class="read-more">Read more</span>` : ""}
+  `;
+})() : ""}
+
 
 
       ${type === "text" ? `
@@ -155,7 +194,6 @@ ${caption ? `
   if ((target === "both" || target === "profile") && profileFeed)
     profileFeed.insertAdjacentHTML("afterbegin", postHTML);
 
-  if (!skipSave) MEMORY_POSTS.unshift({ type, media, caption, isProfileUpdate, updateType });
 
 }
 
@@ -172,34 +210,52 @@ const coverPic = document.getElementById("coverPic");
 profileCam.onclick = () => profileInput.click();
 coverCam.onclick = () => coverInput.click();
 
+//sub profile
 profileInput.onchange = () => {
   const file = profileInput.files[0];
-  if (!file) return;
+  if (!file || !auth.currentUser) return;
 
   const r = new FileReader();
   r.onload = () => {
     profilePic.src = r.result;
     profilePicBig.src = r.result;
-    MEMORY_PROFILE_PIC = r.result;
+
+    // ✅ save to firestore
+    db.collection("users")
+      .doc(auth.currentUser.uid)
+      .update({
+        profilePic: r.result
+      });
 
     createPost({
       type: "image",
       media: r.result,
+      userName: MEMORY_PROFILE_NAME,
+      userPhoto: r.result,
       isProfileUpdate: true,
       updateType: "profile"
     });
   };
+
   r.readAsDataURL(file);
 };
 
+
+//sub cover
 coverInput.onchange = () => {
   const file = coverInput.files[0];
-  if (!file) return;
+  if (!file || !auth.currentUser) return;
 
   const r = new FileReader();
   r.onload = () => {
     coverPic.src = r.result;
-    MEMORY_COVER_PIC = r.result;
+
+    // ✅ save cover
+    db.collection("users")
+      .doc(auth.currentUser.uid)
+      .update({
+        coverPic: r.result
+      });
 
     createPost({
       type: "image",
@@ -208,8 +264,10 @@ coverInput.onchange = () => {
       updateType: "cover"
     });
   };
+
   r.readAsDataURL(file);
 };
+
 
 
 
@@ -242,7 +300,14 @@ textPostBtn.onclick = () => {
   const text = textPostInput.value.trim();
   if (!text) return;
 
-  createPost({ type: "text", media: text });
+  //firebase
+savePostToFirebase({
+  type: "text",
+  media: text
+});
+
+
+
   textPostModal.style.display = "none";
 };
     //auth btn//
@@ -264,6 +329,34 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+//save cover/profile
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists) return;
+
+    const data = doc.data();
+
+    const fullName = data.firstName + " " + data.lastName;
+    MEMORY_PROFILE_NAME = fullName;
+
+    document.getElementById("profileName").innerText = fullName;
+
+    // profile pic
+    if (data.profilePic) {
+      profilePic.src = data.profilePic;
+      profilePicBig.src = data.profilePic;
+    }
+
+    // cover pic
+    if (data.coverPic) {
+      coverPic.src = data.coverPic;
+    }
+  });
+});
+
 
 /* ================= AUTH ELEMENTS ================= */
 const authModal   = document.getElementById("authModal");
@@ -348,8 +441,8 @@ authSubmitBtn.onclick = () => {
     .then(() => {
       const fullName = firstName + " " + lastName;
 
-      // TEMP MEMORY (no localStorage)
-      MEMORY_PROFILE_NAME = fullName;
+     MEMORY_PROFILE_NAME = fullName;
+
 
       // UI update
       document.getElementById("profileName").innerText = fullName;
@@ -369,6 +462,24 @@ authSubmitBtn.onclick = () => {
     });
 };
 
+
+
+//no remove id name
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+
+  // user still logged in after refresh
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists) return;
+
+    const data = doc.data();
+
+    const fullName = data.firstName + " " + data.lastName;
+    MEMORY_PROFILE_NAME = fullName;
+
+    document.getElementById("profileName").innerText = fullName;
+  });
+});
 
 
 
@@ -406,81 +517,57 @@ saveBioBtn.onclick = () => {
 };
 
 
-
-//post delet section//
+//post delet section
 document.addEventListener("click", e => {
+
+  // CLOSE MENUS
   document.querySelectorAll(".post-menu-dropdown").forEach(m => {
     if (!m.parentElement.contains(e.target)) {
       m.classList.remove("show");
     }
   });
 
+  // TOGGLE MENU
   if (e.target.classList.contains("post-menu")) {
-    const dropdown = e.target.nextElementSibling;
-    dropdown.classList.toggle("show");
+    e.target.nextElementSibling.classList.toggle("show");
   }
 
+  // DELETE POST
+  if (e.target.classList.contains("delete")) {
+    const postEl = e.target.closest(".post");
+    if (!postEl) return;
 
-if (e.target.classList.contains("delete")) {
-  const postEl = e.target.closest(".post");
-  const id = postEl.dataset.id;
+    const id = postEl.dataset.id;
 
-  // MEMORY থেকে delete
-  MEMORY_POSTS = MEMORY_POSTS.filter(p => p.media !== id);
+    db.collection("posts")
+      .where("media", "==", id)
+      .get()
+      .then(qs => qs.forEach(d => d.ref.delete()));
+  }
 
-  // UI re-render
-  document.getElementById("feed").innerHTML = "";
-  document.getElementById("profileFeed").innerHTML = "";
-
-  MEMORY_POSTS.forEach(p =>
-    createPost({ ...p, skipSave: true })
-  );
-}
-
-
-//caption section//
+  // DOWNLOAD
   if (e.target.classList.contains("download")) {
-    const img = e.target.closest(".post").querySelector("img,video");
-    if (!img) return;
+    const media = e.target.closest(".post")?.querySelector("img,video");
+    if (!media) return;
 
     const a = document.createElement("a");
-    a.href = img.src;
+    a.href = media.src;
     a.download = "post";
     a.click();
   }
 
+  // EDIT
   if (e.target.classList.contains("edit")) {
     alert("Edit post coming soon");
   }
 
+  // PIN
   if (e.target.classList.contains("pin")) {
     alert("Pin post coming soon");
   }
-});
-
-
-
-
-function addPost(text) {
-  const post = {
-    id: Date.now(),
-    text: text
-  };
-
-  posts.unshift(post);
-  renderAllPosts();
-}
-
-function renderAllPosts() {
-  feed.innerHTML = "";
-  profileFeed.innerHTML = "";
-
-  posts.forEach(post => {
-    const el = createPost(post);
-    feed.appendChild(el.cloneNode(true));
-    profileFeed.appendChild(el);
   });
-}
+
+
 
 
 
@@ -525,11 +612,12 @@ imageInput.onchange = () => {
 document.getElementById("mediaPostBtn").onclick = () => {
   const caption = document.getElementById("mediaCaptionInput").value.trim();
 
-  createPost({
-    type: selectedMediaType,
-    media: selectedMedia,
-    caption: caption
-  });
+savePostToFirebase({
+  type: selectedMediaType,
+  media: selectedMedia,
+  caption: caption
+});
+
 
   document.getElementById("mediaCaptionInput").value = "";
   document.getElementById("mediaCaptionModal").style.display = "none";
@@ -537,10 +625,53 @@ document.getElementById("mediaPostBtn").onclick = () => {
 
 
 
-if (e.target.classList.contains("read-more")) {
-  const text = e.target.previousElementSibling;
-  text.classList.toggle("collapsed");
+ 
 
-  e.target.innerText =
-    text.classList.contains("collapsed") ? "Read more" : "See less";
+
+
+
+
+  //firebase
+function savePostToFirebase({ type, media, caption = "" }) {
+
+  if (!auth.currentUser) {
+    alert("Post করতে login লাগবে");
+    return;
+  }
+
+  db.collection("posts").add({
+    userId: auth.currentUser.uid,
+    userName: MEMORY_PROFILE_NAME,
+    userPhoto: profilePic.src,
+    type,
+    media,
+    caption,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 }
+
+
+
+
+
+
+db.collection("posts")
+  .orderBy("createdAt", "desc")
+  .onSnapshot(snapshot => {
+
+    document.getElementById("feed").innerHTML = "";
+    document.getElementById("profileFeed").innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+
+      createPost({
+        type: p.type,
+        media: p.media,
+        caption: p.caption,
+        userName: p.userName,
+        userPhoto: p.userPhoto
+      });
+    });
+  });
+
