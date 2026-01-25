@@ -79,7 +79,7 @@ profileIcon.onclick = () => {
 
 
   const profileFeed = document.getElementById("profileFeed");
-  profileFeed.innerHTML = "";
+  
   
   window.scrollTo(0, 0);
 };
@@ -227,14 +227,12 @@ profileInput.onchange = () => {
         profilePic: r.result
       });
 
-    createPost({
-      type: "image",
-      media: r.result,
-      userName: MEMORY_PROFILE_NAME,
-      userPhoto: r.result,
-      isProfileUpdate: true,
-      updateType: "profile"
-    });
+    savePostToFirebase({
+  type: "image",
+  media: r.result,
+  caption: "updated profile picture"
+});
+
   };
 
   r.readAsDataURL(file);
@@ -257,12 +255,12 @@ coverInput.onchange = () => {
         coverPic: r.result
       });
 
-    createPost({
-      type: "image",
-      media: r.result,
-      isProfileUpdate: true,
-      updateType: "cover"
-    });
+   savePostToFirebase({
+  type: "image",
+  media: r.result,
+  caption: "updated cover photo"
+});
+
   };
 
   r.readAsDataURL(file);
@@ -329,6 +327,60 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+//new
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+
+  db.collection("posts")
+
+  .orderBy("createdAt", "desc")
+
+
+
+
+    .onSnapshot(snapshot => {
+
+      const feed = document.getElementById("feed");
+      const profileFeed = document.getElementById("profileFeed");
+
+      feed.innerHTML = "";
+      profileFeed.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const p = doc.data();
+
+        // ⛔ skip broken post
+        if (!p.userId) return;
+
+        // HOME → সবাই
+        createPost({
+          type: p.type,
+          media: p.media,
+          caption: p.caption,
+          userName: p.userName,
+          userPhoto: p.userPhoto,
+          target: "home"
+        });
+
+        // PROFILE → শুধু আমার post
+        if (p.userId === user.uid) {
+          createPost({
+            type: p.type,
+            media: p.media,
+            caption: p.caption,
+            userName: p.userName,
+            userPhoto: p.userPhoto,
+            target: "profile"
+          });
+        }
+      });
+    });
+});
+
+
+
+
 
 //save cover/profile
 auth.onAuthStateChanged(user => {
@@ -652,26 +704,4 @@ function savePostToFirebase({ type, media, caption = "" }) {
 
 
 
-
-
-
-db.collection("posts")
-  .orderBy("createdAt", "desc")
-  .onSnapshot(snapshot => {
-
-    document.getElementById("feed").innerHTML = "";
-    document.getElementById("profileFeed").innerHTML = "";
-
-    snapshot.forEach(doc => {
-      const p = doc.data();
-
-      createPost({
-        type: p.type,
-        media: p.media,
-        caption: p.caption,
-        userName: p.userName,
-        userPhoto: p.userPhoto
-      });
-    });
-  });
 
