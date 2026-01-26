@@ -685,7 +685,6 @@ savePostToFirebase({
 
   //firebase
 function savePostToFirebase({ type, media, caption = "" }) {
-
   if (!auth.currentUser) {
     alert("Post করতে login লাগবে");
     return;
@@ -698,9 +697,10 @@ function savePostToFirebase({ type, media, caption = "" }) {
     type,
     media,
     caption,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: Date.now() // ✅ FIX
   });
 }
+
 
 
 
