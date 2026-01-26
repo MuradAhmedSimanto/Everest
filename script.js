@@ -330,7 +330,7 @@ const db = firebase.firestore();
 
 //new
 auth.onAuthStateChanged(user => {
-  if (!user) return;
+  
 
   db.collection("posts")
 
@@ -700,6 +700,7 @@ function savePostToFirebase({ type, media, caption = "" }) {
     createdAt: Date.now() // ✅ FIX
   });
 }
+
 
 
 
