@@ -104,16 +104,19 @@ messageIcon.onclick = () => {
 
 /* ================= POST SYSTEM ================= */
 function createPost({
+  postId,
   type,
   media,
   caption = "",
   userName,
   userPhoto,
+  reactions = {},
   isProfileUpdate = false,
   updateType = "",
   skipSave = false,
   target = "both"
 }) {
+
 
   const feed = document.getElementById("feed");
   const profileFeed = document.getElementById("profileFeed");
@@ -125,7 +128,7 @@ function createPost({
   if (isProfileUpdate && updateType === "cover") updateText = "updated cover photo";
 
   const postHTML = `
-    <div class="post" data-id="${media}">
+    <div class="post" data-id="${postId}">
 
       <div class="post-header">
         <div class="post-user-left">
@@ -181,12 +184,40 @@ ${caption ? (() => {
       `}
 
       <div class="post-actions">
-        <span>👍 Like</span>
-        <span>💬 Comment</span>
-        <span>↗️ Share</span>
-      </div>
-    </div>
+
+  <span class="like-btn" data-post="${postId}">
+  <span class="like-text">👍 Like</span>
+
+  <div class="reaction-box">
+    <span>😆</span>
+    <span>😥</span>
+    <span>❤️</span>
+    <span>💔</span>
+    <span>😮</span>
+    <span>😡</span>
+    <span>🤙</span>
+  </div>
+</span>
+
+<div class="reaction-summary">
+  ${Object.values(reactions).join(" ")}
+</div>
+
+
+ </div>
   `;
+
+const myReaction = reactions?.[auth.currentUser?.uid];
+
+if (myReaction) {
+  setTimeout(() => {
+    const btn = document.querySelector(
+      `[data-post="${postId}"] .like-text`
+    );
+    if (btn) btn.innerText = myReaction;
+  }, 0);
+}
+
 
   if ((target === "both" || target === "home") && feed)
     feed.insertAdjacentHTML("afterbegin", postHTML);
@@ -347,35 +378,34 @@ auth.onAuthStateChanged(user => {
       feed.innerHTML = "";
       profileFeed.innerHTML = "";
 
-      snapshot.forEach(doc => {
-        const p = doc.data();
+    snapshot.forEach(doc => {
+  const p = doc.data();
 
-        // ⛔ skip broken post
-        if (!p.userId) return;
+  createPost({
+    postId: doc.id, // ✅ ADD
+    type: p.type,
+    media: p.media,
+    caption: p.caption,
+    userName: p.userName,
+    userPhoto: p.userPhoto,
+    reactions: p.reactions || {},
+    target: "home"
+  });
 
-        // HOME → সবাই
-        createPost({
-          type: p.type,
-          media: p.media,
-          caption: p.caption,
-          userName: p.userName,
-          userPhoto: p.userPhoto,
-          target: "home"
-        });
-
-        // PROFILE → শুধু আমার post
-        if (p.userId === user.uid) {
-          createPost({
-            type: p.type,
-            media: p.media,
-            caption: p.caption,
-            userName: p.userName,
-            userPhoto: p.userPhoto,
-            target: "profile"
-          });
-        }
-      });
-    });
+  if (p.userId === user.uid) {
+    createPost({
+      postId: doc.id,
+      type: p.type,
+      media: p.media,
+      caption: p.caption,
+      userName: p.userName,
+      userPhoto: p.userPhoto,
+      reactions: p.reactions || {},
+      target: "profile"
+     });
+    }
+  });
+});
 });
 
 
@@ -384,7 +414,7 @@ auth.onAuthStateChanged(user => {
 
 //save cover/profile
 auth.onAuthStateChanged(user => {
-  if (!user) return;
+  
 
   db.collection("users").doc(user.uid).get().then(doc => {
     if (!doc.exists) return;
@@ -572,6 +602,8 @@ saveBioBtn.onclick = () => {
 //post delet section
 document.addEventListener("click", e => {
 
+if (e.target.closest(".reaction-box")) return;
+
   // CLOSE MENUS
   document.querySelectorAll(".post-menu-dropdown").forEach(m => {
     if (!m.parentElement.contains(e.target)) {
@@ -590,11 +622,10 @@ document.addEventListener("click", e => {
     if (!postEl) return;
 
     const id = postEl.dataset.id;
-
-    db.collection("posts")
-      .where("media", "==", id)
-      .get()
-      .then(qs => qs.forEach(d => d.ref.delete()));
+ 
+ db.collection("posts")
+  .doc(id)
+  .delete();
   }
 
   // DOWNLOAD
@@ -690,20 +721,223 @@ function savePostToFirebase({ type, media, caption = "" }) {
     return;
   }
 
-  db.collection("posts").add({
-    userId: auth.currentUser.uid,
-    userName: MEMORY_PROFILE_NAME,
-    userPhoto: profilePic.src,
-    type,
-    media,
-    caption,
-    createdAt: Date.now() // ✅ FIX
-  });
+db.collection("posts").add({
+  userId: auth.currentUser.uid,
+  userName: MEMORY_PROFILE_NAME,
+  userPhoto: profilePic.src,
+  type,
+  media,
+  caption,
+  reactions: {}, // ✅ ADD THIS
+  createdAt: Date.now()
+});
+
 }
 
 
 
 
 
+let holdTimer = null;
+let activePost = null;
 
+// ================= LONG PRESS DETECTION =================
+document.addEventListener("mousedown", startHold);
+document.addEventListener("touchstart", startHold);
 
+function startHold(e) {
+  const likeBtn = e.target.closest(".like-btn");
+  if (!likeBtn) return;
+
+  if (!auth.currentUser) {
+    alert("Reaction দিতে login লাগবে");
+    return;
+  }
+
+  const postEl = likeBtn.closest(".post");
+  const box = likeBtn.querySelector(".reaction-box");
+  if (!box) return;
+
+  activePost = postEl;
+
+  // 0.5s hold → reaction box open
+  holdTimer = setTimeout(() => {
+    closeAllReactionBoxes(); // ensure only this box open
+    box.style.display = "flex";
+  }, 500);
+}
+
+// ================= CLICK OR HOLD END =================
+document.addEventListener("mouseup", endHold);
+document.addEventListener("touchend", endHold);
+
+async function endHold(e) {
+  if (!activePost) return;
+
+  const likeBtn = e.target.closest(".like-btn");
+  const postEl = activePost;
+  const postId = postEl.dataset.id;
+  const uid = auth.currentUser?.uid;
+  const postRef = db.collection("posts").doc(postId);
+  const box = postEl.querySelector(".reaction-box");
+
+  if (holdTimer) {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+
+    // Normal click → ❤️ toggle only if box not open
+    if (box.style.display !== "flex" && uid) {
+      try {
+        await db.runTransaction(async transaction => {
+          const doc = await transaction.get(postRef);
+          if (!doc.exists) return;
+          const data = doc.data();
+          const reactions = data.reactions || {};
+
+          reactions[uid] = reactions[uid] === "❤️" ? null : "❤️";
+
+          transaction.update(postRef, { reactions });
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  activePost = null;
+}
+
+// ================= BOX REACTION SELECT =================
+document.addEventListener("click", async e => {
+  const emojiEl = e.target.closest(".reaction-box span");
+  if (emojiEl) {
+    const postEl = emojiEl.closest(".post");
+    const postId = postEl.dataset.id;
+    const uid = auth.currentUser?.uid;
+    const emoji = emojiEl.innerText;
+    const postRef = db.collection("posts").doc(postId);
+
+    try {
+      await db.runTransaction(async transaction => {
+        const doc = await transaction.get(postRef);
+        if (!doc.exists) return;
+
+        const data = doc.data();
+        const reactions = data.reactions || {};
+
+        reactions[uid] = emoji; // user reaction set
+
+        transaction.update(postRef, { reactions });
+
+        // Close box after selecting reaction
+        const box = postEl.querySelector(".reaction-box");
+        if (box) box.style.display = "none";
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
+    return; // prevent box-close below
+  }
+
+  // ================= CLOSE ALL BOXES IF clicked outside =================
+  if (!e.target.closest(".like-btn") && !e.target.closest(".reaction-box")) {
+    closeAllReactionBoxes();
+  }
+});
+
+// ================= CLOSE ALL BOXES =================
+function closeAllReactionBoxes() {
+  document.querySelectorAll(".reaction-box").forEach(box => {
+    box.style.display = "none";
+  });
+}
+
+// ================= LIVE REACTION DISPLAY =================
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+
+  db.collection("posts")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      const feed = document.getElementById("feed");
+      const profileFeed = document.getElementById("profileFeed");
+
+      feed.innerHTML = "";
+      profileFeed.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const p = doc.data();
+
+        createPost({
+          postId: doc.id,
+          type: p.type,
+          media: p.media,
+          caption: p.caption,
+          userName: p.userName,
+          userPhoto: p.userPhoto,
+          reactions: p.reactions || {},
+          target: "home"
+        });
+
+        if (p.userId === user.uid) {
+          createPost({
+            postId: doc.id,
+            type: p.type,
+            media: p.media,
+            caption: p.caption,
+            userName: p.userName,
+            userPhoto: p.userPhoto,
+            reactions: p.reactions || {},
+            target: "profile"
+          });
+        }
+      });
+    });
+});
+
+// ================= CREATE POST WITH REACTIONS =================
+function createPost({ postId, type, media, caption = "", userName, userPhoto, reactions = {}, target = "both" }) {
+  const feed = document.getElementById("feed");
+  const profileFeed = document.getElementById("profileFeed");
+
+  const reactionSummary = Object.values(reactions).filter(Boolean).join(" ");
+
+  const postHTML = `
+    <div class="post" data-id="${postId}">
+      <div class="post-header">
+        <div class="post-user-left">
+          <img src="${userPhoto}" class="post-user-pic">
+          <div>
+            <div class="post-user-name">${userName}</div>
+          </div>
+        </div>
+      </div>
+
+      ${caption ? `<div class="post-text">${caption}</div>` : ""}
+
+      ${type === "image" ? `<div class="post-media"><img src="${media}"></div>` :
+        type === "video" ? `<div class="post-media"><video controls src="${media}"></video></div>` :
+        `<div class="post-text">${media}</div>`}
+
+      <div class="post-actions">
+        <span class="like-btn">
+          <span class="like-text">${reactions[auth.currentUser?.uid] || "👍 Like"}</span>
+          <div class="reaction-box" style="display:none;">
+            <span>😆</span>
+            <span>😥</span>
+            <span>❤️</span>
+            <span>💔</span>
+            <span>😮</span>
+            <span>😡</span>
+            <span>🤙</span>
+          </div>
+        </span>
+        <div class="reaction-summary">${reactionSummary}</div>
+      </div>
+    </div>
+  `;
+
+  if ((target === "both" || target === "home") && feed) feed.insertAdjacentHTML("afterbegin", postHTML);
+  if ((target === "both" || target === "profile") && profileFeed) profileFeed.insertAdjacentHTML("afterbegin", postHTML);
+}
