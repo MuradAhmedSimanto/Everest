@@ -1188,4 +1188,11 @@ transition: none;          /* animation remove */
   background-color: #dc3545;
   color: #fff;
 }
+/* profile post of gap  */
+#profileFeed {
+  margin-top: 22px !important;
+  border-top: 5px solid #c5c9cf !important;
+  padding-top: 5px !important;
+}
+
 
