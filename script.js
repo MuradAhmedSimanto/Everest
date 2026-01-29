@@ -718,7 +718,7 @@ document.getElementById("cancelEditPostBtn").onclick = () => {
 
   // PIN
   if (e.target.classList.contains("pin")) {
-    alert("Pin post coming soon");
+    alert("developer is working");
   }
   });
 
@@ -969,5 +969,6 @@ auth.onAuthStateChanged(user => {
       });
     });
 });
+
 
 
