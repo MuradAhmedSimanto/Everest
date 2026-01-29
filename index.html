@@ -226,6 +226,34 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+  <!-- EDIT POST MODAL -->
+<div id="editPostModal" class="auth-modal" style="display:none;">
+  <div class="auth-box">
+
+    <h3>Edit post</h3>
+
+    <textarea
+      id="editPostCaption"
+      placeholder="Edit caption..."
+    ></textarea>
+
+    <img
+      id="editPostImage"
+      style="display:none; width:100%; border-radius:8px;"
+    >
+
+    <video
+      id="editPostVideo"
+      controls
+      style="display:none; width:100%; border-radius:8px;"
+    ></video>
+
+    <button id="saveEditPostBtn">Save</button>
+    <button id="cancelEditPostBtn">Cancel</button>
+
+  </div>
+</div>
+
 
   <!-- MEDIA CAPTION MODAL -->
   <div id="mediaCaptionModal" class="auth-modal" style="display:none;">
@@ -252,8 +280,5 @@
 
 <script src="script.js"></script>
 
-</body>
-
-
-
+</body>.
 </html>
