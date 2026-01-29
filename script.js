@@ -105,6 +105,7 @@ messageIcon.onclick = () => {
 /* ================= POST SYSTEM ================= */
 function createPost({
   postId,
+  userId,
   type,
   media,
   caption = "",
@@ -117,6 +118,7 @@ function createPost({
   target = "both"
 }) {
 
+const isOwner = auth.currentUser && auth.currentUser.uid === userId;
 
   const feed = document.getElementById("feed");
   const profileFeed = document.getElementById("profileFeed");
@@ -143,12 +145,15 @@ function createPost({
         <div class="post-menu-wrapper">
   <div class="post-menu">⋯</div>
 
-  <div class="post-menu-dropdown">
+ <div class="post-menu-dropdown">
+  ${isOwner ? `
     <div class="pm-item delete">Delete post</div>
     <div class="pm-item edit">Edit post</div>
     <div class="pm-item pin">Pin post</div>
-    <div class="pm-item download">Download post</div>
-  </div>
+  ` : ``}
+  <div class="pm-item download">Download post</div>
+</div>
+
 </div>
 
       </div>
@@ -383,6 +388,7 @@ auth.onAuthStateChanged(user => {
 
   createPost({
     postId: doc.id, // ✅ ADD
+    userId: p.userId,
     type: p.type,
     media: p.media,
     caption: p.caption,
@@ -639,10 +645,76 @@ if (e.target.closest(".reaction-box")) return;
     a.click();
   }
 
-  // EDIT
-  if (e.target.classList.contains("edit")) {
-    alert("Edit post coming soon");
+ 
+// EDIT POST
+if (e.target.classList.contains("edit")) {
+  e.stopPropagation(); // 🔥 THIS IS THE KEY
+
+  const postEl = e.target.closest(".post");
+  if (!postEl) return;
+
+  const editPostModal = document.getElementById("editPostModal");
+  const editPostCaption = document.getElementById("editPostCaption");
+  const editPostImage = document.getElementById("editPostImage");
+  const editPostVideo = document.getElementById("editPostVideo");
+
+  const postId = postEl.dataset.id;
+
+
+
+  db.collection("posts").doc(postId).get().then(snap => {
+    if (!snap.exists) return;
+
+    const data = snap.data();
+    editPostCaption.value = data.caption || "";
+
+    if (data.type === "image") {
+      editPostImage.src = data.media;
+      editPostImage.style.display = "block";
+      editPostVideo.style.display = "none";
+    } else {
+      editPostVideo.src = data.media;
+      editPostVideo.style.display = "block";
+      editPostImage.style.display = "none";
+    }
+
+    editPostModal.style.display = "flex";
+  });
+}
+//edit post save cancle
+let editingPostId = null;
+
+
+// SAVE EDIT
+document.getElementById("saveEditPostBtn").onclick = async () => {
+  if (!editingPostId) return;
+
+  const newCaption =
+    document.getElementById("editPostCaption").value.trim();
+
+  try {
+    await db.collection("posts")
+      .doc(editingPostId)
+      .update({
+        caption: newCaption
+      });
+
+    document.getElementById("editPostModal").style.display = "none";
+    editingPostId = null;
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update post");
   }
+};
+
+// CANCEL EDIT
+document.getElementById("cancelEditPostBtn").onclick = () => {
+  document.getElementById("editPostModal").style.display = "none";
+  editingPostId = null;
+};
+
+
 
   // PIN
   if (e.target.classList.contains("pin")) {
@@ -871,6 +943,7 @@ auth.onAuthStateChanged(user => {
 
         createPost({
           postId: doc.id,
+          userId: p.userId,
           type: p.type,
           media: p.media,
           caption: p.caption,
@@ -883,6 +956,7 @@ auth.onAuthStateChanged(user => {
         if (p.userId === user.uid) {
           createPost({
             postId: doc.id,
+            userId: p.userId,
             type: p.type,
             media: p.media,
             caption: p.caption,
@@ -896,48 +970,4 @@ auth.onAuthStateChanged(user => {
     });
 });
 
-// ================= CREATE POST WITH REACTIONS =================
-function createPost({ postId, type, media, caption = "", userName, userPhoto, reactions = {}, target = "both" }) {
-  const feed = document.getElementById("feed");
-  const profileFeed = document.getElementById("profileFeed");
 
-  const reactionSummary = Object.values(reactions).filter(Boolean).join(" ");
-
-  const postHTML = `
-    <div class="post" data-id="${postId}">
-      <div class="post-header">
-        <div class="post-user-left">
-          <img src="${userPhoto}" class="post-user-pic">
-          <div>
-            <div class="post-user-name">${userName}</div>
-          </div>
-        </div>
-      </div>
-
-      ${caption ? `<div class="post-text">${caption}</div>` : ""}
-
-      ${type === "image" ? `<div class="post-media"><img src="${media}"></div>` :
-        type === "video" ? `<div class="post-media"><video controls src="${media}"></video></div>` :
-        `<div class="post-text">${media}</div>`}
-
-      <div class="post-actions">
-        <span class="like-btn">
-          <span class="like-text">${reactions[auth.currentUser?.uid] || "👍 Like"}</span>
-          <div class="reaction-box" style="display:none;">
-            <span>😆</span>
-            <span>😥</span>
-            <span>❤️</span>
-            <span>💔</span>
-            <span>😮</span>
-            <span>😡</span>
-            <span>🤙</span>
-          </div>
-        </span>
-        <div class="reaction-summary">${reactionSummary}</div>
-      </div>
-    </div>
-  `;
-
-  if ((target === "both" || target === "home") && feed) feed.insertAdjacentHTML("afterbegin", postHTML);
-  if ((target === "both" || target === "profile") && profileFeed) profileFeed.insertAdjacentHTML("afterbegin", postHTML);
-}
