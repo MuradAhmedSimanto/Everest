@@ -134,7 +134,9 @@ const isOwner = auth.currentUser && auth.currentUser.uid === userId;
 
       <div class="post-header">
         <div class="post-user-left">
-          <img src="${userPhoto}" class="post-user-pic">
+
+          <img class="post-user-pic" data-uid="${userId}">
+
 
           <div>
             <div class="post-user-name">${userName}</div>
@@ -229,6 +231,8 @@ if (myReaction) {
 
   if ((target === "both" || target === "profile") && profileFeed)
     profileFeed.insertAdjacentHTML("afterbegin", postHTML);
+  
+hydratePostUserPhoto();
 
 
 }
@@ -263,11 +267,13 @@ profileInput.onchange = () => {
         profilePic: r.result
       });
 
-    savePostToFirebase({
+  savePostToFirebase({
   type: "image",
   media: r.result,
-  caption: "updated profile picture"
+  isProfileUpdate: true,
+  updateType: "profile"
 });
+
 
   };
 
@@ -291,10 +297,11 @@ coverInput.onchange = () => {
         coverPic: r.result
       });
 
-   savePostToFirebase({
+savePostToFirebase({
   type: "image",
   media: r.result,
-  caption: "updated cover photo"
+  isProfileUpdate: true,
+  updateType: "cover"
 });
 
   };
@@ -785,28 +792,26 @@ savePostToFirebase({
 
 
 
-
   //firebase
-function savePostToFirebase({ type, media, caption = "" }) {
+function savePostToFirebase({ type, media, caption = "", isProfileUpdate = false, updateType = "" }) {
   if (!auth.currentUser) {
     alert("Post করতে login লাগবে");
     return;
   }
 
-db.collection("posts").add({
+ db.collection("posts").add({
   userId: auth.currentUser.uid,
   userName: MEMORY_PROFILE_NAME,
-  userPhoto: profilePic.src,
   type,
   media,
   caption,
-  reactions: {}, // ✅ ADD THIS
+  isProfileUpdate,
+  updateType,
+  reactions: {},
   createdAt: Date.now()
 });
 
 }
-
-
 
 
 
@@ -941,30 +946,37 @@ auth.onAuthStateChanged(user => {
       snapshot.forEach(doc => {
         const p = doc.data();
 
-        createPost({
-          postId: doc.id,
-          userId: p.userId,
-          type: p.type,
-          media: p.media,
-          caption: p.caption,
-          userName: p.userName,
-          userPhoto: p.userPhoto,
-          reactions: p.reactions || {},
-          target: "home"
-        });
+  createPost({
+  postId: doc.id,
+  userId: p.userId,
+  type: p.type,
+  media: p.media,
+  caption: p.caption,
+  userName: p.userName,
+  userPhoto: p.userPhoto,
+  reactions: p.reactions || {},
+  isProfileUpdate: p.isProfileUpdate,
+  updateType: p.updateType,
+  target: "home"
+});
+
+
 
         if (p.userId === user.uid) {
-          createPost({
-            postId: doc.id,
-            userId: p.userId,
-            type: p.type,
-            media: p.media,
-            caption: p.caption,
-            userName: p.userName,
-            userPhoto: p.userPhoto,
-            reactions: p.reactions || {},
-            target: "profile"
-          });
+         createPost({
+  postId: doc.id,
+  userId: p.userId,
+  type: p.type,
+  media: p.media,
+  caption: p.caption,
+  userName: p.userName,
+  userPhoto: p.userPhoto,
+  reactions: p.reactions || {},
+  isProfileUpdate: p.isProfileUpdate,
+  updateType: p.updateType,
+  target: "profile"
+});
+
         }
       });
     });
@@ -972,3 +984,16 @@ auth.onAuthStateChanged(user => {
 
 
 
+async function hydratePostUserPhoto() {
+  const imgs = document.querySelectorAll(".post-user-pic[data-uid]");
+
+  for (let img of imgs) {
+    const uid = img.dataset.uid;
+    if (img.src) continue;
+
+    const doc = await db.collection("users").doc(uid).get();
+    if (doc.exists && doc.data().profilePic) {
+      img.src = doc.data().profilePic;
+    }
+  }
+}
