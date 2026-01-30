@@ -1024,10 +1024,6 @@ transition: none;          /* animation remove */
     opacity: 1;
   }
 }
-
-
-
-
 .post-text {
   font-size: 15px;
   line-height: 1.5;
@@ -1048,12 +1044,7 @@ transition: none;          /* animation remove */
   margin-top: 4px;
   display: inline-block;
 }
-
-
-
-
 /* ===== POST FULL WIDTH (FB STYLE) ===== */
-
 .feed,
 #feed,
 #profileFeed {
@@ -1076,11 +1067,6 @@ transition: none;          /* animation remove */
   object-fit: cover;
   display: block;
 }
-
-
-
-
-
 
 /*like btn*/
 .post-actions {
@@ -1114,12 +1100,6 @@ transition: none;          /* animation remove */
   gap: 4px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-
-
-
-
-
-
 
 /* Edit Post Modal */
 #editPostModal {
@@ -1194,5 +1174,18 @@ transition: none;          /* animation remove */
   border-top: 5px solid #c5c9cf !important;
   padding-top: 5px !important;
 }
+
+/* post in gap */
+.post,
+.feedPost,
+.feed-card,
+.postCard {
+  margin-bottom: 1px !important;
+}
+.post {
+  padding-bottom: 4px !important;
+}
+
+
 
 
