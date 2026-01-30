@@ -1,4 +1,4 @@
-
+           
 * {
   box-sizing: border-box;
 }
@@ -1185,6 +1185,31 @@ transition: none;          /* animation remove */
 .post {
   padding-bottom: 4px !important;
 }
+/* spinner button style */
+#authSubmit.loading {
+  position: relative;
+  color: transparent; /* text hide while spinning */
+}
+
+#authSubmit.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 3px solid #fff;
+  border-top-color: #ff2d2d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
 
 
 
