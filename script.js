@@ -211,12 +211,13 @@ ${caption ? (() => {
 </div>
 
 
+
  </div>
   `;
 
 const myReaction = reactions?.[auth.currentUser?.uid];
 
-if (myReaction) {
+if (myReaction) {     
   setTimeout(() => {
     const btn = document.querySelector(
       `[data-post="${postId}"] .like-text`
@@ -467,10 +468,12 @@ const authSubmitBtn = document.getElementById("authSubmit");
 /* ================= OPEN SIGNUP MODAL ================= */
 signupBtn.onclick = (e) => {
   e.preventDefault();
+
   authModal.style.display = "flex";
   stepOne.style.display = "block";
   stepTwo.style.display = "none";
-  authMsg.textContent = "";
+
+  authMsg.innerText = "";
 };
 
 /* ================= CLOSE MODAL ================= */
@@ -499,6 +502,7 @@ continueBtn.onclick = () => {
 };
 
 /* ================= STEP 2 → SIGNUP ================= */
+/* ================= STEP 2 → SIGNUP ================= */
 authSubmitBtn.onclick = () => {
   const contact   = document.getElementById("authContact").value.trim();
   const password  = document.getElementById("password").value;
@@ -522,6 +526,10 @@ authSubmitBtn.onclick = () => {
     ? contact
     : contact + "@everest.app";
 
+  // ✅ Add loading spinner
+  authSubmitBtn.classList.add("loading");
+  authSubmitBtn.disabled = true;
+
   auth.createUserWithEmailAndPassword(email, password)
     .then((cred) => {
       return db.collection("users").doc(cred.user.uid).set({
@@ -535,28 +543,40 @@ authSubmitBtn.onclick = () => {
     })
     .then(() => {
       const fullName = firstName + " " + lastName;
-
-     MEMORY_PROFILE_NAME = fullName;
-
-
-      // UI update
+      MEMORY_PROFILE_NAME = fullName;
       document.getElementById("profileName").innerText = fullName;
 
-      // switch page
-      homePage.style.display = "none";
-      profilePage.style.display = "block";
-      notificationPage.style.display = "none";
-      messagePage.style.display = "none";
-      setActive(profileIcon);
+      // simulate 1.5s loading before showing success
+      setTimeout(() => {
+        authSubmitBtn.classList.remove("loading");
+        authSubmitBtn.disabled = false;
 
-      authModal.style.display = "none";
+        document.getElementById("signupSuccess").style.display = "block";
+
+        setTimeout(() => {
+          document.getElementById("signupSuccess").style.display = "none";
+        }, 3000);
+
+        // switch page
+        homePage.style.display = "none";
+        profilePage.style.display = "block";
+        notificationPage.style.display = "none";
+        messagePage.style.display = "none";
+        setActive(profileIcon);
+
+        authModal.style.display = "none";
+      }, 1500);
     })
     .catch((err) => {
       authMsg.textContent = err.message;
       console.error(err);
+      authSubmitBtn.classList.remove("loading");
+      authSubmitBtn.disabled = false;
     });
 };
 
+      
+   
 
 
 //no remove id name
@@ -997,3 +1017,7 @@ async function hydratePostUserPhoto() {
     }
   }
 }
+
+
+
+
