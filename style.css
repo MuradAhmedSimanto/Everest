@@ -1212,5 +1212,28 @@ transition: none;          /* animation remove */
 
 
 
+/*veryfi badge */
+.verified-badge{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  line-height:0;
+  flex:0 0 auto;
+  margin-left:6px;
+  transform:translateY(1px);
+}
+
+/* only show when verified */
+.verified-badge.show{
+  display:inline-flex;
+}
+
+/* badge size */
+.verified-icon{
+  width:16px;
+  height:16px;
+  display:block;
+}
+
 
 
