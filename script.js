@@ -146,10 +146,11 @@ const isOwner = auth.currentUser && auth.currentUser.uid === userId;
                   title="Verified"
                   style="display:none;">
               <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
-                 <path
+               <path
                    d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
                    fill="#ff1f1f"
                    />
+
                 <path
                   d="M9.3 12.6l1.9 1.9 4.2-4.3"
                   fill="none"
@@ -404,6 +405,14 @@ auth.onAuthStateChanged(user => {
     MEMORY_PROFILE_NAME = fullName;
 
     document.getElementById("profileName").innerText = fullName;
+
+    // ✅ profile badge uid set + hydrate
+const pb = document.getElementById("profileVerifiedBadge");
+if (pb) pb.dataset.verifiedUid = user.uid;
+
+VERIFIED_CACHE.clear();
+hydrateVerifiedBadges();
+
 
     // profile pic
     if (data.profilePic) {
@@ -1069,4 +1078,3 @@ async function hydratePostUserPhoto() {
     }
   }
 }
-
