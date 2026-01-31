@@ -1212,28 +1212,38 @@ transition: none;          /* animation remove */
 
 
 
+
 /*veryfi badge */
 .verified-badge{
   display:none;
   align-items:center;
-  justify-content:center;
-  line-height:0;
-  flex:0 0 auto;
   margin-left:6px;
-  transform:translateY(1px);
+  vertical-align:middle; /* 🔑 important */
 }
 
-/* only show when verified */
 .verified-badge.show{
   display:inline-flex;
 }
 
-/* badge size */
 .verified-icon{
-  width:16px;
-  height:16px;
+  width:18px;
+  height:18px;
   display:block;
+
+   border-radius:50%;
+  overflow:hidden;
 }
 
+/* IMPORTANT */
+.verified-icon{
+  border-radius:0;     /* ← এটা দরকার */
+  overflow:visible;    /* ← এটা দরকার */
+}
+
+.verified-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
 
 
