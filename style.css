@@ -1217,7 +1217,7 @@ transition: none;          /* animation remove */
 .verified-badge{
   display:none;
   align-items:center;
-  margin-left:6px;
+  margin-left:2px;
   vertical-align:middle; /* 🔑 important */
 }
 
@@ -1245,5 +1245,6 @@ transition: none;          /* animation remove */
   height:100%;
   display:block;
 }
+
 
 
