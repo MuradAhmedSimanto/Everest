@@ -146,10 +146,10 @@ const isOwner = auth.currentUser && auth.currentUser.uid === userId;
                   title="Verified"
                   style="display:none;">
               <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 1.5l2.8 1.7 3.2-.6 1.7 2.8 2.8 1.7-.6 3.2 1.7 2.8-1.7 2.8.6 3.2-2.8 1.7-1.7 2.8-3.2-.6L12 22.5l-2.8-1.7-3.2.6-1.7-2.8-2.8-1.7.6-3.2L.5 12l1.7-2.8-.6-3.2 2.8-1.7 1.7-2.8 3.2.6L12 1.5z"
-                  fill="#ff1f1f"
-                />
+                 <path
+                   d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
+                   fill="#ff1f1f"
+                   />
                 <path
                   d="M9.3 12.6l1.9 1.9 4.2-4.3"
                   fill="none"
@@ -1069,3 +1069,4 @@ async function hydratePostUserPhoto() {
     }
   }
 }
+
