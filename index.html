@@ -142,8 +142,31 @@
     <i class="fa-solid fa-camera" id="profileCam"></i>
   </div>
 
-  <!-- NAME -->
+ 
+  <!-- NAME + VERIFIED -->
+<div class="profile-name-row">
   <h3 id="profileName">Your Name</h3>
+
+  <span id="profileVerifiedBadge"
+        class="verified-badge"
+        data-verified-uid=""
+        title="Verified"
+        style="display:none;">
+    <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
+        fill="#ff1f1f" />
+      <path
+        d="M9.3 12.6l1.9 1.9 4.2-4.3"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round" />
+    </svg>
+  </span>
+</div>
+
 
   <!-- FOLLOW INFO -->
   <div class="follow-info">
@@ -278,7 +301,3 @@
 </body>
 </html>
 
-<script src="script.js"></script>
-
-</body>.
-</html>
