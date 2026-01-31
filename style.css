@@ -1213,6 +1213,7 @@ transition: none;          /* animation remove */
 
 
 
+
 /*veryfi badge */
 .verified-badge{
   display:none;
@@ -1247,4 +1248,28 @@ transition: none;          /* animation remove */
 }
 
 
+/* PROFILE NAME + BADGE */
+.profile-name-row{
+  display:flex;
+  align-items:center;
+  gap:4px;
+
+  justify-content:flex-start;
+  margin-top:6px;      /* 🔽 নামটা নিচে নামায় */
+}
+
+.profile-name-row h3{
+  margin:0;
+  line-height:1.3;     /* 🔑 natural height */
+}
+
+
+/* NAME → FOLLOW GAP CONTROL */
+.profile-name-row{
+  margin-bottom:4px;   /* 🔽 gap কমাও */
+}
+
+.follow-info{
+  margin-top:0;        /* 🔥 extra gap remove */
+}
 
