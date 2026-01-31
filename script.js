@@ -111,6 +111,7 @@ function createPost({
   caption = "",
   userName,
   userPhoto,
+ 
   reactions = {},
   isProfileUpdate = false,
   updateType = "",
@@ -129,91 +130,102 @@ const isOwner = auth.currentUser && auth.currentUser.uid === userId;
   if (isProfileUpdate && updateType === "profile") updateText = "updated profile picture";
   if (isProfileUpdate && updateType === "cover") updateText = "updated cover photo";
 
-  const postHTML = `
-    <div class="post" data-id="${postId}">
+ const postHTML = `
+  <div class="post" data-id="${postId}">
 
-      <div class="post-header">
-        <div class="post-user-left">
+    <div class="post-header">
+      <div class="post-user-left">
+        <img class="post-user-pic" data-uid="${userId}" src="${userPhoto || ""}" />
 
-          <img class="post-user-pic" data-uid="${userId}">
+        <div class="post-user-meta">
+          <div class="post-user-name">
+            <span class="uname" data-uid="${userId}">${userName || ""}</span>
 
-
-          <div>
-            <div class="post-user-name">${userName}</div>
-            ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
+            <span class="verified-badge"
+                  data-verified-uid="${userId}"
+                  title="Verified"
+                  style="display:none;">
+              <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 1.5l2.8 1.7 3.2-.6 1.7 2.8 2.8 1.7-.6 3.2 1.7 2.8-1.7 2.8.6 3.2-2.8 1.7-1.7 2.8-3.2-.6L12 22.5l-2.8-1.7-3.2.6-1.7-2.8-2.8-1.7.6-3.2L.5 12l1.7-2.8-.6-3.2 2.8-1.7 1.7-2.8 3.2.6L12 1.5z"
+                  fill="#ff1f1f"
+                />
+                <path
+                  d="M9.3 12.6l1.9 1.9 4.2-4.3"
+                  fill="none"
+                  stroke="#ffffff"
+                  stroke-width="2.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
           </div>
+
+          ${updateText ? `<div class="post-update-text">${updateText}</div>` : ""}
         </div>
-
-        <div class="post-menu-wrapper">
-  <div class="post-menu">⋯</div>
-
- <div class="post-menu-dropdown">
-  ${isOwner ? `
-    <div class="pm-item delete">Delete post</div>
-    <div class="pm-item edit">Edit post</div>
-    <div class="pm-item pin">Pin post</div>
-  ` : ``}
-  <div class="pm-item download">Download post</div>
-</div>
-
-</div>
-
       </div>
 
+      <div class="post-menu-wrapper">
+        <div class="post-menu">⋯</div>
 
-${caption ? (() => {
-  const c = formatCaption(caption);
-
-  return `
-    <div class="post-text ${c.showReadMore ? "collapsed" : ""}"
-         data-full="${c.full}">
-      ${c.preview}
-    </div>
-    ${c.showReadMore ? `<span class="read-more">Read more</span>` : ""}
-  `;
-})() : ""}
-
-
-
-      ${type === "text" ? `
-        <div class="post-text">${media}</div>
-      ` : `
-
-
-        <div class="post-media">
-
-          ${type === "image"
-            ? `<img src="${media}">`
-            : `<video controls playsinline preload="metadata">
-                 <source src="${media}" type="video/mp4">
-               </video>`}
+        <div class="post-menu-dropdown">
+          ${isOwner ? `
+            <div class="pm-item delete">Delete post</div>
+            <div class="pm-item edit">Edit post</div>
+            <div class="pm-item pin">Pin post</div>
+          ` : ``}
+          <div class="pm-item download">Download post</div>
         </div>
-      `}
+      </div>
+    </div>
 
-      <div class="post-actions">
+    ${caption ? (() => {
+      const c = formatCaption(caption);
+      return `
+        <div class="post-text ${c.showReadMore ? "collapsed" : ""}" data-full="${c.full}">
+          ${c.preview}
+        </div>
+        ${c.showReadMore ? `<span class="read-more">Read more</span>` : ""}
+      `;
+    })() : ""}
 
-  <span class="like-btn" data-post="${postId}">
-  <span class="like-text">👍 Like</span>
+    ${type === "text" ? `
+      <div class="post-text">${media}</div>
+    ` : `
+      <div class="post-media">
+        ${type === "image"
+          ? `<img src="${media}">`
+          : `<video controls playsinline preload="metadata">
+               <source src="${media}" type="video/mp4">
+             </video>`
+        }
+      </div>
+    `}
 
-  <div class="reaction-box">
-    <span>😆</span>
-    <span>😥</span>
-    <span>❤️</span>
-    <span>💔</span>
-    <span>😮</span>
-    <span>😡</span>
-    <span>🤙</span>
+    <div class="post-actions">
+      <span class="like-btn" data-post="${postId}">
+        <span class="like-text">👍 Like</span>
+
+        <div class="reaction-box">
+          <span>😆</span>
+          <span>😥</span>
+          <span>❤️</span>
+          <span>💔</span>
+          <span>😮</span>
+          <span>😡</span>
+          <span>🤙</span>
+        </div>
+      </span>
+
+      <div class="reaction-summary">
+        ${Object.values(reactions).join(" ")}
+      </div>
+    </div>
+
   </div>
-</span>
+`;
 
-<div class="reaction-summary">
-  ${Object.values(reactions).join(" ")}
-</div>
-
-
-
- </div>
-  `;
 
 const myReaction = reactions?.[auth.currentUser?.uid];
 
@@ -233,7 +245,9 @@ if (myReaction) {
   if ((target === "both" || target === "profile") && profileFeed)
     profileFeed.insertAdjacentHTML("afterbegin", postHTML);
   
-hydratePostUserPhoto();
+
+
+
 
 
 }
@@ -372,55 +386,6 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-//new
-auth.onAuthStateChanged(user => {
-  if (!user) return;
-
-  db.collection("posts")
-
-  .orderBy("createdAt", "desc")
-
-
-
-
-    .onSnapshot(snapshot => {
-
-      const feed = document.getElementById("feed");
-      const profileFeed = document.getElementById("profileFeed");
-
-      feed.innerHTML = "";
-      profileFeed.innerHTML = "";
-
-    snapshot.forEach(doc => {
-  const p = doc.data();
-
-  createPost({
-    postId: doc.id, // ✅ ADD
-    userId: p.userId,
-    type: p.type,
-    media: p.media,
-    caption: p.caption,
-    userName: p.userName,
-    userPhoto: p.userPhoto,
-    reactions: p.reactions || {},
-    target: "home"
-  });
-
-  if (p.userId === user.uid) {
-    createPost({
-      postId: doc.id,
-      type: p.type,
-      media: p.media,
-      caption: p.caption,
-      userName: p.userName,
-      userPhoto: p.userPhoto,
-      reactions: p.reactions || {},
-      target: "profile"
-     });
-    }
-  });
-});
-});
 
 
 
@@ -428,7 +393,7 @@ auth.onAuthStateChanged(user => {
 
 //save cover/profile
 auth.onAuthStateChanged(user => {
-  
+  if (!user) return;
 
   db.collection("users").doc(user.uid).get().then(doc => {
     if (!doc.exists) return;
@@ -538,6 +503,7 @@ authSubmitBtn.onclick = () => {
         lastName,
         gender,
         dob,
+        verified: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     })
@@ -579,22 +545,6 @@ authSubmitBtn.onclick = () => {
    
 
 
-//no remove id name
-auth.onAuthStateChanged(user => {
-  if (!user) return;
-
-  // user still logged in after refresh
-  db.collection("users").doc(user.uid).get().then(doc => {
-    if (!doc.exists) return;
-
-    const data = doc.data();
-
-    const fullName = data.firstName + " " + data.lastName;
-    MEMORY_PROFILE_NAME = fullName;
-
-    document.getElementById("profileName").innerText = fullName;
-  });
-});
 
 
 
@@ -813,25 +763,47 @@ savePostToFirebase({
 
 
   //firebase
-function savePostToFirebase({ type, media, caption = "", isProfileUpdate = false, updateType = "" }) {
+async function savePostToFirebase({
+  type,
+  media,
+  caption = "",
+  isProfileUpdate = false,
+  updateType = ""
+}) {
   if (!auth.currentUser) {
     alert("Post করতে login লাগবে");
     return;
   }
 
- db.collection("posts").add({
-  userId: auth.currentUser.uid,
-  userName: MEMORY_PROFILE_NAME,
-  type,
-  media,
-  caption,
-  isProfileUpdate,
-  updateType,
-  reactions: {},
-  createdAt: Date.now()
-});
+  const uid = auth.currentUser.uid;
 
+  // ✅ ensure username always available
+  let userName = (MEMORY_PROFILE_NAME || "").trim();
+  let userPhoto = "";
+
+  if (!userName) {
+    const snap = await db.collection("users").doc(uid).get();
+    if (snap.exists) {
+      const d = snap.data();
+      userName = [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+      MEMORY_PROFILE_NAME = userName; // cache
+    userPhoto = d.profilePic || "";
+  }
 }
+  await db.collection("posts").add({
+    userId: uid,
+    userName: userName || "User",   // fallback
+    userPhoto: userPhoto || "",
+    type,
+    media,
+    caption,
+    isProfileUpdate,
+    updateType,
+    reactions: {},
+    createdAt: Date.now()
+  });
+}
+
 
 
 
@@ -960,11 +932,14 @@ auth.onAuthStateChanged(user => {
       const feed = document.getElementById("feed");
       const profileFeed = document.getElementById("profileFeed");
 
-      feed.innerHTML = "";
-      profileFeed.innerHTML = "";
+    if (feed) feed.innerHTML = "";
+if (profileFeed) profileFeed.innerHTML = "";
+
 
       snapshot.forEach(doc => {
         const p = doc.data();
+
+ 
 
   createPost({
   postId: doc.id,
@@ -974,6 +949,7 @@ auth.onAuthStateChanged(user => {
   caption: p.caption,
   userName: p.userName,
   userPhoto: p.userPhoto,
+ 
   reactions: p.reactions || {},
   isProfileUpdate: p.isProfileUpdate,
   updateType: p.updateType,
@@ -991,6 +967,7 @@ auth.onAuthStateChanged(user => {
   caption: p.caption,
   userName: p.userName,
   userPhoto: p.userPhoto,
+ 
   reactions: p.reactions || {},
   isProfileUpdate: p.isProfileUpdate,
   updateType: p.updateType,
@@ -999,21 +976,31 @@ auth.onAuthStateChanged(user => {
 
         }
       });
+
+hydratePostUserPhoto();
+hydratePostUserNames();   // ✅ add this
+VERIFIED_CACHE.clear();
+hydrateVerifiedBadges();
+
+
     });
 });
 
 
 
-async function hydratePostUserPhoto() {
-  const imgs = document.querySelectorAll(".post-user-pic[data-uid]");
+async function hydratePostUserNames() {
+  const els = document.querySelectorAll(".uname[data-uid]");
 
-  for (let img of imgs) {
-    const uid = img.dataset.uid;
-    if (img.src) continue;
+  for (const el of els) {
+    if (el.textContent.trim()) continue; // already has name
 
-    const doc = await db.collection("users").doc(uid).get();
-    if (doc.exists && doc.data().profilePic) {
-      img.src = doc.data().profilePic;
+    const uid = el.dataset.uid;
+    const snap = await db.collection("users").doc(uid).get();
+
+    if (snap.exists) {
+      const d = snap.data();
+      const full = [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+      if (full) el.textContent = full;
     }
   }
 }
@@ -1021,3 +1008,64 @@ async function hydratePostUserPhoto() {
 
 
 
+
+
+
+//user veryfied
+const VERIFIED_CACHE = new Map();
+
+async function hydrateVerifiedBadges() {
+  const badges = document.querySelectorAll(".verified-badge[data-verified-uid]");
+
+  for (const badge of badges) {
+    const uid = badge.dataset.verifiedUid;
+
+    // cache hit
+    if (VERIFIED_CACHE.has(uid)) {
+      badge.style.display = VERIFIED_CACHE.get(uid) ? "inline-flex" : "none";
+      continue;
+    }
+
+    // fetch user doc
+    const doc = await db.collection("users").doc(uid).get();
+    const verified = !!(doc.exists && doc.data().verified);
+
+    VERIFIED_CACHE.set(uid, verified);
+    badge.style.display = verified ? "inline-flex" : "none";
+  }
+}
+
+
+
+
+
+async function hydrateFirebaseVerifiedBadges() {
+  const badges = document.querySelectorAll(".firebase-verified");
+
+  for (const badge of badges) {
+    const uid = badge.dataset.verifiedUid;
+    const snap = await db.collection("users").doc(uid).get();
+
+    if (snap.exists && snap.data().verified === true) {
+      badge.style.display = "inline-flex";
+    }
+  }
+}
+
+
+
+
+async function hydratePostUserPhoto() {
+  const imgs = document.querySelectorAll(".post-user-pic[data-uid]");
+
+  for (const img of imgs) {
+    if (img.src && !img.src.endsWith("/") && img.getAttribute("src")) continue;
+
+    const uid = img.dataset.uid;
+    const snap = await db.collection("users").doc(uid).get();
+    if (snap.exists) {
+      const d = snap.data();
+      if (d.profilePic) img.src = d.profilePic;
+    }
+  }
+}
