@@ -70,6 +70,13 @@ homeIcon.onclick = () => {
 };
 
 profileIcon.onclick = () => {
+
+  // guest হলে শুধু message দেখাবে, modal খুলবে না
+  if (typeof auth === "undefined" || !auth.currentUser) {
+    alert("Please signup to view profile");
+    return;
+  }
+
   homePage.style.display = "none";
   profilePage.style.display = "block";
   notificationPage.style.display = "none";
@@ -442,22 +449,40 @@ hydrateVerifiedBadges();
 
 
 /* ================= AUTH ELEMENTS ================= */
-const authModal   = document.getElementById("authModal");
-const authMsg     = document.getElementById("authMsg");
+const authModal = document.getElementById("authModal");
+const authMsg   = document.getElementById("authMsg");
 
-const stepOne     = document.getElementById("stepOne");
-const stepTwo     = document.getElementById("stepTwo");
+const stepOne = document.getElementById("stepOne");
+const stepTwo = document.getElementById("stepTwo");
 
+/* ================= SIGNUP PROMPT ================= */
 function promptSignup(message = "Please signup to react") {
   alert(message);
 
-  // চাইলে modal-ও খুলবে
-  if (typeof authModal !== "undefined") {
+  if (authModal) {
     authModal.style.display = "flex";
-    if (typeof stepOne !== "undefined") stepOne.style.display = "block";
-    if (typeof stepTwo !== "undefined") stepTwo.style.display = "none";
+    if (stepOne) stepOne.style.display = "block";
+    if (stepTwo) stepTwo.style.display = "none";
   }
 }
+
+/* ================= GUEST BLOCK: PROFILE CLICK ================= */
+/* ⚠️ এটা শুধু একবারই থাকবে */
+document.addEventListener("click", (e) => {
+  const clickedUser = e.target.closest(
+    ".post-user-pic[data-uid], .uname[data-uid]"
+  );
+  if (!clickedUser) return;
+
+  // guest হলে signup দেখাবে
+  if (!auth || !auth.currentUser) {
+    promptSignup("Please signup to view profiles");
+    return;
+  }
+
+  // future: logged-in হলে profile open
+  // const uid = clickedUser.dataset.uid;
+});
 
 
 const signupBtn   = document.getElementById("signupBtn");
