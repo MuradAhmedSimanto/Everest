@@ -1069,36 +1069,27 @@ transition: none;          /* animation remove */
 }
 
 /*like btn*/
-.post-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.reaction-summary {
-  display: flex;
-  gap: 4px;
-  font-size: 14px;
-}
-
 .like-btn {
   cursor: pointer;
   position: relative;
+  user-select: none;
 }
 
 .reaction-box {
   display: none;
   position: absolute;
-  bottom: 100%; /* like বাটনের উপরে */
+  bottom: 100%;
   left: 0;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 24px;
   padding: 4px 8px;
-  display: flex;
   gap: 4px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.reaction-box.show {
+  display: flex;
 }
 
 /* Edit Post Modal */
@@ -1272,3 +1263,4 @@ transition: none;          /* animation remove */
 .follow-info{
   margin-top:0;        /* 🔥 extra gap remove */
 }
+
