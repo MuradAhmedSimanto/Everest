@@ -394,7 +394,7 @@ auth.onAuthStateChanged(user => {
     postBtn.style.display = "none";
     mindBox.style.pointerEvents = "none";
     mindBox.style.opacity = "0.6";
-    mindBox.innerText = "Login to post";
+    mindBox.innerText = "what are you thinking";
   } else {
     postBtn.style.display = "";
     mindBox.style.pointerEvents = "";
