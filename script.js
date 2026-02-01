@@ -112,18 +112,20 @@ function createPost({
   userName,
   userPhoto,
  
-  reactions = {},
+
   isProfileUpdate = false,
   updateType = "",
   skipSave = false,
   target = "both"
 }) {
 
-const isOwner = auth.currentUser && auth.currentUser.uid === userId;
+const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
+
+
 
   const feed = document.getElementById("feed");
   const profileFeed = document.getElementById("profileFeed");
-  const profilePic = document.getElementById("profilePic");
+  
 
 
   let updateText = "";
@@ -219,25 +221,15 @@ const isOwner = auth.currentUser && auth.currentUser.uid === userId;
         </div>
       </span>
 
-      <div class="reaction-summary">
-        ${Object.values(reactions).join(" ")}
-      </div>
+    <div class="reaction-summary"></div>
+
     </div>
 
   </div>
 `;
 
 
-const myReaction = reactions?.[auth.currentUser?.uid];
 
-if (myReaction) {     
-  setTimeout(() => {
-    const btn = document.querySelector(
-      `[data-post="${postId}"] .like-text`
-    );
-    if (btn) btn.innerText = myReaction;
-  }, 0);
-}
 
 
   if ((target === "both" || target === "home") && feed)
@@ -246,7 +238,11 @@ if (myReaction) {
   if ((target === "both" || target === "profile") && profileFeed)
     profileFeed.insertAdjacentHTML("afterbegin", postHTML);
   
-
+setTimeout(() => {
+  document
+    .querySelectorAll(`.post[data-id="${postId}"]`)
+    .forEach(el => attachReactionListener(postId, el));
+}, 0);
 
 
 
@@ -387,7 +383,24 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+/* ===== GUEST POST BLOCK ===== */
+auth.onAuthStateChanged(user => {
+  const postBtn = document.getElementById("postBtn");
+  const mindBox = document.querySelector(".mind");
 
+  if (!postBtn || !mindBox) return;
+
+  if (!user) {
+    postBtn.style.display = "none";
+    mindBox.style.pointerEvents = "none";
+    mindBox.style.opacity = "0.6";
+    mindBox.innerText = "Login to post";
+  } else {
+    postBtn.style.display = "";
+    mindBox.style.pointerEvents = "";
+    mindBox.style.opacity = "";
+  }
+});
 
 
 
@@ -434,6 +447,18 @@ const authMsg     = document.getElementById("authMsg");
 
 const stepOne     = document.getElementById("stepOne");
 const stepTwo     = document.getElementById("stepTwo");
+
+function promptSignup(message = "Please signup to react") {
+  alert(message);
+
+  // চাইলে modal-ও খুলবে
+  if (typeof authModal !== "undefined") {
+    authModal.style.display = "flex";
+    if (typeof stepOne !== "undefined") stepOne.style.display = "block";
+    if (typeof stepTwo !== "undefined") stepTwo.style.display = "none";
+  }
+}
+
 
 const signupBtn   = document.getElementById("signupBtn");
 const continueBtn = document.getElementById("continueBtn");
@@ -827,10 +852,11 @@ function startHold(e) {
   const likeBtn = e.target.closest(".like-btn");
   if (!likeBtn) return;
 
-  if (!auth.currentUser) {
-    alert("Reaction দিতে login লাগবে");
-    return;
-  }
+if (!auth.currentUser) {
+  promptSignup("Please signup to react");
+  return;
+}
+
 
   const postEl = likeBtn.closest(".post");
   const box = likeBtn.querySelector(".reaction-box");
@@ -863,66 +889,79 @@ async function endHold(e) {
     clearTimeout(holdTimer);
     holdTimer = null;
 
-    // Normal click → ❤️ toggle only if box not open
-    if (box.style.display !== "flex" && uid) {
-      try {
-        await db.runTransaction(async transaction => {
-          const doc = await transaction.get(postRef);
-          if (!doc.exists) return;
-          const data = doc.data();
-          const reactions = data.reactions || {};
+// Normal click → ❤️ toggle only if box not open
+if (box.style.display !== "flex") {
+  if (!auth.currentUser) {
+    promptSignup("Please signup to react");
+    return;
+  }
 
-          reactions[uid] = reactions[uid] === "❤️" ? null : "❤️";
+  try {
+    const uid = auth.currentUser.uid;
+    const rRef = db.collection("posts").doc(postId).collection("reactions").doc(uid);
+    const snap = await rRef.get();
 
-          transaction.update(postRef, { reactions });
-        });
-      } catch (err) {
-        console.error(err);
-      }
+    if (snap.exists && snap.data()?.emoji === "❤️") {
+      await rRef.delete(); // remove reaction
+    } else {
+      await rRef.set({ emoji: "❤️", createdAt: Date.now() });
     }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
   }
 
   activePost = null;
 }
 
-// ================= BOX REACTION SELECT =================
-document.addEventListener("click", async e => {
+// ================= CLICK HANDLER (REACTION + CLOSE) =================
+document.addEventListener("click", async (e) => {
+  // 1) emoji select
   const emojiEl = e.target.closest(".reaction-box span");
   if (emojiEl) {
     const postEl = emojiEl.closest(".post");
+    if (!postEl) return;
+
     const postId = postEl.dataset.id;
-    const uid = auth.currentUser?.uid;
     const emoji = emojiEl.innerText;
-    const postRef = db.collection("posts").doc(postId);
+
+    if (!auth.currentUser) {
+      promptSignup("Please signup to react");
+      return;
+    }
 
     try {
-      await db.runTransaction(async transaction => {
-        const doc = await transaction.get(postRef);
-        if (!doc.exists) return;
+      const uid = auth.currentUser.uid;
 
-        const data = doc.data();
-        const reactions = data.reactions || {};
+      const rRef = db
+        .collection("posts")
+        .doc(postId)
+        .collection("reactions")
+        .doc(uid);
 
-        reactions[uid] = emoji; // user reaction set
-
-        transaction.update(postRef, { reactions });
-
-        // Close box after selecting reaction
-        const box = postEl.querySelector(".reaction-box");
-        if (box) box.style.display = "none";
+      await rRef.set({
+        emoji,
+        createdAt: Date.now()
       });
+
+      // close this box
+      const box = postEl.querySelector(".reaction-box");
+      if (box) box.style.display = "none";
     } catch (err) {
       console.error(err);
     }
 
-    return; // prevent box-close below
+    return; // stop here so it doesn't trigger closeAll below
   }
 
-  // ================= CLOSE ALL BOXES IF clicked outside =================
+  // 2) clicked outside → close all boxes
   if (!e.target.closest(".like-btn") && !e.target.closest(".reaction-box")) {
     closeAllReactionBoxes();
   }
 });
+
 
 // ================= CLOSE ALL BOXES =================
 function closeAllReactionBoxes() {
@@ -931,67 +970,92 @@ function closeAllReactionBoxes() {
   });
 }
 
-// ================= LIVE REACTION DISPLAY =================
-auth.onAuthStateChanged(user => {
-  if (!user) return;
 
-  db.collection("posts")
+
+const REACTION_LISTENER_ATTACHED = new Set();
+
+function attachReactionListener(postId, postEl) {
+  const key = postId + "|" + (postEl.closest("#profileFeed") ? "profile" : "home");
+  if (REACTION_LISTENER_ATTACHED.has(key)) return;
+  REACTION_LISTENER_ATTACHED.add(key);
+
+  const summaryEl = postEl.querySelector(".reaction-summary");
+  const likeTextEl = postEl.querySelector(".like-text");
+
+  db.collection("posts").doc(postId).collection("reactions")
+    .onSnapshot((snap) => {
+      const emojis = [];
+      let myEmoji = null;
+      const myUid = auth.currentUser?.uid;
+
+      snap.forEach((d) => {
+        const data = d.data();
+        if (data?.emoji) emojis.push(data.emoji);
+        if (myUid && d.id === myUid) myEmoji = data.emoji;
+      });
+
+      if (summaryEl) summaryEl.textContent = emojis.join(" ");
+      if (likeTextEl) likeTextEl.textContent = myEmoji ? myEmoji : "👍 Like";
+    });
+}
+
+
+// ================= POSTS FEED LISTENER (guest can see) =================
+let postsUnsub = null;
+
+auth.onAuthStateChanged((user) => {
+  // stop previous listener (prevents duplicates)
+  if (typeof postsUnsub === "function") postsUnsub();
+
+  postsUnsub = db.collection("posts")
     .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
+    .onSnapshot((snapshot) => {
       const feed = document.getElementById("feed");
       const profileFeed = document.getElementById("profileFeed");
 
-    if (feed) feed.innerHTML = "";
-if (profileFeed) profileFeed.innerHTML = "";
+      if (feed) feed.innerHTML = "";
+      if (profileFeed) profileFeed.innerHTML = "";
 
-
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         const p = doc.data();
 
- 
+        // HOME: সবাই দেখবে
+        createPost({
+          postId: doc.id,
+          userId: p.userId,
+          type: p.type,
+          media: p.media,
+          caption: p.caption,
+          userName: p.userName,
+          userPhoto: p.userPhoto,
+          isProfileUpdate: p.isProfileUpdate,
+          updateType: p.updateType,
+          target: "home"
+        });
 
-  createPost({
-  postId: doc.id,
-  userId: p.userId,
-  type: p.type,
-  media: p.media,
-  caption: p.caption,
-  userName: p.userName,
-  userPhoto: p.userPhoto,
- 
-  reactions: p.reactions || {},
-  isProfileUpdate: p.isProfileUpdate,
-  updateType: p.updateType,
-  target: "home"
-});
-
-
-
-        if (p.userId === user.uid) {
-         createPost({
-  postId: doc.id,
-  userId: p.userId,
-  type: p.type,
-  media: p.media,
-  caption: p.caption,
-  userName: p.userName,
-  userPhoto: p.userPhoto,
- 
-  reactions: p.reactions || {},
-  isProfileUpdate: p.isProfileUpdate,
-  updateType: p.updateType,
-  target: "profile"
-});
-
+        // PROFILE: শুধু logged-in user তার নিজের পোস্ট দেখবে
+        if (user && p.userId === user.uid) {
+          createPost({
+            postId: doc.id,
+            userId: p.userId,
+            type: p.type,
+            media: p.media,
+            caption: p.caption,
+            userName: p.userName,
+            userPhoto: p.userPhoto,
+            isProfileUpdate: p.isProfileUpdate,
+            updateType: p.updateType,
+            target: "profile"
+          });
         }
       });
 
-hydratePostUserPhoto();
-hydratePostUserNames();   // ✅ add this
-VERIFIED_CACHE.clear();
-hydrateVerifiedBadges();
-
-
+      hydratePostUserPhoto();
+      hydratePostUserNames();
+      VERIFIED_CACHE.clear();
+      hydrateVerifiedBadges();
+    }, (err) => {
+      console.error("posts listener error:", err);
     });
 });
 
