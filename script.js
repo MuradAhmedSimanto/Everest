@@ -240,10 +240,11 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
 
 
   if ((target === "both" || target === "home") && feed)
-    feed.insertAdjacentHTML("afterbegin", postHTML);
+  feed.insertAdjacentHTML("beforeend", postHTML);
 
-  if ((target === "both" || target === "profile") && profileFeed)
-    profileFeed.insertAdjacentHTML("afterbegin", postHTML);
+if ((target === "both" || target === "profile") && profileFeed)
+  profileFeed.insertAdjacentHTML("beforeend", postHTML);
+
   
 setTimeout(() => {
   document
