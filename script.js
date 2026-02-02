@@ -275,8 +275,7 @@ profileInput.onchange = () => {
   const file = profileInput.files[0];
   if (!file || !auth.currentUser) return;
 
-
-
+ 
   const r = new FileReader();
   r.onload = () => {
     profilePic.src = r.result;
@@ -1172,4 +1171,3 @@ async function hydratePostUserPhoto() {
     }
   }
 }
-
