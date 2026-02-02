@@ -166,16 +166,27 @@ body {
 }
 
 /* COVER */
-.cover-wrapper {
+.cover-wrapper{
   position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
-#coverPic {
+
+#coverPic{
   width: 100%;
-  height: 230px;
-  object-fit: cover;
+  height: 230px;          /* তোমার পছন্দ অনুযায়ী */
   display: block;
+
+  object-fit: cover;
+  object-position: center center;  /* ✅ এটা না থাকলে একপাশে সরে যেতে পারে */
+
+  margin: 0;
+  padding: 0;
 }
+
 
 #coverCam {
   position: absolute;
