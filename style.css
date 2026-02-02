@@ -1248,28 +1248,25 @@ transition: none;          /* animation remove */
  
 
 
-/* ================= PROFILE COVER (CLEAN FB STYLE) ================= */
 
-html, body{
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden; /* white gap prevent */
-}
 
-/* profile page container */
+/* ===== FB COVER: ALWAYS FULL WIDTH, NO RIGHT SHIFT ===== */
+
 #profilePage{
   width: 100%;
   background: #fff;
+  padding-bottom: 30px;
 }
 
-/* cover full-bleed (always full screen width) */
+/* full-bleed cover */
 #profilePage .cover-wrapper{
   position: relative;
-  width: 100vw;            /* full viewport width */
+  width: 100vw;              /* full screen width */
   left: 50%;
-  transform: translateX(-50%); /* ✅ no right shift */
+  transform: translateX(-50%); /* ✅ prevents right shifting */
   overflow: hidden;
-  background: #ddd;
+
+  max-width: none !important;  /* ✅ blocks any parent max-width */
 }
 
 /* cover image */
@@ -1278,11 +1275,11 @@ html, body{
   height: 230px;
   display: block;
 
-  object-fit: cover;          /* crop but keep full width */
+  object-fit: cover;
   object-position: 50% 50%;   /* ✅ center focus */
 }
 
-/* camera button */
+/* camera */
 #profilePage #coverCam{
   position: absolute;
   right: 15px;
@@ -1296,7 +1293,12 @@ html, body{
 
 /* mobile height */
 @media (max-width: 768px){
-  #profilePage #coverPic{
-    height: 180px;
-  }
+  #profilePage #coverPic{ height: 180px; }
 }
+
+/* stop horizontal gap */
+html, body{
+  overflow-x: hidden;
+}
+
+
