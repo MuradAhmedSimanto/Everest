@@ -275,12 +275,7 @@ profileInput.onchange = () => {
   const file = profileInput.files[0];
   if (!file || !auth.currentUser) return;
 
-  // ✅ only image allow
-  if (!file.type || !file.type.startsWith("image/")) {
-    alert("Only photo allowed for profile picture");
-    profileInput.value = "";
-    return;
-  }
+
 
   const r = new FileReader();
   r.onload = () => {
@@ -313,12 +308,7 @@ coverInput.onchange = () => {
   const file = coverInput.files[0];
   if (!file || !auth.currentUser) return;
 
-  // ✅ only image allow
-  if (!file.type || !file.type.startsWith("image/")) {
-    alert("Only photo allowed for cover photo");
-    coverInput.value = "";
-    return;
-  }
+ 
 
   const r = new FileReader();
   r.onload = () => {
@@ -1182,3 +1172,4 @@ async function hydratePostUserPhoto() {
     }
   }
 }
+
