@@ -1278,24 +1278,32 @@ transition: none;          /* animation remove */
 
 
 
-/* ===== FIX COVER FULL WIDTH ===== */
+
+
+/* ensure profile page itself doesn't create side gaps */
 #profilePage{
-  width:100%;
-  margin:0;
-  padding:0 0 30px;
-  background:#fff;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 30px;
+  background: #fff;
 }
 
-.cover-wrapper{
-  width:100%;
-  margin:0;
-  overflow:hidden;
-  background:#fff;
+/* break out of centered/max-width parents */
+#profilePage .cover-wrapper{
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  overflow: hidden;
+  background: #fff;
 }
 
-#coverPic{
-  width:100%;
-  height:230px;
-  object-fit:cover;
-  display:block;
+/* stable responsive height */
+#profilePage #coverPic{
+  width: 100%;
+  height: 200px;            /* <-- এখানে চাইলে 180/230 দিতে পারো */
+  object-fit: cover;
+  display: block;
 }
