@@ -165,17 +165,7 @@ body {
   display: none;
 }
 
-/* COVER */
-.cover-wrapper {
-  position: relative;
-}
 
-#coverPic {
-  width: 100%;
-  height: 230px;
-  object-fit: cover;
-  display: block;
-}
 
 #coverCam {
   position: absolute;
@@ -1280,29 +1270,29 @@ transition: none;          /* animation remove */
 
 
 
-/* ensure profile page itself doesn't create side gaps */
+
+/* profile page full width */
+/* ===== COVER FIX (FINAL) ===== */
 #profilePage{
   width:100%;
   margin:0;
   padding:0;
   background:#fff;
+  overflow-x:hidden;
 }
 
-/* cover stays inside normal flow */
 .cover-wrapper{
   width:100%;
   margin:0;
   padding:0;
+  position:relative;
   overflow:hidden;
 }
 
 #coverPic{
   width:100%;
-  height:200px;
-  object-fit:cover;
+  height:230px;          /* চাইলে 200 করো */
   display:block;
+  object-fit:cover;
+  object-position:center;
 }
-
-
-
-
