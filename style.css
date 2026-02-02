@@ -165,17 +165,21 @@ body {
   display: none;
 }
 
+
+
+
 /* COVER */
-.cover-wrapper {
+.cover-wrapper{
   position: relative;
+  overflow: hidden;
 }
 
-#coverPic {
+#coverPic{
   width: 100%;
-  height: 230px;
-  object-fit: cover;
+  height: clamp(220px, 30vw, 420px); /* 🔥 responsive height */
   display: block;
- object-position: 40% center;
+  object-fit: cover;
+  object-position: center 35%;       /* 🔥 একটু উপরের দিকে ফোকাস */
 }
 
 #coverCam {
