@@ -158,6 +158,20 @@ body {
 /* ================================================= */
 /* ================= PROFILE PAGE ================== */
 /* ================================================= */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+
+.cover-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+
 
 #profilePage {
   background: #fff;
@@ -1092,6 +1106,7 @@ transition: none;          /* animation remove */
   display: flex;
 }
 
+
 /* Edit Post Modal */
 #editPostModal {
   display: none;
@@ -1263,4 +1278,3 @@ transition: none;          /* animation remove */
 .follow-info{
   margin-top:0;        /* 🔥 extra gap remove */
 }
-
