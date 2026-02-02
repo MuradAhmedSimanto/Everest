@@ -1,4 +1,4 @@
-           
+
 * {
   box-sizing: border-box;
 }
@@ -165,7 +165,17 @@ body {
   display: none;
 }
 
+/* COVER */
+.cover-wrapper {
+  position: relative;
+}
 
+#coverPic {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  display: block;
+}
 
 #coverCam {
   position: absolute;
@@ -1036,17 +1046,11 @@ transition: none;          /* animation remove */
 }
 /* ===== POST FULL WIDTH (FB STYLE) ===== */
 .feed,
-#feed {
+#feed,
+#profileFeed {
   max-width: 680px;
   margin: 0 auto;
 }
-
-/* profile posts center হবে */
-#profileFeed{
-  max-width: 680px;
-  margin: 0 auto;
-}
-
 
 .post {
   width: 100%;
@@ -1065,27 +1069,36 @@ transition: none;          /* animation remove */
 }
 
 /*like btn*/
+.post-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.reaction-summary {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+}
+
 .like-btn {
   cursor: pointer;
   position: relative;
-  user-select: none;
 }
 
 .reaction-box {
   display: none;
   position: absolute;
-  bottom: 100%;
+  bottom: 100%; /* like বাটনের উপরে */
   left: 0;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 24px;
   padding: 4px 8px;
+  display: flex;
   gap: 4px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.reaction-box.show {
-  display: flex;
 }
 
 /* Edit Post Modal */
@@ -1161,6 +1174,7 @@ transition: none;          /* animation remove */
   border-top: 5px solid #c5c9cf !important;
   padding-top: 5px !important;
 }
+
 
 /* post in gap */
 .post,
@@ -1261,41 +1275,4 @@ transition: none;          /* animation remove */
 }
  
 
-
-
-
-
-
-
-
-
-
-
-/* profile page full width */
-/* ===== COVER FULL BLEED (MOBILE FIX) ===== */
-#profilePage{
-  width:100%;
-  margin:0;
-  padding:0;
-  background:#fff;
-  overflow-x:hidden;
-}
-
-/* cover goes edge-to-edge like FB */
-.cover-wrapper{
-  position:relative;
-  width:100vw;
-  margin-left:calc(50% - 50vw);
-  margin-right:calc(50% - 50vw);
-  padding:0;
-  overflow:hidden;
-}
-
-#coverPic{
-  width:100%;
-  height:230px;
-  display:block;
-  object-fit:cover;
-  object-position:center;
-}
 
