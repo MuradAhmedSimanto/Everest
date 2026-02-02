@@ -155,48 +155,9 @@ body {
 }
 
 
-/* ================================================= */
-/* ================= PROFILE PAGE ================== */
-/* ================================================= */
-
-#profilePage {
-  background: #fff;
-  padding-bottom: 30px;
-  display: none;
-}
-
-/* COVER */
-.cover-wrapper{
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-}
 
 
-#coverPic{
-  width: 100%;
-  height: 230px;          /* তোমার পছন্দ অনুযায়ী */
-  display: block;
 
-  object-fit: cover;
-  object-position: center center;  /* ✅ এটা না থাকলে একপাশে সরে যেতে পারে */
-
-  margin: 0;
-  padding: 0;
-}
-
-
-#coverCam {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  background: #fff;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-}
 
 /* PROFILE PIC */
 .profile-pic-wrapper {
@@ -1287,3 +1248,51 @@ transition: none;          /* animation remove */
  
 
 
+/* ================= PROFILE COVER (CLEAN FB STYLE) ================= */
+
+#profilePage{
+  background:#fff;
+  padding-bottom:30px;
+  display:none;
+}
+
+/* full-bleed cover (viewport full width) */
+#profilePage .cover-wrapper{
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+}
+
+/* cover image */
+#profilePage #coverPic{
+  width: 100%;
+  height: 230px;
+  display: block;
+  object-fit: cover;
+  object-position: center; /* focus center */
+}
+
+/* camera icon */
+#profilePage #coverCam{
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* mobile height */
+@media (max-width: 768px){
+  #profilePage #coverPic{ height: 180px; }
+}
+
+/* safety: prevent white gap / horizontal scroll */
+html, body{
+  width: 100%;
+  overflow-x: hidden;
+}
