@@ -144,7 +144,6 @@ body {
   padding-bottom: 10px;
 }
 
-/* ================= POST MEDIA ================= */
 /* ONLY POST MEDIA — NOT PROFILE PIC */
 .post > img,
 .post > video {
@@ -154,11 +153,7 @@ body {
   display: block;
 }
 
-
-/* ================================================= */
 /* ================= PROFILE PAGE ================== */
-/* ================================================= */
-
 #profilePage {
   background: #fff;
   padding-bottom: 30px;
@@ -497,9 +492,6 @@ transition: none;          /* animation remove */
   transform: scale(0.97);
 }
 
-
-
-
 .signup-success {
   display: none;
   color: #28a745;
@@ -507,8 +499,6 @@ transition: none;          /* animation remove */
   margin-top: 12px;
   text-align: center;
 }
-
-
 
 #profileName {
   padding-left: 20px;
@@ -518,27 +508,11 @@ transition: none;          /* animation remove */
   font-weight: 700;
 }
 
-
-
 /* Remove extra gap before bio */
 .profile-header {
   margin-top: 6px !important;
   padding-top: 0;
 }
-
-/* Bio text spacing */
-#bioText {
-  margin-top: 4px;
-  margin-bottom: 6px;
-  font-size: 14px;
-  color: #555;
-}
-
-/* Follow info spacing */
-.follow-info {
-  margin-bottom: 4px;
-}
-
 
 /* ================= PROFILE SPACING FIX (FINAL) ================= */
 
@@ -559,19 +533,6 @@ transition: none;          /* animation remove */
 /* Follow info spacing */
 .follow-info {
   margin-bottom: 4px !important;
-}
-
-
-
-
-
-
-/* ===== FORCE PERFECT CIRCLE PROFILE PIC ===== */
-/* ================= POST ================= */
-.post {
-  background: #fff;
-  margin: 0px;
-  border-radius: 0px;
 }
 
 /* ================= POST HEADER ================= */
@@ -626,20 +587,6 @@ transition: none;          /* animation remove */
 .post-update-text{
   font-size: 12px;
   color: #65676b;
-}
-.menu-bar {
-  position: fixed;
-  top: 54px;
-  left: 0;
-  width: 100%;
-  height: 54px;
-  background: #fff;
-  z-index: 999;
-  transition: transform 0.3s ease;
-}
-
-.menu-bar.hide {
-  transform: translateY(-120%);
 }
 
 
@@ -747,18 +694,6 @@ transition: none;          /* animation remove */
   border-bottom: 3px solid #c5c9cf;
 }
 
-/* 🔥 PROFILE HEADER → POST GAP (FB STYLE) */
-#profileFeed {
-  margin-top: 10px;
-  border-top: 5px solid #c5c9cf; /* dark white line */
-  padding-top: 5px;
-}
-
-
-
-
-
-
 /* ===== CREATE POST MODAL ===== */
 
 #textPostModal .auth-box{
@@ -827,14 +762,6 @@ transition: none;          /* animation remove */
   transform:scale(.97);
 }
 
-/* ===== POST TEXT ===== */
-
-.post-text{
-  padding:8px 16px 10px 54px;
-  font:14px/1.5 sans-serif;
-  color:#050505;
-}
-
 /* ===== MOBILE ===== */
 
 @media(max-width:480px){
@@ -850,48 +777,6 @@ transition: none;          /* animation remove */
     min-height:130px;
   }
 }
-
-
-
-
-.post-menu-wrapper {
-  position: relative;
-}
-
-.post-menu-dropdown {
-  position: absolute;
-  right: 0;
-  top: 26px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.2);
-  width: 160px;
-  display: none;
-  z-index: 999;
-}
-
-.post-menu-dropdown.show {
-  display: block;
-}
-
-.pm-item {
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.pm-item:hover {
-  background: #f0f2f5;
-}
-
-.pm-item.delete {
-  color: #e41e3f;
-  font-weight: 600;
-}
-
-
-
-
 
 /* ===== POST 3 DOT MENU FIX ===== */
 .post-menu-wrapper {
@@ -1024,11 +909,14 @@ transition: none;          /* animation remove */
     opacity: 1;
   }
 }
-.post-text {
-  font-size: 15px;
-  line-height: 1.5;
-  margin: 8px 0;
+.post-text{
+  padding:8px 16px 10px 54px;
+  margin:8px 0;
+  font-size:15px;
+  line-height:1.5;
+  color:#050505;
 }
+
 
 .post-text.collapsed {
   display: -webkit-box;
@@ -1211,10 +1099,6 @@ transition: none;          /* animation remove */
   100% { transform: rotate(360deg);}
 }
 
-
-
-
-
 /*veryfi badge */
 .verified-badge{
   display:none;
@@ -1225,15 +1109,6 @@ transition: none;          /* animation remove */
 
 .verified-badge.show{
   display:inline-flex;
-}
-
-.verified-icon{
-  width:18px;
-  height:18px;
-  display:block;
-
-   border-radius:50%;
-  overflow:hidden;
 }
 
 /* IMPORTANT */
@@ -1249,6 +1124,15 @@ transition: none;          /* animation remove */
 }
 
 
+.verified-icon{
+  width:18px;
+  height:18px;
+  display:block;
+
+   border-radius:50%;
+  overflow:hidden;
+}
+
 /* PROFILE NAME + BADGE */
 .profile-name-row{
   display:flex;
@@ -1263,7 +1147,6 @@ transition: none;          /* animation remove */
   margin:0;
   line-height:1.3;     /* 🔑 natural height */
 }
-
 
 /* NAME → FOLLOW GAP CONTROL */
 .profile-name-row{
