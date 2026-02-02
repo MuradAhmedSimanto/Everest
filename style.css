@@ -1,34 +1,183 @@
-/* ===== FB COVER: ALWAYS FULL WIDTH, NO RIGHT SHIFT ===== */
 
-#profilePage{
+* {
+  box-sizing: border-box;
+}
+/* ================= BODY ================= */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f0f2f5;
+  padding-top: 108px;
+}
+/* ================= NAVBAR ================= */
+.navbar {
+  background: #fff;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e4e6eb;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 54px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+.navbar.fb-hide {
+  transform: translateY(-100%);
+}
+/* ================= MENU BAR ================= */
+.menu-bar {
+  background: #fff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e4e6eb;
+  position: fixed;
+  top: 54px;
+  left: 0;
+  width: 100%;
+  height: 54px;
+  z-index: 999;
+}
+.menu-bar i {
+  font-size: 22px;
+  color: #65676b;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+.menu-bar i.active {
+  color: gold;
+  background: rgba(255, 215, 0, 0.18);
+}
+/* ================= LOGO & ICONS ================= */
+.logo {
+ color: #e60023;
+  font-size: 25px;
+  font-weight: 1200;
+  letter-spacing: 1px;
+}
+.top-icons {
+  display: flex;
+  gap: 14px;
+}
+
+.top-icons i {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ================= DROPDOWN ================= */
+.dropdown-menu {
+  position: fixed;
+  right: 12px;
+  top: 112px;
+  width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  display: none;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.dropdown-menu.show {
+  display: flex;
+}
+
+.dropdown-menu a {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #050505;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+  background: #f0f2f5;
+}
+
+/* ================= POST BOX ================= */
+.post-box {
+  background: #fff;
+  margin: 10px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.post-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-input img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.mind {
+  flex: 1;
+  background: #f0f2f5;
+  padding: 10px 16px;
+  border-radius: 20px;
+  color: #65676b;
+}
+
+#postBtn {
+  background: #0a3dff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ================= FEED ================= */
+#feed {
+  padding-bottom: 10px;
+}
+
+/* ================= POST MEDIA ================= */
+/* ONLY POST MEDIA — NOT PROFILE PIC */
+.post > img,
+.post > video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* ================================================= */
+/* ================= PROFILE PAGE ================== */
+/* ================================================= */
+
+#profilePage {
   background: #fff;
   padding-bottom: 30px;
+  display: none;
 }
 
-/* full-bleed cover */
-#profilePage .cover-wrapper{
+/* COVER */
+.cover-wrapper {
   position: relative;
-  width: 100vw;              /* full screen width */
-  left: 50%;
-  transform: translateX(-50%); /* ✅ prevents right shifting */
-  overflow: hidden;
-
-  max-width: none !important;  /* ✅ blocks any parent max-width */
 }
 
-/* cover image */
-#profilePage #coverPic{
+#coverPic {
   width: 100%;
   height: 230px;
-  display: block;
-
   object-fit: cover;
-  object-position: 50% 50%;   /* ✅ center focus */
+  display: block;
 }
 
-/* camera */
-#profilePage #coverCam{
+#coverCam {
   position: absolute;
   right: 15px;
   bottom: 15px;
@@ -36,15 +185,1093 @@
   padding: 10px;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 5;
 }
 
-/* mobile height */
-@media (max-width: 768px){
-  #profilePage #coverPic{ height: 180px; }
+/* PROFILE PIC */
+.profile-pic-wrapper {
+  position: relative;
+  width: 150px;
+  margin: -75px 0 0 24px;
 }
 
-/* stop horizontal gap */
-html, body{
-  overflow-x: hidden;
+#profilePicBig {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 5px solid white;
+  background: #fff;
 }
+
+#profileCam {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #fff;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+
+/* 🔥 NAME + BIO LEFT & UNDER PROFILE PIC */
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+}
+/* EDIT BIO BUTTON */
+#editBioBtn {
+  position: static;
+  margin-left: auto;
+  margin-right: 20px;
+  margin-top: 10px;
+
+  padding: 0;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: #1877f2;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* 🔥 TEXT POSITION FIX (REAL REASON) */
+#profilePage h1,
+#profilePage h2,
+#profilePage h3,
+#profilePage p {
+  padding-left: 20px !important;
+  text-align: left !important;
+}
+
+/* BIO INPUT */
+#bioInput {
+  width: 90%;
+  height: 70px;
+  display: none;
+}
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  #coverPic {
+    height: 180px;
+  }
+
+  .profile-pic-wrapper {
+    margin: -60px 0 0 16px;
+  }
+
+  #profilePage > div:nth-child(3) {
+    margin-left: 16px !important;
+  }
+}
+/* ================= AUTH MODAL (GORGEOUS PREMIUM) ================= */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;                 /* 🔒 default hidden */
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  backdrop-filter: blur(8px);
+}
+
+/* MAIN BOX */
+.auth-box {
+  background: linear-gradient(180deg, #ffffff, #fff7f7);
+  width: 92%;
+  max-width: 420px;
+  padding: 28px 24px;
+  border-radius: 22px;
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  animation: authPop 0.35s ease;
+}
+
+/* POP ANIMATION */
+@keyframes authPop {
+  from {
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* TITLE */
+.auth-box h3 {
+  margin: 0 0 22px;
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+  color: #ff1f1f;
+}
+
+/* INPUTS & SELECT */
+.auth-box input,
+.auth-box select {
+  width: 100%;
+  padding: 13px 15px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  border: 1px solid #e6dede;
+  font-size: 14px;
+  outline: none;
+  background: #fff9f9;
+  transition: all 0.25s ease;
+}
+
+/* FOCUS EFFECT */
+.auth-box input:focus,
+.auth-box select:focus {
+  border-color: #ff1f1f;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255,31,31,0.18);
+}
+
+/* BUTTONS (CONTINUE + SIGNUP) */
+#continueBtn,
+#authSubmit {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px;
+  background: linear-gradient(135deg, #ff1f1f, #ff6b6b);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 22px rgba(255,31,31,0.4);
+}
+
+/* BUTTON HOVER */
+#continueBtn:hover,
+#authSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(255,31,31,0.55);
+}
+
+/* BUTTON ACTIVE */
+#continueBtn:active,
+#authSubmit:active {
+  transform: scale(0.98);
+}
+
+/* ERROR MESSAGE */
+#authMsg {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #ff2a2a;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* MOBILE TWEAK */
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+}
+
+
+/* ================= PROFILE ACTIONS (PREMIUM) ================= */
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 20px;
+  margin-top: 2px;
+}
+
+/* 🌟 FOLLOW BUTTON – BRIGHT GOLD */
+.follow-btn {
+  background: #ff2d2d;   /* 🔥 Bright Red */
+  color: #ffffff;
+
+  border: none;
+  padding: 3px 25px;
+  border-radius: 6px;
+
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+
+ box-shadow: none;
+filter: none;
+outline: none;
+
+
+  /* ❌ animation বন্ধ */
+  transition: none;
+}
+
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255, 215, 0, 0.7);
+}
+
+/* 🔥 MESSAGE BUTTON – RED + GOLD MIX */
+.message-btn {
+ 
+background: #f0f2f5;        /* dark white */
+color: #050505;            /* text black */
+box-shadow: none;          /* glow remove */
+transition: none;          /* animation remove */
+  border: none;
+  padding: 3px 25px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ⋯ MORE ICON – CLEAN & PREMIUM */
+.more-btn {
+  font-size: 20px;
+  padding: 3px;
+  border-radius: 10%;
+  cursor: pointer;
+  color: #050505;
+
+  /* 🔥 DARK WHITE BACKGROUND */
+  background: #f0f2f5;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+
+/* ================= FOLLOW INFO ================= */
+
+.follow-info {
+  display: flex;
+  gap: 14px;
+  padding-left: 20px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #65676b;
+}
+
+.follow-info strong {
+  color: #050505;
+  font-weight: 600;
+} 
+/* 💎 PREMIUM SAVE BIO BUTTON */
+#saveBioBtn {
+  display: none; /* 🔥 inline-block না */
+
+  margin-top: 10px;
+  padding: 8px 20px;
+
+  background: linear-gradient(135deg, #1877f2, #4f8cff);
+  color: #fff;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(24, 119, 242, 0.45);
+  transition: all 0.25s ease;
+}
+
+/* ✨ HOVER EFFECT */
+#saveBioBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(24, 119, 242, 0.6);
+}
+
+/* 🔘 ACTIVE PRESS */
+#saveBioBtn:active {
+  transform: scale(0.97);
+}
+
+
+
+
+.signup-success {
+  display: none;
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+}
+
+
+
+#profileName {
+  padding-left: 20px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+
+/* Remove extra gap before bio */
+.profile-header {
+  margin-top: 6px !important;
+  padding-top: 0;
+}
+
+/* Bio text spacing */
+#bioText {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Follow info spacing */
+.follow-info {
+  margin-bottom: 4px;
+}
+
+
+/* ================= PROFILE SPACING FIX (FINAL) ================= */
+
+/* Remove extra gap before bio */
+.profile-header {
+  margin-top: -8px !important;
+  padding-top: 0 !important;
+}
+
+/* Bio text spacing */
+#bioText {
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Follow info spacing */
+.follow-info {
+  margin-bottom: 4px !important;
+}
+
+
+
+
+
+
+/* ===== FORCE PERFECT CIRCLE PROFILE PIC ===== */
+/* ================= POST ================= */
+.post {
+  background: #fff;
+  margin: 0px;
+  border-radius: 0px;
+}
+
+/* ================= POST HEADER ================= */
+.post-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+/* left side */
+.post-user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* profile pic */
+.post-user-pic {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* user name */
+.post-user-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* 3-dot */
+.post-menu {
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+  color: #65676b;
+}
+
+/* ================= ACTIONS ================= */
+.post-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #e4e6eb;
+  font-size: 14px;
+  color: #65676b;
+}
+
+.post-update-text{
+  font-size: 12px;
+  color: #65676b;
+}
+.menu-bar {
+  position: fixed;
+  top: 54px;
+  left: 0;
+  width: 100%;
+  height: 54px;
+  background: #fff;
+  z-index: 999;
+  transition: transform 0.3s ease;
+}
+
+.menu-bar.hide {
+  transform: translateY(-120%);
+}
+
+
+/* NOTIFICATION PAGE */
+#notificationPage {
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e4e6eb;
+}
+
+.notification-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.notification-header i {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* LIST */
+.notification-list {
+  padding: 10px;
+}
+
+.notification-item {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f0f2f5;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* MESSAGE PAGE */
+#messagePage {
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* HEADER */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+  border-bottom: 1px solid #e4e6eb;
+}
+
+/* E-text */
+.message-header h2 {
+  color: #e41e3f;      /* 🔥 bright red */
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* SEARCH BOX */
+.message-search {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccd0d5;
+  background: #f0f2f5;
+  outline: none;
+  font-size: 14px;
+}
+
+/* RIGHT ICON */
+.message-header i {
+  font-size: 18px;
+  cursor: pointer;
+  color: #050505;
+}
+
+/* MAS logo */
+.dropdown-menu a.logo-item {
+  justify-content: center;
+  padding: 14px 0;
+  border-top: 1px solid #e4e6eb;
+}
+
+.dropdown-menu a.logo-item img {
+  width: 55px;
+  display: block;
+}
+
+/* post of inter gap */
+#profileFeed .post {
+  border-bottom: 3px solid #c5c9cf;
+}
+
+/* 🏠 HOME PAGE POST GAP */
+#feed .post {
+  border-bottom: 3px solid #c5c9cf;
+}
+
+/* 🔥 PROFILE HEADER → POST GAP (FB STYLE) */
+#profileFeed {
+  margin-top: 10px;
+  border-top: 5px solid #c5c9cf; /* dark white line */
+  padding-top: 5px;
+}
+
+
+
+
+
+
+/* ===== CREATE POST MODAL ===== */
+
+#textPostModal .auth-box{
+  padding:26px 22px;
+  border-radius:22px;
+  background:linear-gradient(#fff,#f6f8ff);
+  box-shadow:0 30px 70px rgba(0,0,0,.28), inset 0 1px 0 #fff;
+}
+
+#textPostModal h3{
+  margin:0 0 18px;
+  font:900 24px/1 sans-serif;
+  color:#ff2d2d;
+  text-align:center;
+}
+
+/* textarea */
+#textPostInput{
+  width:100%;
+  min-height:150px;
+  padding:16px 18px;
+  border-radius:18px;
+  border:1.5px solid #dfe3eb;
+  background:linear-gradient(#f8faff,#eef2ff);
+  font:15px/1.6 inherit;
+  color:#050505;
+  resize:none;
+  outline:0;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.04);
+  transition:.25s;
+}
+
+#textPostInput:focus{
+  background:#fff;
+  border-color:#ff2d2d;
+  box-shadow:
+    0 0 0 4px rgba(255,45,45,.25),
+    inset 0 2px 6px rgba(0,0,0,.04);
+}
+
+#textPostInput::placeholder{
+  color:#8a8d91;
+}
+
+/* post button */
+#textPostBtn{
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:0;
+  border-radius:18px;
+  background:linear-gradient(135deg,#ff2d2d,#ff5a5a);
+  color:#fff;
+  font:800 15px sans-serif;
+  cursor:pointer;
+  box-shadow:0 12px 26px rgba(255,45,45,.45);
+  transition:.25s;
+}
+
+#textPostBtn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 18px 38px rgba(255,45,45,.6);
+}
+
+#textPostBtn:active{
+  transform:scale(.97);
+}
+
+/* ===== POST TEXT ===== */
+
+.post-text{
+  padding:8px 16px 10px 54px;
+  font:14px/1.5 sans-serif;
+  color:#050505;
+}
+
+/* ===== MOBILE ===== */
+
+@media(max-width:480px){
+  #textPostModal .auth-box{
+    padding:22px 18px;
+    border-radius:18px;
+  }
+  #textPostInput,
+  #textPostBtn{
+    border-radius:16px;
+  }
+  #textPostInput{
+    min-height:130px;
+  }
+}
+
+
+
+
+.post-menu-wrapper {
+  position: relative;
+}
+
+.post-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 26px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+  width: 160px;
+  display: none;
+  z-index: 999;
+}
+
+.post-menu-dropdown.show {
+  display: block;
+}
+
+.pm-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pm-item:hover {
+  background: #f0f2f5;
+}
+
+.pm-item.delete {
+  color: #e41e3f;
+  font-weight: 600;
+}
+
+
+
+
+
+/* ===== POST 3 DOT MENU FIX ===== */
+.post-menu-wrapper {
+  position: relative;
+}
+
+.post-menu-dropdown {
+  position: absolute;
+  top: 28px;
+  right: 0;
+
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+
+  width: 160px;
+
+  display: none;          /* 🔥 IMPORTANT */
+  z-index: 9999;
+}
+
+.post-menu-dropdown.show {
+  display: block;         /* 🔥 only on click */
+}
+
+.pm-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pm-item:hover {
+  background: #f0f2f5;
+}
+
+.pm-item.delete {
+  color: #e41e3f;
+  font-weight: 600;
+}
+/* caption section*/
+/* ===== PREMIUM CREATE POST MODAL (MOBILE FIRST) ===== */
+
+#mediaCaptionModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.create-post-box {
+  width: 95%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  animation: slideUp .25s ease;
+}
+
+/* header */
+.create-post-box h3 {
+  text-align: center;
+  margin: 4px 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff2d2d;
+}
+
+/* caption */
+#createPostCaption,
+#mediaCaptionInput {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 15px;
+  resize: none;
+  outline: none;
+}
+
+#mediaCaptionInput:focus {
+  border-color: #ff2d2d;
+}
+
+/* media preview */
+.post-preview {
+  margin-top: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.post-preview img,
+.post-preview video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+/* post button */
+#mediaPostBtn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff2d2d, #ff5a5a);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#mediaPostBtn:active {
+  transform: scale(0.98);
+}
+
+/* animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.post-text {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.post-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;   /* কত লাইনের পর read more */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.read-more {
+  color: #1877f2;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  display: inline-block;
+}
+/* ===== POST FULL WIDTH (FB STYLE) ===== */
+.feed,
+#feed,
+#profileFeed {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.post {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.post-media img,
+.post-media video {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: cover;
+  display: block;
+}
+
+/*like btn*/
+.post-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.reaction-summary {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.like-btn {
+  cursor: pointer;
+  position: relative;
+}
+
+.reaction-box {
+  display: none;
+  position: absolute;
+  bottom: 100%; /* like বাটনের উপরে */
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  padding: 4px 8px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Edit Post Modal */
+#editPostModal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#editPostModal > div {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+#editPostModal h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+#editPostModal textarea {
+  width: 100%;
+  height: 100px;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+#editPostModal img,
+#editPostModal video {
+  max-width: 100%;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+#editPostModal button {
+  padding: 8px 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#editChangeMediaBtn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+#saveEditPostBtn {
+  background-color: #28a745;
+  color: #fff;
+  margin-right: 10px;
+}
+
+#cancelEditPostBtn {
+  background-color: #dc3545;
+  color: #fff;
+}
+/* profile post of gap  */
+#profileFeed {
+  margin-top: 22px !important;
+  border-top: 5px solid #c5c9cf !important;
+  padding-top: 5px !important;
+}
+
+
+/* post in gap */
+.post,
+.feedPost,
+.feed-card,
+.postCard {
+  margin-bottom: 1px !important;
+}
+.post {
+  padding-bottom: 4px !important;
+}
+/* spinner button style */
+#authSubmit.loading {
+  position: relative;
+  color: transparent; /* text hide while spinning */
+}
+
+#authSubmit.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 3px solid #fff;
+  border-top-color: #ff2d2d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+
+
+
+
+/*veryfi badge */
+.verified-badge{
+  display:none;
+  align-items:center;
+  margin-left:2px;
+  vertical-align:middle; /* 🔑 important */
+}
+
+.verified-badge.show{
+  display:inline-flex;
+}
+
+.verified-icon{
+  width:18px;
+  height:18px;
+  display:block;
+
+   border-radius:50%;
+  overflow:hidden;
+}
+
+/* IMPORTANT */
+.verified-icon{
+  border-radius:0;     /* ← এটা দরকার */
+  overflow:visible;    /* ← এটা দরকার */
+}
+
+.verified-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+
+/* PROFILE NAME + BADGE */
+.profile-name-row{
+  display:flex;
+  align-items:center;
+  gap:4px;
+
+  justify-content:flex-start;
+  margin-top:6px;      /* 🔽 নামটা নিচে নামায় */
+}
+
+.profile-name-row h3{
+  margin:0;
+  line-height:1.3;     /* 🔑 natural height */
+}
+
+
+/* NAME → FOLLOW GAP CONTROL */
+.profile-name-row{
+  margin-bottom:4px;   /* 🔽 gap কমাও */
+}
+
+.follow-info{
+  margin-top:0;        /* 🔥 extra gap remove */
+}
+ 
+
