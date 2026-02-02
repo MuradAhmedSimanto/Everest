@@ -1272,7 +1272,7 @@ transition: none;          /* animation remove */
 
 
 /* profile page full width */
-/* ===== COVER FIX (FINAL) ===== */
+/* ===== COVER FULL BLEED (MOBILE FIX) ===== */
 #profilePage{
   width:100%;
   margin:0;
@@ -1281,18 +1281,21 @@ transition: none;          /* animation remove */
   overflow-x:hidden;
 }
 
+/* cover goes edge-to-edge like FB */
 .cover-wrapper{
-  width:100%;
-  margin:0;
-  padding:0;
   position:relative;
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+  padding:0;
   overflow:hidden;
 }
 
 #coverPic{
   width:100%;
-  height:230px;          /* চাইলে 200 করো */
+  height:230px;
   display:block;
   object-fit:cover;
   object-position:center;
 }
+
