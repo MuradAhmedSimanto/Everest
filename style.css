@@ -175,6 +175,7 @@ body {
   height: 230px;
   object-fit: cover;
   display: block;
+ object-position: 40% center;
 }
 
 #coverCam {
