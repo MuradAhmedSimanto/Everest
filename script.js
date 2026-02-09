@@ -215,24 +215,20 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
 
     <div class="post-actions">
       <span class="like-btn" data-post="${postId}">
-        <span class="like-text">👍 Like</span>
+        <span class="like-text">👍Like</span>
 
-        <div class="reaction-box">
-          <span>😆</span>
-          <span>😥</span>
-          <span>❤️</span>
-          <span>💔</span>
-          <span>😮</span>
-          <span>😡</span>
-          <span>🤙</span>
-        </div>
-      </span>
-
-    <div class="reaction-summary"></div>
-
-    </div>
-
+       <div class="reaction-box">
+  <span class="rx rx-haha">😆</span>
+  <span class="rx rx-sad">😥</span>
+  <span class="rx rx-love">❤️</span>
+  <span class="rx rx-sad">💔</span>
+  <span class="rx rx-wow">😮</span>
+  <span class="rx rx-angry">😡</span>
+</div>
+  </span>
+ <div class="reaction-summary"></div>
   </div>
+ </div>
 `;
 
 
@@ -896,7 +892,8 @@ if (!auth.currentUser) {
   // 0.5s hold → reaction box open
   holdTimer = setTimeout(() => {
     closeAllReactionBoxes(); // ensure only this box open
-    box.style.display = "flex";
+    box.classList.add("open");
+
   }, 500);
 }
 
@@ -919,7 +916,8 @@ async function endHold(e) {
     holdTimer = null;
 
 // Normal click → ❤️ toggle only if box not open
-if (box.style.display !== "flex") {
+    if (!box.classList.contains("open")) {
+
   if (!auth.currentUser) {
     promptSignup("Please signup to react");
     return;
@@ -977,7 +975,8 @@ document.addEventListener("click", async (e) => {
 
       // close this box
       const box = postEl.querySelector(".reaction-box");
-      if (box) box.style.display = "none";
+      if (box) box.classList.remove("open");
+
     } catch (err) {
       console.error(err);
     }
@@ -994,8 +993,8 @@ document.addEventListener("click", async (e) => {
 
 // ================= CLOSE ALL BOXES =================
 function closeAllReactionBoxes() {
-  document.querySelectorAll(".reaction-box").forEach(box => {
-    box.style.display = "none";
+  document.querySelectorAll(".reaction-box.open").forEach(box => {
+    box.classList.remove("open");
   });
 }
 
