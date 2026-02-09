@@ -49,7 +49,11 @@
  <i class="fa-solid fa-user-plus"></i> Signup</a>
 
       <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
-      <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      
+      <a href="#" id="loginMenuBtn">
+  <i class="fa-solid fa-right-to-bracket"></i> Login
+</a>
+
 
 
        <a class="logo-item">
@@ -57,8 +61,10 @@
   </a>
 
     </div>
+ 
   </div>
 </div>
+
 
 <!-- NOTIFICATION PAGE -->
 <div id="notificationPage" style="display:none;">
@@ -204,6 +210,10 @@
 
 </div>
 
+
+
+
+
 <!-- AUTH MODAL -->
 <div class="auth-modal" id="authModal">
   <div class="auth-box">
@@ -245,11 +255,19 @@
 </div>
 
 
+<div class="auth-modal" id="loginModal">
+  <div class="auth-box">
+    <h3>Login</h3>
+    <input type="text" id="loginContact" placeholder="Phone number or Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button id="loginBtn" type="button">Login</button>
+    <p id="loginSuccess" class="success-text">Login successful</p>
+    <p id="loginMsg" class="error-text"></p>
+  </div>
+</div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+
 
   <!-- EDIT POST MODAL -->
 <div id="editPostModal" class="auth-modal" style="display:none;">
@@ -298,7 +316,12 @@
 
     </div>
   </div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
