@@ -1171,3 +1171,118 @@ async function hydratePostUserPhoto() {
     }
   }
 }
+
+
+
+// ================= LOGIN OPTION (REPLACE FULL) =================
+
+// ===== LOGIN MODAL OPEN/CLOSE =====
+const loginMenuBtn = document.getElementById("loginMenuBtn");
+const loginModal   = document.getElementById("loginModal");
+
+const loginBtn     = document.getElementById("loginBtn");
+const loginMsg     = document.getElementById("loginMsg");
+const loginSuccess = document.getElementById("loginSuccess");
+
+function normalizeContact(raw) {
+  let c = (raw || "").trim();
+
+  // remove spaces/dashes
+  c = c.replace(/[\s-]/g, "");
+
+  // +88017... -> 017...
+  if (c.startsWith("+880")) c = "0" + c.slice(4);
+
+  // 88017... -> 017...
+  if (c.startsWith("880")) c = "0" + c.slice(3);
+
+  return c;
+}
+
+function toAuthEmail(contact) {
+  const c = normalizeContact(contact);
+  return c.includes("@") ? c : (c + "@everest.app");
+}
+
+function setLoginLoading(isLoading) {
+  if (!loginBtn) return;
+  loginBtn.disabled = isLoading;
+  loginBtn.classList.toggle("loading", isLoading);
+  loginBtn.textContent = isLoading ? "Logging in..." : "Login";
+}
+
+if (loginMenuBtn) {
+  loginMenuBtn.onclick = (e) => {
+    e.preventDefault();
+    if (!loginModal) return;
+
+    loginModal.style.display = "flex";
+    if (loginMsg) loginMsg.textContent = "";
+    if (loginSuccess) loginSuccess.style.display = "none";
+
+    // optional: clear input
+    const c = document.getElementById("loginContact");
+    const p = document.getElementById("loginPassword");
+    if (c) c.value = "";
+    if (p) p.value = "";
+  };
+}
+
+if (loginModal) {
+  loginModal.onclick = (e) => {
+    if (e.target === loginModal) loginModal.style.display = "none";
+  };
+}
+
+if (loginBtn) {
+  loginBtn.onclick = async () => {
+    const rawContact = document.getElementById("loginContact")?.value || "";
+    const pass = (document.getElementById("loginPassword")?.value || "").trim();
+
+    if (loginMsg) loginMsg.textContent = "";
+    if (loginSuccess) loginSuccess.style.display = "none";
+
+    if (!rawContact.trim() || !pass) {
+      if (loginMsg) loginMsg.textContent = "Email/Phone এবং Password দিন";
+      return;
+    }
+
+    const email = toAuthEmail(rawContact);
+
+    setLoginLoading(true);
+
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+
+      if (loginSuccess) loginSuccess.style.display = "block";
+
+      setTimeout(() => {
+        if (loginSuccess) loginSuccess.style.display = "none";
+        if (loginModal) loginModal.style.display = "none";
+
+        // profile page show
+        homePage.style.display = "none";
+        profilePage.style.display = "block";
+        notificationPage.style.display = "none";
+        messagePage.style.display = "none";
+        setActive(profileIcon);
+      }, 700);
+
+    } catch (err) {
+      // Firebase মাঝে মাঝে INVALID_LOGIN_CREDENTIALS দেয়
+      const code = err?.code || "";
+      let msg = "Login failed. Email/Phone বা Password ভুল (অথবা account নেই)";
+
+      if (code === "auth/user-not-found") msg = "এই account পাওয়া যায়নি";
+      else if (code === "auth/wrong-password") msg = "Password ভুল";
+      else if (code === "auth/invalid-email") msg = "Email/Phone ঠিক নেই";
+      else if (code === "auth/too-many-requests") msg = "অনেকবার চেষ্টা হয়েছে, একটু পরে আবার চেষ্টা করো";
+
+      if (loginMsg) loginMsg.textContent = msg;
+      console.error("LOGIN ERROR:", err);
+
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+}
