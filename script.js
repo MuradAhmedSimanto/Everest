@@ -67,6 +67,8 @@ homeIcon.onclick = () => {
   messagePage.style.display = "none";
   setActive(homeIcon);
   window.scrollTo(0, 0);
+  
+  document.body.classList.remove("profile-mode"); // ✅ add
 };
 
 profileIcon.onclick = () => {
@@ -89,6 +91,8 @@ profileIcon.onclick = () => {
   
   
   window.scrollTo(0, 0);
+
+  document.body.classList.add("profile-mode"); // ✅ add
 };
 
 notificationIcon.onclick = () => {
@@ -1285,3 +1289,60 @@ if (loginBtn) {
     }
   };
 }
+
+
+
+
+
+
+//scrol 
+// ===== Scroll DOWN: hide navbar + lift menu-bar | Scroll UP: show navbar =====
+(() => {
+  const navbar = document.querySelector(".navbar");
+  const body = document.body;
+  if (!navbar) return;
+
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  const THRESHOLD = 8;   // small movement ignore
+  const MIN_Y = 20;      // top এ থাকলে hide না
+
+  function update() {
+    const y = window.scrollY;
+    const delta = y - lastY;
+
+    // top area: keep normal
+    if (y <= MIN_Y) {
+      navbar.classList.remove("fb-hide");
+      body.classList.remove("nav-hidden");
+      lastY = y;
+      ticking = false;
+      return;
+    }
+
+    if (Math.abs(delta) < THRESHOLD) {
+      ticking = false;
+      return;
+    }
+
+    if (delta > 0) {
+      // ✅ scroll DOWN -> hide navbar, menu-bar goes top
+      navbar.classList.add("fb-hide");
+      body.classList.add("nav-hidden");
+    } else {
+      // ✅ scroll UP -> show navbar, menu-bar goes back down
+      navbar.classList.remove("fb-hide");
+      body.classList.remove("nav-hidden");
+    }
+
+    lastY = y;
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+})();
