@@ -999,31 +999,55 @@ transition: none;          /* animation remove */
   padding-left: 50px;   /* value বাড়াও/কমাও নিজের মতো */
 }
 
-.reaction-box span {
+/* base */
+.reaction-box .rx{
+  display:inline-block;
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  transition: transform 0.18s ease;
   will-change: transform;
 }
 
-.reaction-box span:hover {
-  animation: fb-reaction-pop 0.35s ease forwards;
+/* auto animate only when box is open */
+.reaction-box.open .rx-haha  { animation: haha 0.9s ease-in-out infinite; }
+.reaction-box.open .rx-wow   { animation: wow  1.0s ease-in-out infinite; }
+.reaction-box.open .rx-love  { animation: love 0.9s ease-in-out infinite; }
+.reaction-box.open .rx-sad   { animation: sad  1.1s ease-in-out infinite; }
+.reaction-box.open .rx-angry { animation: angry 0.35s ease-in-out infinite; }
+.reaction-box.open .rx-like  { animation: like 1.2s ease-in-out infinite; }
+
+@keyframes haha {
+  0%,100% { transform: rotate(0) translateY(0) scale(1); }
+  25% { transform: rotate(-8deg) translateY(-2px) scale(1.08); }
+  50% { transform: rotate(8deg) translateY(-3px) scale(1.12); }
+  75% { transform: rotate(-6deg) translateY(-2px) scale(1.08); }
 }
 
-@keyframes fb-reaction-pop {
-  0% {
-    transform: scale(1) translateY(0);
-  }
-  40% {
-    transform: scale(1.35) translateY(-6px);
-  }
-  70% {
-    transform: scale(1.25) translateY(-4px);
-  }
-  100% {
-    transform: scale(1.2) translateY(-5px);
-  }
+@keyframes angry {
+  0%,100% { transform: translateX(0) scale(1.05); }
+  25% { transform: translateX(-2px) scale(1.1); }
+  50% { transform: translateX(2px) scale(1.1); }
+  75% { transform: translateX(-2px) scale(1.1); }
+}
+
+@keyframes sad {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(2px) scale(0.98); }
+}
+
+@keyframes wow {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+@keyframes love {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.22); }
+}
+
+@keyframes like {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 
 
