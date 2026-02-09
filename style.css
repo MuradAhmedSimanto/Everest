@@ -7,8 +7,39 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   background: #f0f2f5;
-  padding-top: 108px;
 }
+
+
+:root{
+  --navbar-h: 54px;
+  --menubar-h: 54px;
+}
+
+/* normal অবস্থায় navbar + menubar জায়গা রাখবে */
+body{
+  padding-top: calc(var(--navbar-h) + var(--menubar-h));
+}
+
+/* scroll down এ navbar hide হলে padding কমবে */
+body.nav-hidden{
+  padding-top: var(--menubar-h);
+}
+
+/* menu-bar default: navbar এর নিচে */
+.menu-bar{
+  top: var(--navbar-h);
+  transition: top .17s ease;
+}
+
+/* navbar hide হলে menu-bar একদম top এ */
+body.nav-hidden .menu-bar{
+  top: 0;
+}
+
+
+
+
+
 /* ================= NAVBAR ================= */
 .navbar {
   background: #fff;
