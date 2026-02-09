@@ -67,7 +67,7 @@ homeIcon.onclick = () => {
   messagePage.style.display = "none";
   setActive(homeIcon);
   window.scrollTo(0, 0);
-  
+
   document.body.classList.remove("profile-mode"); // ✅ add
 };
 
@@ -1346,3 +1346,45 @@ if (loginBtn) {
     requestAnimationFrame(update);
   }, { passive: true });
 })();
+
+
+
+
+
+//post model of//
+// ===== CLOSE MODALS ON OUTSIDE CLICK =====
+function closeModal(modal) {
+  if (!modal) return;
+  modal.style.display = "none";
+}
+
+function wireOutsideClose(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  // outside (overlay) click -> close
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal(modal);
+  });
+
+  // inside box click -> don't close
+  const box = modal.querySelector(".auth-box, .create-post-box");
+  if (box) {
+    box.addEventListener("click", (e) => e.stopPropagation());
+  }
+}
+
+wireOutsideClose("textPostModal");
+wireOutsideClose("mediaCaptionModal");
+wireOutsideClose("editPostModal");
+wireOutsideClose("authModal");
+wireOutsideClose("loginModal");
+
+// Esc চাপলে close (optional)
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  ["textPostModal","mediaCaptionModal","editPostModal","authModal","loginModal"].forEach(id=>{
+    closeModal(document.getElementById(id));
+  });
+});
+
