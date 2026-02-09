@@ -1013,7 +1013,7 @@ transition: none;          /* animation remove */
 .reaction-box.open .rx-wow   { animation: wow  1.0s ease-in-out infinite; }
 .reaction-box.open .rx-love  { animation: love 0.9s ease-in-out infinite; }
 .reaction-box.open .rx-sad   { animation: sad  1.1s ease-in-out infinite; }
-.reaction-box.open .rx-angry { animation: angry 0.35s ease-in-out infinite; }
+.reaction-box.open .rx-angry { animation: angry 0.9s ease-in-out infinite; }
 .reaction-box.open .rx-like  { animation: like 1.2s ease-in-out infinite; }
 
 @keyframes haha {
@@ -1048,6 +1048,36 @@ transition: none;          /* animation remove */
 @keyframes like {
   0%,100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
+}
+
+
+
+.reaction-box{
+  position:absolute;
+  bottom:100%;
+  left:0;
+
+  background:#fff;
+  border:1px solid #d0d0d0;
+  border-radius: 32px;
+
+  padding: 10px 14px;      /* ✅ bigger box */
+  gap: 10px;               /* ✅ more space between emojis */
+
+  display:none;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.25);  /* ✅ stronger shadow */
+  z-index: 10;
+}
+
+.reaction-box.open{ display:flex; }
+
+/* ✅ bigger emojis */
+.reaction-box .rx{
+  display:inline-block;
+  font-size: 30px;         /* ✅ increase (28–34 best) */
+  line-height: 1;
+  cursor:pointer;
+  will-change: transform;
 }
 
 
