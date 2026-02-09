@@ -158,14 +158,7 @@ body.nav-hidden .menu-bar{
   color: #65676b;
 }
 
-#postBtn {
-  background: #0a3dff;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-}
+
 
 /* ================= FEED ================= */
 #feed {
@@ -1442,3 +1435,29 @@ body.profile-mode .menu-bar{
 }
 
 
+
+/*post logo*/
+#postBtn{
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
+
+.post-logo-btn{
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.post-logo-btn img{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: block;
+}
