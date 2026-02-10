@@ -1484,6 +1484,9 @@ body.profile-mode .profile-pic-wrapper{
   margin-left: 10px !important;   /* 24px → 10px */
 }
 
+
+
+
 /* name + bio + follow-info move a bit right (match profile pic) */
 body.profile-mode #profileName,
 body.profile-mode #bioText,
@@ -1497,4 +1500,76 @@ body.profile-mode #bioText{
   max-width: 92%;
 }
 
+
+/*reaction summary*/
+/* ✅ FORCE: reaction count always ABOVE like button */
+.post .post-actions{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+}
+
+/* reaction row উপরে */
+.post .reaction-summary{
+  order:-1 !important;
+  width:100%;
+  margin-bottom:6px;
+}
+
+/* like button নিচে */
+.post .like-btn{
+  order:0 !important;
+}
+
+/* ================= FB STYLE REACTION SUMMARY ================= */
+
+/* summary wrapper: icons + text in one row */
+.post .reaction-summary{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  padding:4px 12px 0 12px !important;
+  font-size:14px !important;
+  color:#65676b !important;
+}
+
+/* icons row */
+.post .reaction-summary .reaction-icons{
+  display:flex !important;
+  align-items:center !important;
+}
+
+/* ✅ emoji overlap (kasakasi) */
+.post .reaction-summary .reaction-icons span{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:15px !important;
+  margin-left:-11px !important;     /* 🔥 main overlap control */
+
+  background:#fff !important;
+  border-radius:50% !important;
+  padding:2px !important;
+  border:1px solid #fff !important;
+}
+
+/* first icon normal */
+.post .reaction-summary .reaction-icons span:first-child{
+  margin-left:0 !important;
+}
+
+/* text */
+.post .reaction-summary .reaction-text{
+  white-space:nowrap !important;
+  margin-left:4px !important;
+}
+
+/* ✅ optional: আরও টাইট চাইলে -8 / আরও gap চাইলে -5 */
+
+
+.post .reaction-summary{
+  padding-left:50px !important;
+  margin-left:-70px !important;
+}
 
