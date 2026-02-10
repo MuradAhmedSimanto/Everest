@@ -1420,44 +1420,60 @@ body.profile-mode .menu-bar{
 
 
 /*cover width full*/
-/* ===== PROFILE COVER (NO OVERFLOW, FB STYLE) ===== */
-
-/* prevent sideways scroll */
-html, body { overflow-x: hidden; }
-
+/* ===== PROFILE PAGE VISIBILITY (NO FLASH) ===== */
 #profilePage{
+  display:none;
   background:#fff;
-  padding-bottom:30px;
   width:100%;
+  padding-bottom:30px;
 }
 
-/* full-bleed cover WITHOUT 100vw transform bug */
-#profilePage .cover-wrapper{
-  position: relative;
-  width: 100%;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  overflow: hidden;
+body.profile-mode #profilePage{ display:block; }
+body.profile-mode #feed{ display:none; }
+
+/* ===== COVER (FB STYLE) ===== */
+body.profile-mode .cover-wrapper{
+  position:relative;            /* ✅ coverCam anchor */
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
 }
 
-#profilePage #coverPic{
+/* cover image */
+body.profile-mode #coverPic{
   display:block;
   width:100%;
   height:230px;
   object-fit:cover;
-  object-position:left center;
+  object-position:center;
 }
 
-#profilePage #coverCam{
-  position:absolute;
-  right:15px;
-  bottom:15px;
+/* ✅ FORCE cover camera to bottom-right (even if other CSS exists) */
+body.profile-mode #coverCam{
+  position:absolute !important;
+  right:16px !important;
+  bottom:16px !important;
+  left:auto !important;
+  top:auto !important;
+
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
   background:#fff;
-  padding:10px;
   border-radius:50%;
   cursor:pointer;
+  z-index:5;
 }
 
+/* MOBILE */
 @media (max-width:768px){
-  #profilePage #coverPic{ height:180px; }
+  body.profile-mode #coverPic{ height:180px; }
+  body.profile-mode #coverCam{
+    right:12px !important;
+    bottom:12px !important;
+  }
 }
