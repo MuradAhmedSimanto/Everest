@@ -1477,3 +1477,11 @@ body.profile-mode #coverCam{
     bottom:12px !important;
   }
 }
+
+
+/* only profile circle move left */
+body.profile-mode .profile-pic-wrapper{
+  margin-left: 10px !important;   /* 24px → 10px */
+}
+
+
