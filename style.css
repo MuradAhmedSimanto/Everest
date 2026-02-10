@@ -1458,39 +1458,51 @@ body.profile-mode .menu-bar{
 
 
 
-/*cover pic width full*/
+
+/*cover width full*/
+/* ================= PROFILE COVER (CLEAN REPLACE) ================= */
+
+/* Profile page container clean */
 #profilePage{
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  background:#fff;
+  padding-bottom:30px;
+  display:none;
+  width:100%;
+  margin:0;
+  padding-left:0;
+  padding-right:0;
 }
 
-/* cover container full width, no padding/margin */
+/* cover wrapper full width, no overflow issues */
 #profilePage .cover-wrapper{
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
+  position:relative;
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
 }
 
-/* cover image full width + center crop */
+/* cover image: always full width */
 #profilePage #coverPic{
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 230px;
-  object-fit: cover !important;
-  object-position: center !important;
+  display:block;
+  width:100%;
+  height:230px;
+  object-fit:cover;
+  object-position:left center;  /* left side show */
 }
 
-/* 🔥 IMPORTANT: এইটা cover কে left padding দিচ্ছিল, তাই profile page এর text-only তে সীমাবদ্ধ করলাম */
-#profilePage .profile-header h1,
-#profilePage .profile-header h2,
-#profilePage .profile-header h3,
-#profilePage .profile-header p,
-#profilePage #profileName,
-#profilePage #bioText,
-#profilePage .follow-info,
-#profilePage .profile-actions{
-  padding-left: 20px !important;
-  padding-right: 20px !important;
+/* cover camera button */
+#profilePage #coverCam{
+  position:absolute;
+  right:15px;
+  bottom:15px;
+  background:#fff;
+  padding:10px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+/* mobile cover height */
+@media (max-width:768px){
+  #profilePage #coverPic{ height:180px; }
 }
