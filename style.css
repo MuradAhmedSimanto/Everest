@@ -251,13 +251,7 @@ body.nav-hidden .menu-bar{
   cursor: pointer;
 }
 /* 🔥 TEXT POSITION FIX (REAL REASON) */
-#profilePage h1,
-#profilePage h2,
-#profilePage h3,
-#profilePage p {
-  padding-left: 20px !important;
-  text-align: left !important;
-}
+
 
 /* BIO INPUT */
 #bioInput {
@@ -1460,4 +1454,43 @@ body.profile-mode .menu-bar{
   height: 34px;
   object-fit: contain;
   display: block;
+}
+
+
+
+/*cover pic width full*/
+#profilePage{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* cover container full width, no padding/margin */
+#profilePage .cover-wrapper{
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* cover image full width + center crop */
+#profilePage #coverPic{
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 230px;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* 🔥 IMPORTANT: এইটা cover কে left padding দিচ্ছিল, তাই profile page এর text-only তে সীমাবদ্ধ করলাম */
+#profilePage .profile-header h1,
+#profilePage .profile-header h2,
+#profilePage .profile-header h3,
+#profilePage .profile-header p,
+#profilePage #profileName,
+#profilePage #bioText,
+#profilePage .follow-info,
+#profilePage .profile-actions{
+  padding-left: 20px !important;
+  padding-right: 20px !important;
 }
