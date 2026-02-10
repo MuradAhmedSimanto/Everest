@@ -221,14 +221,17 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
       <span class="like-btn" data-post="${postId}">
         <span class="like-text">👍Like</span>
 
-       <div class="reaction-box">
-  <span class="rx rx-haha">😆</span>
-  <span class="rx rx-sad">😥</span>
-  <span class="rx rx-love">❤️</span>
-  <span class="rx rx-sad">💔</span>
-  <span class="rx rx-wow">😮</span>
-  <span class="rx rx-angry">😡</span>
+  <div class="reaction-box">
+  <span class="rx rx-like"  data-type="like">👍</span>
+  <span class="rx rx-love"  data-type="love">❤️</span>
+  <span class="rx rx-haha"  data-type="haha">😆</span>
+  <span class="rx rx-wow"   data-type="wow">😮</span>
+  <span class="rx rx-sad"   data-type="sad">😥</span>
+  <span class="rx rx-angry" data-type="angry">😡</span>
 </div>
+
+
+
   </span>
  <div class="reaction-summary"></div>
   </div>
@@ -935,7 +938,15 @@ async function endHold(e) {
     if (snap.exists && snap.data()?.emoji === "❤️") {
       await rRef.delete(); // remove reaction
     } else {
-      await rRef.set({ emoji: "❤️", createdAt: Date.now() });
+     
+await rRef.set({
+  type: "love",
+  emoji: "❤️",
+  userName: MEMORY_PROFILE_NAME || "User",
+  createdAt: Date.now()
+});
+
+
     }
   } catch (err) {
     console.error(err);
@@ -972,10 +983,25 @@ document.addEventListener("click", async (e) => {
         .collection("reactions")
         .doc(uid);
 
-      await rRef.set({
-        emoji,
-        createdAt: Date.now()
-      });
+      const type = emojiEl.dataset.type; // data-type থেকে আসবে
+let userName = (MEMORY_PROFILE_NAME || "").trim();
+
+if (!userName) {
+  const us = await db.collection("users").doc(uid).get();
+  if (us.exists) {
+    const d = us.data();
+    userName = [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+    MEMORY_PROFILE_NAME = userName;
+  }
+}
+
+await rRef.set({
+  type,              // like/love/haha/wow/sad/angry
+  emoji: emojiEl.innerText,
+  userName: userName || "User",
+  createdAt: Date.now()
+});
+
 
       // close this box
       const box = postEl.querySelector(".reaction-box");
@@ -1002,9 +1028,55 @@ function closeAllReactionBoxes() {
   });
 }
 
-
-
+// ================= REACTION LISTENER CACHE =================
 const REACTION_LISTENER_ATTACHED = new Set();
+//reaction count//
+const reactionEmoji = {
+  like: "👍",
+  love: "❤️",
+  haha: "😆",
+  wow:  "😮",
+  sad:  "😥",
+  angry:"😡",
+};
+
+function renderFbReactionSummary(reactions, container){
+  if (!container) return;
+
+  if (!reactions.length){
+    container.innerHTML = "";
+    return;
+  }
+
+  // count by type
+  const typeCount = {};
+  for (const r of reactions){
+    const t = r.type || "like";
+    typeCount[t] = (typeCount[t] || 0) + 1;
+  }
+
+  // top 3 types
+  const topTypes = Object.entries(typeCount)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
+    .map(([t])=>t);
+
+  // first reactor (oldest)
+  const first = reactions.slice().sort((a,b)=>a.createdAt - b.createdAt)[0];
+  const firstName = first.userName || "User";
+  const total = reactions.length;
+
+  const iconsHTML = topTypes
+    .map(t => `<span>${reactionEmoji[t] || "👍"}</span>`)
+    .join("");
+
+  const text = total > 1 ? `${firstName} +${total-1}` : firstName;
+
+  container.innerHTML = `
+    <div class="reaction-icons">${iconsHTML}</div>
+    <div class="reaction-text">${text}</div>
+  `;
+}
 
 function attachReactionListener(postId, postEl) {
   const key = postId + "|" + (postEl.closest("#profileFeed") ? "profile" : "home");
@@ -1016,17 +1088,23 @@ function attachReactionListener(postId, postEl) {
 
   db.collection("posts").doc(postId).collection("reactions")
     .onSnapshot((snap) => {
-      const emojis = [];
+      const reactions = [];
       let myEmoji = null;
       const myUid = auth.currentUser?.uid;
 
       snap.forEach((d) => {
-        const data = d.data();
-        if (data?.emoji) emojis.push(data.emoji);
+        const data = d.data() || {};
+        reactions.push({
+          type: data.type,
+          emoji: data.emoji,
+          userName: data.userName,
+          createdAt: data.createdAt || 0,
+        });
+
         if (myUid && d.id === myUid) myEmoji = data.emoji;
       });
 
-      if (summaryEl) summaryEl.textContent = emojis.join(" ");
+      renderFbReactionSummary(reactions, summaryEl);
       if (likeTextEl) likeTextEl.textContent = myEmoji ? myEmoji : "👍 Like";
     });
 }
