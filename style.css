@@ -174,34 +174,7 @@ body.nav-hidden .menu-bar{
   display: block;
 }
 
-/* ================= PROFILE PAGE ================== */
-#profilePage {
-  background: #fff;
-  padding-bottom: 30px;
-  display: none;
-}
 
-/* COVER */
-.cover-wrapper {
-  position: relative;
-}
-
-#coverPic {
-  width: 100%;
-  height: 230px;
-  object-fit: cover;
-  display: block;
-}
-
-#coverCam {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  background: #fff;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-}
 
 /* PROFILE PIC */
 .profile-pic-wrapper {
@@ -259,20 +232,7 @@ body.nav-hidden .menu-bar{
   height: 70px;
   display: none;
 }
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-  #coverPic {
-    height: 180px;
-  }
 
-  .profile-pic-wrapper {
-    margin: -60px 0 0 16px;
-  }
-
-  #profilePage > div:nth-child(3) {
-    margin-left: 16px !important;
-  }
-}
 /* ================= AUTH MODAL (GORGEOUS PREMIUM) ================= */
 .auth-modal {
   position: fixed;
@@ -1460,38 +1420,34 @@ body.profile-mode .menu-bar{
 
 
 /*cover width full*/
-/* ================= PROFILE COVER (CLEAN REPLACE) ================= */
+/* ===== PROFILE COVER (NO OVERFLOW, FB STYLE) ===== */
 
-/* Profile page container clean */
+/* prevent sideways scroll */
+html, body { overflow-x: hidden; }
+
 #profilePage{
   background:#fff;
   padding-bottom:30px;
-  display:none;
   width:100%;
-  margin:0;
-  padding-left:0;
-  padding-right:0;
 }
 
-/* cover wrapper full width, no overflow issues */
+/* full-bleed cover WITHOUT 100vw transform bug */
 #profilePage .cover-wrapper{
-  position:relative;
-  width:100%;
-  margin:0;
-  padding:0;
-  overflow:hidden;
+  position: relative;
+  width: 100%;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
 }
 
-/* cover image: always full width */
 #profilePage #coverPic{
   display:block;
   width:100%;
   height:230px;
   object-fit:cover;
-  object-position:left center;  /* left side show */
+  object-position:left center;
 }
 
-/* cover camera button */
 #profilePage #coverCam{
   position:absolute;
   right:15px;
@@ -1502,7 +1458,6 @@ body.profile-mode .menu-bar{
   cursor:pointer;
 }
 
-/* mobile cover height */
 @media (max-width:768px){
   #profilePage #coverPic{ height:180px; }
 }
