@@ -1484,4 +1484,17 @@ body.profile-mode .profile-pic-wrapper{
   margin-left: 10px !important;   /* 24px → 10px */
 }
 
+/* name + bio + follow-info move a bit right (match profile pic) */
+body.profile-mode #profileName,
+body.profile-mode #bioText,
+body.profile-mode .follow-info,
+body.profile-mode .profile-actions{
+  padding-left: 12px !important;   /* 20px ছিল, এখন কম/বেশি করে adjust করো */
+}
+
+/* bio text width stable (optional, nice) */
+body.profile-mode #bioText{
+  max-width: 92%;
+}
+
 
