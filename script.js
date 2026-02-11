@@ -938,11 +938,26 @@ async function endHold(e) {
     if (snap.exists && snap.data()?.emoji === "❤️") {
       await rRef.delete(); // remove reaction
     } else {
-     
+     //show reaction 
+let userName = (MEMORY_PROFILE_NAME || "").trim();
+let userPhoto = "";
+
+if (!userName || !userPhoto) {
+  const us = await db.collection("users").doc(uid).get();
+  if (us.exists) {
+    const d = us.data();
+    userName = userName || [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+    userPhoto = d.profilePic || "";
+    MEMORY_PROFILE_NAME = userName || MEMORY_PROFILE_NAME;
+  }
+}
+
 await rRef.set({
   type: "love",
   emoji: "❤️",
-  userName: MEMORY_PROFILE_NAME || "User",
+  userId: uid,
+  userName: userName || "User",
+  userPhoto: userPhoto || "",
   createdAt: Date.now()
 });
 
@@ -995,12 +1010,25 @@ if (!userName) {
   }
 }
 
+let userPhoto = "";
+
+const us = await db.collection("users").doc(uid).get();
+if (us.exists) {
+  const d = us.data();
+  userName = userName || [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+  userPhoto = d.profilePic || "";
+  MEMORY_PROFILE_NAME = userName || MEMORY_PROFILE_NAME;
+}
+
 await rRef.set({
-  type,              // like/love/haha/wow/sad/angry
+  type,
   emoji: emojiEl.innerText,
+  userId: uid,
   userName: userName || "User",
+  userPhoto: userPhoto || "",
   createdAt: Date.now()
 });
+
 
 
       // close this box
@@ -1146,9 +1174,202 @@ function attachReactionListener(postId, postEl) {
     likeTextEl.style.color = "#65676b";
   }
 }
-
-    });
+ });
 }
+
+
+//show reaction//
+const reactorsModal = document.getElementById("reactorsModal");
+const reactorsList  = document.getElementById("reactorsList");
+const reactTabsEl   = document.getElementById("reactTabs");
+const reactorsClose = document.getElementById("reactorsClose");
+
+function openReactorsModal(){ reactorsModal?.classList.add("open"); }
+function closeReactorsModal(){ reactorsModal?.classList.remove("open"); }
+
+reactorsClose?.addEventListener("click", closeReactorsModal);
+reactorsModal?.addEventListener("click", (e) => {
+  if (e.target === reactorsModal) closeReactorsModal();
+});
+
+const TAB_ORDER = ["all","love","like","haha","wow","sad","angry"];
+
+function tabIcon(type){
+  if (type === "all") return "";
+  return reactionEmoji[type] || "👍";
+}
+
+function buildCounts(list){
+  const counts = { all: list.length };
+  for (const r of list){
+    const t = r.type || "like";
+    counts[t] = (counts[t] || 0) + 1;
+  }
+  return counts;
+}
+
+function renderTabs(counts, active){
+  if (!reactTabsEl) return;
+
+  const html = TAB_ORDER
+    .filter(t => t === "all" ? true : (counts[t] || 0) > 0)
+    .map(t => {
+      const isActive = t === active ? "active" : "";
+      const icon = t === "all" ? "" : `<span class="ticon">${tabIcon(t)}</span>`;
+      const label = t === "all" ? "All" : "";
+      const num = t === "all" ? counts.all : counts[t];
+      return `<div class="react-tab ${isActive}" data-tab="${t}">${icon}${label}${num}</div>`;
+    })
+    .join("");
+
+  reactTabsEl.innerHTML = html;
+}
+
+function renderReactorsList(list, filterType){
+  if (!reactorsList) return;
+
+  const filtered = (filterType === "all")
+    ? list
+    : list.filter(r => (r.type || "like") === filterType);
+
+  if (!filtered.length){
+    reactorsList.innerHTML = `<div style="padding:14px;color:#666;">No reactions</div>`;
+    return;
+  }
+
+  const rows = filtered.map(r => {
+    const name = r.userName || "User";
+    const pic = r.userPhoto || "";
+    const badge = r.emoji || reactionEmoji[r.type] || "👍";
+
+    return `
+      <div class="reactor-row">
+        <div class="reactor-pic-wrap">
+          <img class="reactor-pic"
+     src="${pic}"
+     onerror="this.onerror=null; this.src='https://i.imgur.com/6VBx3io.png';" />
+
+          <div class="reactor-badge">${badge}</div>
+        </div>
+        <div class="reactor-name">${name}</div>
+      </div>
+    `;
+  }).join("");
+
+  reactorsList.innerHTML = rows;
+}
+
+//reaction show model//
+async function showReactorsForPost(postId){
+  if (!reactorsList || !reactTabsEl) return;
+
+  // ✅ open immediately (0ms)
+  openReactorsModal();
+
+  // ✅ show skeleton (no "Loading..." text)
+  reactTabsEl.innerHTML = `
+    <div class="react-tab active">All</div>
+  `;
+  reactorsList.innerHTML = Array.from({ length: 6 }).map(() => `
+    <div class="reactor-row" style="opacity:.7;">
+      <div class="reactor-pic-wrap">
+        <div class="reactor-pic" style="width:40px;height:40px;border-radius:50%;background:#eee;"></div>
+        <div class="reactor-badge" style="background:#eee;color:transparent;">🙂</div>
+      </div>
+      <div class="reactor-name" style="height:12px;width:140px;background:#eee;border-radius:6px;"></div>
+    </div>
+  `).join("");
+
+  try {
+    // 1) reactions list fetch
+    const snap = await db.collection("posts").doc(postId)
+      .collection("reactions")
+      .orderBy("createdAt", "desc")
+      .limit(50) // ✅ speed cap
+      .get();
+
+    const raw = snap.docs.map(doc => {
+      const r = doc.data() || {};
+      const uid = r.userId || doc.id;
+      return {
+        type: r.type || "like",
+        emoji: r.emoji || (reactionEmoji[r.type] || "👍"),
+        userId: uid,
+        userName: r.userName || "User",
+        userPhoto: r.userPhoto || "",
+        createdAt: r.createdAt || 0
+      };
+    });
+
+    // 2) find missing users (only those without photo or real name)
+    const needUids = Array.from(new Set(
+      raw
+        .filter(x => !x.userPhoto || x.userName === "User")
+        .map(x => x.userId)
+    ));
+
+    // ✅ parallel fetch users (fast)
+    const userDocs = await Promise.all(
+      needUids.map(uid => db.collection("users").doc(uid).get())
+    );
+
+    const userMap = new Map();
+    userDocs.forEach((us, i) => {
+      const uid = needUids[i];
+      userMap.set(uid, us.exists ? us.data() : null);
+    });
+
+    // 3) merge
+    const list = raw.map(x => {
+      const ud = userMap.get(x.userId);
+      const nameFromUser = ud ? [ud.firstName, ud.lastName].filter(Boolean).join(" ").trim() : "";
+      const photoFromUser = ud ? (ud.profilePic || "") : "";
+
+      return {
+        ...x,
+        userName: (x.userName !== "User" ? x.userName : (nameFromUser || "User")),
+        userPhoto: (x.userPhoto || photoFromUser || ""),
+      };
+    });
+
+    // 4) render real UI
+    const counts = buildCounts(list);
+    let active = "all";
+
+    renderTabs(counts, active);
+    renderReactorsList(list, active);
+
+    reactTabsEl.onclick = (e) => {
+      const tab = e.target.closest(".react-tab")?.dataset?.tab;
+      if (!tab) return;
+      active = tab;
+
+      reactTabsEl.querySelectorAll(".react-tab").forEach(x => x.classList.remove("active"));
+      reactTabsEl.querySelector(`.react-tab[data-tab="${tab}"]`)?.classList.add("active");
+
+      renderReactorsList(list, active);
+    };
+
+  } catch (err) {
+    console.error(err);
+    reactTabsEl.innerHTML = "";
+    reactorsList.innerHTML = `<div style="padding:14px;color:#c00;">Failed to load</div>`;
+  }
+}
+
+
+// ✅ click reaction summary -> open modal
+document.addEventListener("click", (e) => {
+  const sum = e.target.closest(".reaction-summary");
+  if (!sum) return;
+
+  const postEl = sum.closest(".post");
+  const postId = postEl?.dataset?.id;
+  if (!postId) return;
+
+  showReactorsForPost(postId);
+});
+
 
 
 // ================= POSTS FEED LISTENER (guest can see) =================
