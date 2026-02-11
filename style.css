@@ -1625,7 +1625,7 @@ body.profile-mode #bioText{
   white-space:nowrap;
 }
 .react-tab.active{
-  color:#1877f2;
+  color:#ff1f1f;
   font-weight:600;
 }
 .react-tab.active::after{
@@ -1635,7 +1635,7 @@ body.profile-mode #bioText{
   right:0;
   bottom:0;
   height:3px;
-  background:#1877f2;
+  background:#ff1f1f;
   border-radius:3px;
 }
 
