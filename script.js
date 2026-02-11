@@ -1040,6 +1040,25 @@ const reactionEmoji = {
   angry:"😡",
 };
 
+const reactionLabel = {
+  like: "Like",
+  love: "Love",
+  haha: "Haha",
+  wow: "Wow",
+  sad: "Sad",
+  angry: "Angry"
+};
+
+const reactionColor = {
+  like:  "#007BFF",
+  love:  "#e0245e",
+  angry: "#800000",
+  haha:  "#f7b125",
+  wow:   "#f7b125",
+  sad:   "#f7b125",
+};
+
+
 function renderFbReactionSummary(reactions, container){
   if (!container) return;
 
@@ -1105,7 +1124,29 @@ function attachReactionListener(postId, postEl) {
       });
 
       renderFbReactionSummary(reactions, summaryEl);
-      if (likeTextEl) likeTextEl.textContent = myEmoji ? myEmoji : "👍 Like";
+    if (likeTextEl) {
+
+  let myType = null;
+  const myUid2 = auth.currentUser?.uid;
+
+  // নিজের reaction খুঁজে বের কর
+  snap.forEach((d) => {
+    if (myUid2 && d.id === myUid2) {
+      const data = d.data() || {};
+      myType = data.type || "like";
+    }
+  });
+
+  if (myType) {
+    const emoji = reactionEmoji[myType] || "👍";
+    likeTextEl.textContent = emoji + " " + (reactionLabel[myType] || "Like");
+    likeTextEl.style.color = reactionColor[myType] || "#65676b";
+  } else {
+    likeTextEl.textContent = "👍 Like";
+    likeTextEl.style.color = "#65676b";
+  }
+}
+
     });
 }
 
