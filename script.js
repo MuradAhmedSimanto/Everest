@@ -217,24 +217,28 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
       </div>
     `}
 
-    <div class="post-actions">
-      <span class="like-btn" data-post="${postId}">
-        <span class="like-text">👍Like</span>
+<!-- ✅ Reaction summary (UP) -->
+<div class="reaction-summary"></div>
 
-  <div class="reaction-box">
-  <span class="rx rx-like"  data-type="like">👍</span>
-  <span class="rx rx-love"  data-type="love">❤️</span>
-  <span class="rx rx-haha"  data-type="haha">😆</span>
-  <span class="rx rx-wow"   data-type="wow">😮</span>
-  <span class="rx rx-sad"   data-type="sad">😥</span>
-  <span class="rx rx-angry" data-type="angry">😡</span>
-</div>
+<!-- ✅ Actions row (Like / Comment / Share) -->
+<div class="post-actions">
+  <span class="action-btn like-btn" data-post="${postId}">
+    <span class="like-text">👍 Like</span>
 
-
-
+    <!-- reaction box stays inside like btn -->
+    <div class="reaction-box">
+      <span class="rx rx-like"  data-type="like">👍</span>
+      <span class="rx rx-love"  data-type="love">❤️</span>
+      <span class="rx rx-haha"  data-type="haha">😆</span>
+      <span class="rx rx-wow"   data-type="wow">😮</span>
+      <span class="rx rx-sad"   data-type="sad">😥</span>
+      <span class="rx rx-angry" data-type="angry">😡</span>
+    </div>
   </span>
- <div class="reaction-summary"></div>
-  </div>
+
+  <span class="action-btn comment-btn" data-post="${postId}">💬 Comment</span>
+  <span class="action-btn share-btn" data-post="${postId}">↗️ Share</span>
+</div>
  </div>
 `;
 
@@ -1728,3 +1732,447 @@ document.addEventListener("keydown", (e) => {
   });
 });
 
+
+//coment section//
+// ===== COMMENTS MODAL SYSTEM (FULL) =====
+const commentsModal = document.getElementById("commentsModal");
+const cmodalClose   = document.getElementById("cmodalClose");
+const cmodalList    = document.getElementById("cmodalList");
+const cmodalInput   = document.getElementById("cmodalInput");
+const cmodalSend    = document.getElementById("cmodalSend");
+
+
+
+const confirmModal  = document.getElementById("confirmModal");
+const confirmTextEl = document.getElementById("confirmText");
+const confirmOkBtn  = document.getElementById("confirmOk");
+const confirmCancelBtn = document.getElementById("confirmCancel");
+
+function confirmBox(message){
+  return new Promise((resolve) => {
+    if (!confirmModal) return resolve(false);
+
+    confirmTextEl.textContent = message;
+    confirmModal.classList.add("open");
+
+    const cleanup = () => {
+      confirmModal.classList.remove("open");
+      confirmOkBtn.onclick = null;
+      confirmCancelBtn.onclick = null;
+      confirmModal.onclick = null;
+    };
+
+    confirmOkBtn.onclick = () => { cleanup(); resolve(true); };
+    confirmCancelBtn.onclick = () => { cleanup(); resolve(false); };
+
+    confirmModal.onclick = (e) => {
+      if (e.target === confirmModal) { cleanup(); resolve(false); }
+    };
+  });
+}
+
+
+
+
+
+let ACTIVE_POST_ID = null;
+let COMMENTS_UNSUB = null;
+const REPLY_UNSUBS = new Map(); // commentId -> unsub
+
+function openCommentsModal(postId){
+  ACTIVE_POST_ID = postId;
+  commentsModal.classList.add("open");
+  cmodalList.innerHTML = "";
+  cmodalInput.value = "";
+
+  // stop old listener
+  if (COMMENTS_UNSUB) COMMENTS_UNSUB();
+  REPLY_UNSUBS.forEach(un => un && un());
+  REPLY_UNSUBS.clear();
+
+  COMMENTS_UNSUB = db.collection("posts").doc(postId)
+    .collection("comments")
+    .orderBy("createdAt", "asc")
+    .limit(50)
+    .onSnapshot((snap)=>{
+     
+const myUid = auth.currentUser?.uid || "";
+
+// ✅ যদি কোনো comment না থাকে
+if (snap.empty) {
+  cmodalList.innerHTML = `
+    <div class="no-comments">No comments</div>
+  `;
+  return;
+}
+
+// ✅ comment থাকলে আগের লেখা মুছে নতুন render হবে
+cmodalList.innerHTML = "";
+
+
+      snap.forEach((d)=>{
+        const c = d.data() || {};
+        const cid = d.id;
+
+        const isOwner = myUid && c.userId === myUid;
+        const likeCount = c.likeCount || 0;
+        const liked = !!(c.likedBy && myUid && c.likedBy[myUid]);
+
+        const row = document.createElement("div");
+        row.className = "crow";
+        row.dataset.cid = cid;
+
+        row.innerHTML = `
+          <img class="cpic" src="${c.userPhoto || "https://i.imgur.com/6VBx3io.png"}"
+           onerror="this.onerror=null; this.src='https://i.imgur.com/6VBx3io.png';"/>
+
+          <div class="cbody">
+            <div class="cbubble">
+              <div class="cname">${c.userName || "User"}</div>
+              <div class="ctext">${(c.text || "").replace(/[<>]/g,"")}</div>
+            </div>
+
+            <div class="cactions">
+              <span class="cact c-like ${liked ? "active":""}" data-act="like">
+                Like ${likeCount ? `(${likeCount})` : ""}
+              </span>
+              <span class="cact c-reply" data-act="reply">Reply</span>
+              ${isOwner ? `
+                <span class="cact c-edit" data-act="edit">Edit</span>
+                <span class="cact c-del" data-act="del">Delete</span>
+              ` : ``}
+            </div>
+
+            <div class="replybox">
+              <input type="text" placeholder="Write a reply..." />
+              <button data-act="replysend">Send</button>
+            </div>
+
+            <div class="editbox" style="display:none; gap:8px; margin-top:8px;">
+              <input class="edit-input" type="text" />
+              <button data-act="editsave">Save</button>
+              <button data-act="editcancel">Cancel</button>
+            </div>
+
+            <div class="replies"></div>
+          </div>
+        `;
+
+        cmodalList.appendChild(row);
+
+        // replies realtime (limit 20)
+        const ref = db.collection("posts").doc(postId)
+          .collection("comments").doc(cid)
+          .collection("replies")
+          .orderBy("createdAt","asc")
+          .limit(20);
+
+        const oldUn = REPLY_UNSUBS.get(cid);
+        if (oldUn) oldUn();
+
+        const unsub = ref.onSnapshot((rsnap)=>{
+          const repliesBox = row.querySelector(".replies");
+          if (!repliesBox) return;
+          repliesBox.innerHTML = "";
+
+          rsnap.forEach(rdoc=>{
+            const r = rdoc.data() || {};
+            const isReplyOwner = myUid && r.userId === myUid;
+
+            const div = document.createElement("div");
+            div.className = "rrow";
+            div.dataset.rid = rdoc.id;
+
+            div.innerHTML = `
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <img class="cpic" style="width:30px;height:30px;"
+                  src="${r.userPhoto || "https://i.imgur.com/6VBx3io.png"}"
+                  onerror="this.onerror=null; this.src='https://i.imgur.com/6VBx3io.png';" />
+                <div style="flex:1;">
+                  <div class="cbubble">
+                    <div class="cname">${r.userName || "User"}</div>
+                    <div class="ctext">${(r.text || "").replace(/[<>]/g,"")}</div>
+                  </div>
+                  ${isReplyOwner ? `
+                    <div class="cactions">
+                      <span class="cact" data-act="rdel">Delete</span>
+                    </div>
+                  ` : ``}
+                </div>
+              </div>
+            `;
+
+            repliesBox.appendChild(div);
+          });
+        });
+
+        REPLY_UNSUBS.set(cid, unsub);
+      });
+
+      // bottom
+      cmodalList.scrollTop = cmodalList.scrollHeight;
+    });
+}
+
+function closeCommentsModal(){
+  commentsModal.classList.remove("open");
+  ACTIVE_POST_ID = null;
+
+  if (COMMENTS_UNSUB) COMMENTS_UNSUB();
+  COMMENTS_UNSUB = null;
+
+  REPLY_UNSUBS.forEach(un => un && un());
+  REPLY_UNSUBS.clear();
+}
+
+cmodalClose?.addEventListener("click", closeCommentsModal);
+commentsModal?.addEventListener("click",(e)=>{
+  if (e.target === commentsModal) closeCommentsModal();
+});
+
+function ensureLoggedInForComment() {
+  if (!auth.currentUser) {
+    promptSignup("Please signup to comment");
+    return false;
+  }
+  return true;
+}
+
+async function getMyUserMeta(){
+  const uid = auth.currentUser.uid;
+
+  let userName = (MEMORY_PROFILE_NAME || "").trim();
+  let userPhoto = "";
+
+  const us = await db.collection("users").doc(uid).get();
+  if (us.exists){
+    const d = us.data() || {};
+    userName = userName || [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+    userPhoto = d.profilePic || "";
+    MEMORY_PROFILE_NAME = userName || MEMORY_PROFILE_NAME;
+  }
+
+  return {
+    uid,
+    userName: userName || "User",
+    userPhoto: userPhoto || ""
+  };
+}
+
+// add comment
+async function addCommentToPost(postId, text){
+  if (!ensureLoggedInForComment()) return;
+
+  const me = await getMyUserMeta();
+
+  await db.collection("posts").doc(postId)
+    .collection("comments")
+    .add({
+      userId: me.uid,
+      userName: me.userName,
+      userPhoto: me.userPhoto,
+      text: text.trim(),
+      createdAt: Date.now(),
+      likeCount: 0,
+      likedBy: {}
+    });
+}
+
+// FIX: Post button
+cmodalSend.onclick = async ()=>{
+  if (!ACTIVE_POST_ID) return;
+  const t = (cmodalInput.value || "").trim();
+  if (!t) return;
+  await addCommentToPost(ACTIVE_POST_ID, t);
+  cmodalInput.value = "";
+};
+
+cmodalInput.onkeydown = async (e)=>{
+  if (e.key === "Enter"){
+    e.preventDefault();
+    cmodalSend.click();
+  }
+};
+
+// open modal on comment btn click
+document.addEventListener("click", (e)=>{
+  const cb = e.target.closest(".comment-btn");
+  if (!cb) return;
+  openCommentsModal(cb.dataset.post);
+});
+
+// actions inside modal
+document.addEventListener("click", async (e)=>{
+  if (!commentsModal.classList.contains("open")) return;
+
+  const btn = e.target.closest("[data-act]");
+  if (!btn) return;
+
+  const act = btn.dataset.act;
+  const row = e.target.closest(".crow");
+  const cid = row?.dataset?.cid;
+  if (!ACTIVE_POST_ID || !cid) return;
+
+  const cRef = db.collection("posts").doc(ACTIVE_POST_ID).collection("comments").doc(cid);
+
+  // LIKE comment (anyone can like)
+  if (act === "like"){
+    if (!ensureLoggedInForComment()) return;
+    const uid = auth.currentUser.uid;
+
+    await db.runTransaction(async (tx)=>{
+      const snap = await tx.get(cRef);
+      const d = snap.data() || {};
+      const likedBy = d.likedBy || {};
+      let likeCount = d.likeCount || 0;
+
+      if (likedBy[uid]) {
+        delete likedBy[uid];
+        likeCount = Math.max(0, likeCount - 1);
+      } else {
+        likedBy[uid] = true;
+        likeCount = likeCount + 1;
+      }
+
+      tx.update(cRef, { likedBy, likeCount });
+    });
+
+    return;
+  }
+
+  // REPLY toggle
+  if (act === "reply"){
+    if (!ensureLoggedInForComment()) return;
+    row.querySelector(".replybox")?.classList.toggle("open");
+    row.querySelector(".replybox input")?.focus();
+    return;
+  }
+
+  // SEND reply (anyone can reply)
+  if (act === "replysend"){
+    if (!ensureLoggedInForComment()) return;
+
+    const input = row.querySelector(".replybox input");
+    const text = (input?.value || "").trim();
+    if (!text) return;
+
+    const me = await getMyUserMeta();
+
+    await cRef.collection("replies").add({
+      userId: me.uid,
+      userName: me.userName,
+      userPhoto: me.userPhoto,
+      text,
+      createdAt: Date.now()
+    });
+
+    input.value = "";
+    row.querySelector(".replybox")?.classList.remove("open");
+    return;
+  }
+
+  // EDIT comment (only owner UI দেখায়, কিন্তু আবারও check)
+  if (act === "edit"){
+    if (!ensureLoggedInForComment()) return;
+    const snap = await cRef.get();
+    const d = snap.data() || {};
+    if (d.userId !== auth.currentUser.uid) return;
+
+    const editBox = row.querySelector(".editbox");
+    const editInput = row.querySelector(".edit-input");
+    if (!editBox || !editInput) return;
+
+    editInput.value = d.text || "";
+    editBox.style.display = "flex";
+    editInput.focus();
+    return;
+  }
+
+  if (act === "editsave"){
+    if (!ensureLoggedInForComment()) return;
+    const snap = await cRef.get();
+    const d = snap.data() || {};
+    if (d.userId !== auth.currentUser.uid) return;
+
+    const editInput = row.querySelector(".edit-input");
+    const newText = (editInput?.value || "").trim();
+    if (!newText) return;
+
+    await cRef.update({ text: newText });
+    row.querySelector(".editbox").style.display = "none";
+    return;
+  }
+
+  if (act === "editcancel"){
+    row.querySelector(".editbox").style.display = "none";
+    return;
+  }
+
+  // DELETE comment (only owner)
+ if (act === "del"){
+  if (!ensureLoggedInForComment()) return;
+
+  const snap = await cRef.get();
+  const d = snap.data() || {};
+  if (d.userId !== auth.currentUser.uid) return;
+
+  const yes = await confirmBox("Do you want to delete your comment?");
+  if (!yes) return;
+
+  await cRef.delete();
+  return;
+}
+
+  // DELETE reply (only owner)
+  if (act === "rdel"){
+    if (!ensureLoggedInForComment()) return;
+
+    const rrow = e.target.closest(".rrow");
+    const rid = rrow?.dataset?.rid;
+    if (!rid) return;
+
+    const rRef = cRef.collection("replies").doc(rid);
+    const snap = await rRef.get();
+    const d = snap.data() || {};
+    if (d.userId !== auth.currentUser.uid) return;
+
+    await rRef.delete();
+    return;
+  }
+});
+
+
+//coment delet section//
+function renderCommentRow(c, canDelete) {
+  const name = c.userName || "User";
+  const pic = c.userPhoto || "https://i.imgur.com/6VBx3io.png";
+  const text = (c.text || "").replace(/[<>]/g, "");
+
+  return `
+    <div class="comment-row" data-cid="${c.id}">
+      <img class="comment-pic" src="${pic}" onerror="this.onerror=null; this.src='https://i.imgur.com/6VBx3io.png';" />
+      <div class="comment-body">
+        <div class="comment-name">${name}</div>
+        <div class="comment-text">${text}</div>
+
+        <div class="comment-actions">
+          <span class="comment-like">Like</span>
+          <span class="comment-reply">Reply</span>
+          ${canDelete ? `<span class="comment-del">Delete</span>` : ``}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+// change send button color based on input
+cmodalInput.addEventListener("input", () => {
+  const hasText = cmodalInput.value.trim().length > 0;
+
+  if (hasText) {
+    cmodalSend.style.color = "#ff2d2d";  // red
+  } else {
+    cmodalSend.style.color = "#cfd2d6";  // light grey
+  }
+});
