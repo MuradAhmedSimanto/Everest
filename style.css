@@ -1573,3 +1573,123 @@ body.profile-mode #bioText{
   margin-left:-70px !important;
 }
 
+/*show reaction*/
+.reactors-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.reactors-modal.open{ display:flex; }
+
+.reactors-box{
+  width:min(520px, 94vw);
+  max-height:min(620px, 86vh);
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 10px 40px rgba(0,0,0,.2);
+}
+
+.reactors-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 14px;
+  border-bottom:1px solid #eee;
+}
+.reactors-title{ font-weight:600; }
+.reactors-close{
+  border:none;
+  background:transparent;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.react-tabs{
+  display:flex;
+  gap:18px;
+  padding:10px 14px 0 14px;
+  border-bottom:1px solid #eee;
+  overflow:auto;
+}
+.react-tab{
+  position:relative;
+  padding:8px 2px 12px 2px;
+  font-size:15px;
+  color:#65676b;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.react-tab.active{
+  color:#1877f2;
+  font-weight:600;
+}
+.react-tab.active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:3px;
+  background:#1877f2;
+  border-radius:3px;
+}
+
+.react-tab .ticon{
+  font-size:16px;
+  margin-right:6px;
+  vertical-align:-2px;
+}
+
+.reactors-list{
+  padding:6px 0;
+  overflow:auto;
+  max-height:calc(min(620px, 86vh) - 104px);
+}
+
+.reactor-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px;
+}
+.reactor-row:hover{ background:#f7f7f7; }
+
+.reactor-pic-wrap{
+  position:relative;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+}
+.reactor-pic{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#eee;
+}
+
+.reactor-badge{
+  position:absolute;
+  right:-2px;
+  bottom:-2px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+
+.reactor-name{
+  font-size:16px;
+  color:#111;
+  font-weight:600;
+}
