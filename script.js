@@ -935,7 +935,7 @@ async function endHold(e) {
     const rRef = db.collection("posts").doc(postId).collection("reactions").doc(uid);
     const snap = await rRef.get();
 
-    if (snap.exists && snap.data()?.emoji === "❤️") {
+    if (snap.exists && snap.data()?.emoji === "👍") {
       await rRef.delete(); // remove reaction
     } else {
      //show reaction 
@@ -953,8 +953,8 @@ if (!userName || !userPhoto) {
 }
 
 await rRef.set({
-  type: "love",
-  emoji: "❤️",
+  type: "like",
+  emoji: "👍",
   userId: uid,
   userName: userName || "User",
   userPhoto: userPhoto || "",
