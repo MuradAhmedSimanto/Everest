@@ -2195,7 +2195,6 @@ body.profile-mode #bioText{
 }
 
 /* sinup model full display*/
-/* ✅ SIGNUP (AUTH) MODAL — MOBILE FULL SCREEN (CSS ONLY) */
 @media (max-width: 560px){
 
   /* overlay full screen + stretch layout */
@@ -2228,3 +2227,28 @@ body.profile-mode #bioText{
     -webkit-overflow-scrolling: touch;
   }
 }
+/*dropdown full scren*/
+/* ✅ MOBILE: dropdown-menu full screen (CSS only) */
+@media (max-width: 560px){
+  .dropdown-menu{
+    position: fixed !important;
+    inset: 0 !important;         /* top/right/bottom/left = 0 */
+    width: 100vw !important;
+    height: 100dvh !important;
+
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    padding-top: calc(12px + env(safe-area-inset-top));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dropdown-menu a{
+    padding: 16px 18px;
+    font-size: 16px;
+  }
+}
+
