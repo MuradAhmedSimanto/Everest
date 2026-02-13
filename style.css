@@ -1202,13 +1202,40 @@ transition: none;          /* animation remove */
   }
 }
 
+/* 🔙 Premium Minimal Back Arrow */
+#loginModal .auth-box{
+  position: relative;
+}
+
+#loginModal .login-back{
+  position: absolute;
+  top: 18px;
+  left: 18px;
+
+  border: none;
+  background: transparent;
+
+  font-size: 22px;
+  color: #111;
+  cursor: pointer;
+
+  padding: 0;
+  line-height: 1;
+
+  transition: 0.2s ease;
+}
+
+#loginModal .login-back:hover{
+  transform: translateX(-3px);
+  color: #ff1f1f;
+}
+
+#loginModal .login-back:active{
+  transform: scale(0.9);
+}
 
 
 /*profile tab menu hide*/
-:root{
-  --navbar-h: 56px;
-  --menubar-h: 56px;
-}
 
 /* ===== Default (Home etc.) ===== */
 body{
@@ -2078,4 +2105,30 @@ body.profile-mode #bioText{
   to { transform: rotate(360deg); }
 }
 
+/*no break cover*/
+/* ========== NO-FLASH COVER LOCK (ALWAYS ON PROFILE PAGE) ========== */
 
+/* cover container fixed height */
+#profilePage .cover-wrapper{
+  position: relative !important;
+  width: 100% !important;
+  height: 230px !important;          /* 🔒 fixed */
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* image fills the container, never grows */
+#profilePage #coverPic{
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;           /* 🔒 always match wrapper */
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* mobile */
+@media (max-width:768px){
+  #profilePage .cover-wrapper{ height: 180px !important; }
+}
