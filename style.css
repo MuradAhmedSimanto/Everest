@@ -234,7 +234,10 @@ body.nav-hidden .menu-bar{
 }
 
 /* ================= AUTH MODAL (GORGEOUS PREMIUM) ================= */
-.auth-modal {
+
+/* ================= AUTH MODAL (PREMIUM + MOBILE FULL SCREEN) ================= */
+
+.auth-modal{
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
@@ -246,7 +249,7 @@ body.nav-hidden .menu-bar{
 }
 
 /* MAIN BOX */
-.auth-box {
+.auth-box{
   background: linear-gradient(180deg, #ffffff, #fff7f7);
   width: 92%;
   max-width: 420px;
@@ -259,19 +262,13 @@ body.nav-hidden .menu-bar{
 }
 
 /* POP ANIMATION */
-@keyframes authPop {
-  from {
-    transform: translateY(30px) scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+@keyframes authPop{
+  from{ transform: translateY(30px) scale(0.95); opacity: 0; }
+  to  { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 /* TITLE */
-.auth-box h3 {
+.auth-box h3{
   margin: 0 0 22px;
   font-size: 24px;
   font-weight: 800;
@@ -281,7 +278,7 @@ body.nav-hidden .menu-bar{
 
 /* INPUTS & SELECT */
 .auth-box input,
-.auth-box select {
+.auth-box select{
   width: 100%;
   padding: 13px 15px;
   margin-bottom: 14px;
@@ -295,15 +292,15 @@ body.nav-hidden .menu-bar{
 
 /* FOCUS EFFECT */
 .auth-box input:focus,
-.auth-box select:focus {
+.auth-box select:focus{
   border-color: #ff1f1f;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(255,31,31,0.18);
 }
 
-/* BUTTONS (CONTINUE + SIGNUP) */
+/* BUTTONS */
 #continueBtn,
-#authSubmit {
+#authSubmit{
   width: 100%;
   margin-top: 6px;
   padding: 13px;
@@ -318,21 +315,19 @@ body.nav-hidden .menu-bar{
   box-shadow: 0 10px 22px rgba(255,31,31,0.4);
 }
 
-/* BUTTON HOVER */
 #continueBtn:hover,
-#authSubmit:hover {
+#authSubmit:hover{
   transform: translateY(-1px);
   box-shadow: 0 14px 30px rgba(255,31,31,0.55);
 }
 
-/* BUTTON ACTIVE */
 #continueBtn:active,
-#authSubmit:active {
+#authSubmit:active{
   transform: scale(0.98);
 }
 
 /* ERROR MESSAGE */
-#authMsg {
+#authMsg{
   margin-top: 12px;
   font-size: 13px;
   color: #ff2a2a;
@@ -340,11 +335,41 @@ body.nav-hidden .menu-bar{
   font-weight: 600;
 }
 
-/* MOBILE TWEAK */
-@media (max-width: 480px) {
-  .auth-box {
-    padding: 24px 20px;
-    border-radius: 18px;
+/* ================= ✅ MOBILE FULL SCREEN ================= */
+@media (max-width: 560px){
+  .auth-modal{
+    background: #fff;            /* overlay off */
+    align-items: stretch;
+    justify-content: stretch;
+    backdrop-filter: none;
+  }
+
+  .auth-box{
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;              /* mobile friendly full height */
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+
+    padding: 18px 16px;
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .auth-box h3{
+    margin-top: 6px;
+  }
+}
+
+/* optional small phones */
+@media (max-width: 480px){
+  .auth-box{
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
@@ -792,8 +817,6 @@ transition: none;          /* animation remove */
   font-weight: 600;
 }
 /* caption section*/
-/* ===== PREMIUM CREATE POST MODAL (MOBILE FIRST) ===== */
-
 #mediaCaptionModal {
   position: fixed;
   inset: 0;
@@ -1100,7 +1123,7 @@ transition: none;          /* animation remove */
 }
 
 .follow-info{
-  margin-top:0;        /* 🔥 extra gap remove */
+  margin-top:0;       
 }
  
 
