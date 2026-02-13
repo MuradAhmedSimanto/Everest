@@ -2194,46 +2194,37 @@ body.profile-mode #bioText{
   #profilePage .cover-wrapper{ height: 180px !important; }
 }
 
-/* ================= SIGNUP MODAL (#authModal) — FORCE FULL SCREEN MOBILE ================= */
-
-/* only signup overlay */
-#authModal.auth-modal{
-  z-index: 99999;
-}
-
-/* ✅ MOBILE FULL SCREEN */
+/* sinup model full display*/
+/* ✅ SIGNUP (AUTH) MODAL — MOBILE FULL SCREEN (CSS ONLY) */
 @media (max-width: 560px){
-  /* overlay becomes full screen page */
+
+  /* overlay full screen + stretch layout */
   #authModal.auth-modal{
-    background: #fff !important;
-    backdrop-filter: none !important;
-
-    align-items: stretch !important;
-    justify-content: stretch !important;
+    display: none;              /* default hidden (JS will set flex) */
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    background: #fff;           /* full screen হলে dark overlay না */
+    align-items: stretch;       /* ✅ center বাদ */
+    justify-content: stretch;   /* ✅ center বাদ */
+    z-index: 99999;
   }
 
-  /* box becomes full height */
+  /* the white box becomes full screen */
   #authModal .auth-box{
-    width: 100vw !important;
-    max-width: none !important;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    min-height: 100dvh;
 
-    height: 100vh !important;
-    height: 100dvh !important;
+    border-radius: 0;
+    box-shadow: none;
 
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
 
-    padding: 18px 16px !important;
-    padding-top: calc(18px + env(safe-area-inset-top)) !important;
-    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-
-    overflow: auto !important;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* step blocks full width */
-  #authModal #stepOne,
-  #authModal #stepTwo{
-    width: 100%;
   }
 }
