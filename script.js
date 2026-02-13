@@ -612,8 +612,161 @@ authSubmitBtn.onclick = () => {
 };
 
       
-   
+   //cahnge id name section//
+// ===== CHANGE NAME (FULL) =====
+const changeNameBtn   = document.getElementById("changeNameBtn");
+const changeNameModal = document.getElementById("changeNameModal");
+const saveNameBtn     = document.getElementById("saveNameBtn");
+const changeNameMsg   = document.getElementById("changeNameMsg");
 
+function openChangeNameModal() {
+  if (!auth.currentUser) {
+    promptSignup("Please signup/login to change name");
+    return;
+  }
+
+  // prefll current name
+  const current = (MEMORY_PROFILE_NAME || "").trim().split(" ");
+  const first = current.slice(0, 1).join(" ");
+  const last  = current.slice(1).join(" ");
+
+  document.getElementById("newFirstName").value = first || "";
+  document.getElementById("newLastName").value  = last || "";
+
+  if (changeNameMsg) changeNameMsg.textContent = "";
+  changeNameModal.style.display = "flex";
+}
+
+function closeChangeNameModal() {
+  if (!changeNameModal) return;
+  changeNameModal.style.display = "none";
+}
+
+if (changeNameBtn) {
+  changeNameBtn.onclick = (e) => {
+    e.preventDefault();
+    openChangeNameModal();
+  };
+}
+
+if (changeNameModal) {
+  changeNameModal.onclick = (e) => {
+    if (e.target === changeNameModal) closeChangeNameModal();
+  };
+}
+
+async function saveUserName(firstName, lastName) {
+  const uid = auth.currentUser.uid;
+
+  await db.collection("users").doc(uid).update({
+    firstName,
+    lastName,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  const fullName = (firstName + " " + lastName).trim();
+  MEMORY_PROFILE_NAME = fullName;
+
+  // Profile header update
+  const pn = document.getElementById("profileName");
+  if (pn) pn.textContent = fullName;
+
+  // Also update all rendered post names (fast)
+  updateRenderedNamesForUid(uid, fullName);
+}
+
+if (saveNameBtn) {
+  saveNameBtn.onclick = async () => {
+    if (!auth.currentUser) return;
+
+    const fn = (document.getElementById("newFirstName").value || "").trim();
+    const ln = (document.getElementById("newLastName").value || "").trim();
+
+    if (!fn || !ln) {
+      if (changeNameMsg) changeNameMsg.textContent = "First name এবং Last name দিন";
+      return;
+    }
+
+    if ((fn + " " + ln).length > 40) {
+      if (changeNameMsg) changeNameMsg.textContent = "Name অনেক বড় হয়ে গেছে (max ~40 chars)";
+      return;
+    }
+
+    saveNameBtn.disabled = true;
+    saveNameBtn.classList.add("loading");
+
+    try {
+      await saveUserName(fn, ln);
+      closeChangeNameModal();
+    } catch (err) {
+      console.error(err);
+      if (changeNameMsg) changeNameMsg.textContent = "Failed to update name";
+    } finally {
+      saveNameBtn.disabled = false;
+      saveNameBtn.classList.remove("loading");
+    }
+  };
+}
+
+
+
+// ===== PROFILE SUB DROPDOWN (SIDE) =====
+// ===== DROPDOWN PANEL SWITCH =====
+const menuProfileEl      = document.getElementById("menuProfile");
+const mainMenuPanel      = document.getElementById("mainMenuPanel");
+const changeMenuPanel    = document.getElementById("changeMenuPanel");
+const closeChangeMenuBtn = document.getElementById("closeChangeMenu");
+const changeNameBtnEl    = document.getElementById("changeNameBtn");
+
+function showMainMenu(){
+  if (mainMenuPanel) mainMenuPanel.style.display = "block";
+  if (changeMenuPanel) changeMenuPanel.style.display = "none";
+}
+
+function showChangeMenu(){
+  if (mainMenuPanel) mainMenuPanel.style.display = "none";
+  if (changeMenuPanel) changeMenuPanel.style.display = "block";
+}
+
+function closeAllDropdown(){
+  dropdownMenu.classList.remove("show");
+  showMainMenu(); // reset
+}
+
+// Profile -> open change panel
+if (menuProfileEl) {
+  menuProfileEl.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showChangeMenu();
+  });
+}
+
+// Change name -> open modal + close dropdown
+if (changeNameBtnEl) {
+  changeNameBtnEl.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openChangeNameModal();
+    closeAllDropdown();
+  });
+}
+
+// X -> close everything
+if (closeChangeMenuBtn) {
+  closeChangeMenuBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeAllDropdown();
+  });
+}
+
+// outside click -> close + reset
+window.addEventListener("click", (e) => {
+  if (!e.target.closest(".menu-wrapper")) {
+    closeAllDropdown();
+  }
+});
 
 
 
@@ -1082,7 +1235,7 @@ const reactionLabel = {
 };
 
 const reactionColor = {
-  like:  "#007BFF",
+  like:  "#e0245e",
   love:  "#e0245e",
   angry: "#800000",
   haha:  "#f7b125",
@@ -1437,23 +1590,40 @@ auth.onAuthStateChanged((user) => {
 
 
 
-async function hydratePostUserNames() {
-  const els = document.querySelectorAll(".uname[data-uid]");
+// ===== USER NAME CACHE (FAST) =====
+const USER_NAME_CACHE = new Map(); // uid -> fullName
 
-  for (const el of els) {
-    if (el.textContent.trim()) continue; // already has name
-
-    const uid = el.dataset.uid;
-    const snap = await db.collection("users").doc(uid).get();
-
-    if (snap.exists) {
-      const d = snap.data();
-      const full = [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
-      if (full) el.textContent = full;
-    }
-  }
+function updateRenderedNamesForUid(uid, fullName) {
+  document.querySelectorAll(`.uname[data-uid="${uid}"]`).forEach(el => {
+    el.textContent = fullName;
+  });
 }
 
+async function getUserFullName(uid) {
+  if (USER_NAME_CACHE.has(uid)) return USER_NAME_CACHE.get(uid);
+
+  const snap = await db.collection("users").doc(uid).get();
+  let full = "User";
+
+  if (snap.exists) {
+    const d = snap.data() || {};
+    full = [d.firstName, d.lastName].filter(Boolean).join(" ").trim() || "User";
+  }
+
+  USER_NAME_CACHE.set(uid, full);
+  return full;
+}
+
+async function hydratePostUserNames() {
+  const els = document.querySelectorAll(".uname[data-uid]");
+  const uids = Array.from(new Set(Array.from(els).map(el => el.dataset.uid)));
+
+  // fetch each uid once, then paint all elements
+  await Promise.all(uids.map(async (uid) => {
+    const full = await getUserFullName(uid);
+    updateRenderedNamesForUid(uid, full);
+  }));
+}
 
 
 
