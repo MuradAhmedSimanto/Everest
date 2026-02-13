@@ -1525,6 +1525,7 @@ body.profile-mode #bioText{
   justify-content:center;
   z-index:9999;
 }
+
 .reactors-modal.open{ display:flex; }
 
 .reactors-box{
@@ -1534,6 +1535,15 @@ body.profile-mode #bioText{
   border-radius:14px;
   overflow:hidden;
   box-shadow:0 10px 40px rgba(0,0,0,.2);
+
+  transform:scale(.98);
+  opacity:0;
+  transition:transform .18s ease, opacity .18s ease;
+}
+
+.reactors-modal.open .reactors-box{
+  transform:scale(1);
+  opacity:1;
 }
 
 .reactors-head{
@@ -1543,21 +1553,27 @@ body.profile-mode #bioText{
   padding:12px 14px;
   border-bottom:1px solid #eee;
 }
-.reactors-title{ font-weight:600; }
+
+.reactors-title{ font-weight:700; font-size:16px; }
+
 .reactors-close{
   border:none;
   background:transparent;
-  font-size:18px;
+  font-size:20px;
   cursor:pointer;
+  line-height:1;
 }
 
+/* tabs */
 .react-tabs{
   display:flex;
   gap:18px;
   padding:10px 14px 0 14px;
   border-bottom:1px solid #eee;
   overflow:auto;
+  -webkit-overflow-scrolling:touch;
 }
+
 .react-tab{
   position:relative;
   padding:8px 2px 12px 2px;
@@ -1565,11 +1581,14 @@ body.profile-mode #bioText{
   color:#65676b;
   cursor:pointer;
   white-space:nowrap;
+  user-select:none;
 }
+
 .react-tab.active{
   color:#ff1f1f;
-  font-weight:600;
+  font-weight:700;
 }
+
 .react-tab.active::after{
   content:"";
   position:absolute;
@@ -1587,10 +1606,12 @@ body.profile-mode #bioText{
   vertical-align:-2px;
 }
 
+/* list */
 .reactors-list{
   padding:6px 0;
   overflow:auto;
   max-height:calc(min(620px, 86vh) - 104px);
+  -webkit-overflow-scrolling:touch;
 }
 
 .reactor-row{
@@ -1599,6 +1620,7 @@ body.profile-mode #bioText{
   gap:12px;
   padding:10px 14px;
 }
+
 .reactor-row:hover{ background:#f7f7f7; }
 
 .reactor-pic-wrap{
@@ -1607,6 +1629,7 @@ body.profile-mode #bioText{
   height:42px;
   flex:0 0 42px;
 }
+
 .reactor-pic{
   width:42px;
   height:42px;
@@ -1633,15 +1656,45 @@ body.profile-mode #bioText{
 .reactor-name{
   font-size:16px;
   color:#111;
-  font-weight:600;
+  font-weight:700;
+}
+
+/* ✅ MOBILE FULL SCREEN */
+@media (max-width: 560px){
+  .reactors-modal{
+    background:#fff;          /* full screen হলে overlay লাগবে না */
+    align-items:stretch;
+    justify-content:stretch;
+  }
+
+  .reactors-box{
+    width:100vw;
+    height:100vh;
+    max-height:none;
+    border-radius:0;
+    box-shadow:none;
+    transform:none;
+    opacity:1;
+    transition:none;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .reactors-head{
+    padding-top:calc(12px + env(safe-area-inset-top));
+  }
+
+  .reactors-list{
+    max-height:none;
+    flex:1;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom));
+  }
 }
 
 
 
 
 /* comments model */
-/* ================= COMMENTS MODAL ================= */
-
 .cmodal{
   position:fixed;
   inset:0;
@@ -1651,8 +1704,10 @@ body.profile-mode #bioText{
   justify-content:center;
   z-index:99999;
 }
+
 .cmodal.open{ display:flex; }
 
+/* default: bottom sheet */
 .cmodal-sheet{
   width:min(520px, 100%);
   height:min(80vh, 680px);
@@ -1662,6 +1717,15 @@ body.profile-mode #bioText{
   overflow:hidden;
   display:flex;
   flex-direction:column;
+
+  transform:translateY(16px);
+  opacity:0;
+  transition:transform .18s ease, opacity .18s ease;
+}
+
+.cmodal.open .cmodal-sheet{
+  transform:translateY(0);
+  opacity:1;
 }
 
 /* header */
@@ -1672,15 +1736,16 @@ body.profile-mode #bioText{
   align-items:center;
   justify-content:space-between;
 }
-.cmodal-title{ 
-  font-weight:700; 
+.cmodal-title{
+  font-weight:700;
   font-size:18px;
 }
 .cmodal-close{
   border:none;
   background:transparent;
-  font-size:20px;
+  font-size:22px;
   cursor:pointer;
+  line-height:1;
 }
 
 /* list */
@@ -1705,21 +1770,21 @@ body.profile-mode #bioText{
 }
 .cbody{ flex:1; }
 
-/* ✅ bubble background removed */
+/* bubble */
 .cbubble{
-  background:transparent;   /* আগে #f0f2f5 ছিল */
+  background:transparent;
   border-radius:0;
   padding:0;
 }
 
-.cname{ 
-  font-weight:700; 
-  font-size:14px; 
+.cname{
+  font-weight:700;
+  font-size:14px;
 }
-.ctext{ 
-  font-size:14px; 
-  margin-top:2px; 
-  white-space:pre-wrap; 
+.ctext{
+  font-size:14px;
+  margin-top:2px;
+  white-space:pre-wrap;
 }
 
 /* actions */
@@ -1763,6 +1828,9 @@ body.profile-mode #bioText{
   padding:10px 12px;
   display:flex;
   gap:8px;
+
+  /* notch safe area bottom */
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
 
 /* comment input */
@@ -1779,13 +1847,38 @@ body.profile-mode #bioText{
   background:transparent;
   border:none;
   padding:0 6px;
-  font-size:26px;          /* বড় arrow */
-  color:#cfd2d6;           /* default light grey */
+  font-size:26px;
+  color:#cfd2d6;
   cursor:pointer;
   transition:0.2s ease;
   display:flex;
   align-items:center;
   justify-content:center;
+}
+
+/* ✅ MOBILE FULL SCREEN */
+@media (max-width: 560px){
+  .cmodal{
+    background:#fff;              /* full screen হলে overlay না */
+    align-items:stretch;
+  }
+
+  .cmodal-sheet{
+    width:100vw;
+    height:100vh;
+    border-radius:0;
+    transform:none;
+    opacity:1;
+    transition:none;
+  }
+
+  .cmodal-head{
+    padding-top:calc(12px + env(safe-area-inset-top));
+  }
+
+  .cmodal-list{
+    padding:10px 12px;
+  }
 }
 
 /*coment delet model*/
@@ -1866,3 +1959,108 @@ body.profile-mode #bioText{
   color:#777;
   font-size:15px;
 }
+
+
+/*change name*/
+/* ===== Change Name Modal Base ===== */
+#changeNameModal{
+  position: fixed;
+  inset: 0;
+  display: none;               /* JS দিয়ে flex হবে */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+}
+
+#changeNameModal .auth-box{
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+/* ===== Mobile: Full Screen ===== */
+@media (max-width: 560px){
+  #changeNameModal{
+    background: #fff;          /* full screen হলে overlay লাগবে না */
+  }
+
+  #changeNameModal .auth-box{
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 18px 16px;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+  }
+
+  /* bottom safe space */
+  #changeNameModal .auth-box{
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ===== Inputs nicer ===== */
+#changeNameModal input{
+  width: 100%;
+  padding: 14px 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  outline: none;
+  font-size: 16px;
+}
+
+#changeNameModal input:focus{
+  border-color: #ff1f1f;
+}
+
+/* ===== Premium Red Button ===== */
+.btn-danger{
+  width: 160px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 700;
+  background: #ff1f1f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 12px 26px rgba(255,31,31,.28);
+}
+
+.btn-danger:hover{
+  filter: brightness(0.95);
+}
+
+.btn-danger:disabled{
+  opacity: .85;
+  cursor: not-allowed;
+}
+
+/* ===== Spinner ===== */
+.btn-spinner{
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.45);
+  border-top-color: #fff;
+  display: none;
+  animation: spin .8s linear infinite;
+}
+
+.btn-danger.loading .btn-spinner{ display: inline-block; }
+.btn-danger.loading .btn-text{ opacity: .95; }
+
+@keyframes spin{
+  to { transform: rotate(360deg); }
+}
+
+
