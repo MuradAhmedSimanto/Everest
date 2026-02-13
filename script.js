@@ -1728,6 +1728,21 @@ function setLoginLoading(isLoading) {
   loginBtn.textContent = isLoading ? "Logging in..." : "Login";
 }
 
+//LOGIN BACK ARROW 
+// ✅ LOGIN BACK ARROW (works always)
+const loginBackBtn = document.getElementById("loginBackBtn");
+
+if (loginBackBtn) {
+  loginBackBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // closest modal খুঁজে বন্ধ করবে (safe)
+    const modal = loginBackBtn.closest("#loginModal") || document.getElementById("loginModal");
+    if (modal) modal.style.display = "none";
+  });
+}
+
 if (loginMenuBtn) {
   loginMenuBtn.onclick = (e) => {
     e.preventDefault();
@@ -1764,6 +1779,9 @@ if (loginBtn) {
       return;
     }
 
+
+
+
     const email = toAuthEmail(rawContact);
 
     setLoginLoading(true);
@@ -1773,17 +1791,24 @@ if (loginBtn) {
 
       if (loginSuccess) loginSuccess.style.display = "block";
 
-      setTimeout(() => {
-        if (loginSuccess) loginSuccess.style.display = "none";
-        if (loginModal) loginModal.style.display = "none";
+setTimeout(() => {
+  if (loginSuccess) loginSuccess.style.display = "none";
+  if (loginModal) loginModal.style.display = "none";
 
-        // profile page show
-        homePage.style.display = "none";
-        profilePage.style.display = "block";
-        notificationPage.style.display = "none";
-        messagePage.style.display = "none";
-        setActive(profileIcon);
-      }, 700);
+  // 🔥 IMPORTANT FIX
+  document.body.classList.remove("nav-hidden");
+  document.querySelector(".navbar")?.classList.remove("fb-hide");
+  window.scrollTo(0, 0);
+
+  // profile page show
+  homePage.style.display = "none";
+  profilePage.style.display = "block";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  setActive(profileIcon);
+
+}, 700);
+
 
     } catch (err) {
       // Firebase মাঝে মাঝে INVALID_LOGIN_CREDENTIALS দেয়
@@ -1803,11 +1828,6 @@ if (loginBtn) {
     }
   };
 }
-
-
-
-
-
 
 //scrol 
 // ===== Scroll DOWN: hide navbar + lift menu-bar | Scroll UP: show navbar =====
