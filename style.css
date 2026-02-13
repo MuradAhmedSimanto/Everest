@@ -2194,7 +2194,7 @@ body.profile-mode #bioText{
   #profilePage .cover-wrapper{ height: 180px !important; }
 }
 
-/* sinup model full display*/
+/* sinup model full scrin*/
 @media (max-width: 560px){
 
   /* overlay full screen + stretch layout */
@@ -2227,28 +2227,139 @@ body.profile-mode #bioText{
     -webkit-overflow-scrolling: touch;
   }
 }
-/*dropdown full scren*/
-/* ✅ MOBILE: dropdown-menu full screen (CSS only) */
-@media (max-width: 560px){
-  .dropdown-menu{
-    position: fixed !important;
-    inset: 0 !important;         /* top/right/bottom/left = 0 */
-    width: 100vw !important;
-    height: 100dvh !important;
 
-    border-radius: 0 !important;
-    box-shadow: none !important;
-
-    padding-top: calc(12px + env(safe-area-inset-top));
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-
-    overflow: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .dropdown-menu a{
-    padding: 16px 18px;
-    font-size: 16px;
-  }
+/* ===== LEFT DRAWER ===== */
+/* ===== LEFT DRAWER ===== */
+.drawer-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 9998;
 }
 
+.left-drawer{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  width: min(82vw, 320px);
+  background: #fff;
+  transform: translateX(-100%);
+  transition: transform .22s ease;
+  z-index: 9999;
+  box-shadow: 2px 0 18px rgba(0,0,0,.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.left-drawer.open{
+  transform: translateX(0);
+}
+
+.drawer-overlay.open{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.drawer-open{
+  overflow: hidden;
+}
+
+.drawer-head{
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.drawer-user{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.drawer-avatar{
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ✅ NAME + BADGE PERFECT INLINE */
+.drawer-name-row{
+  display: flex;
+  align-items: center;   /* main fix */
+  gap: 6px;
+}
+
+.drawer-name{
+  font-weight: 700;
+  line-height: 1;        /* baseline issue remove */
+  display: flex;
+  align-items: center;
+}
+
+/* make badge align with text */
+.drawer-name-row .verified-badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  position: relative;
+  top: 0;
+}
+
+.drawer-name-row .verified-icon{
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.drawer-meta{
+  font-size: 12px;
+  color: #666;
+  margin-top: 3px;
+}
+
+.drawer-close{
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* links */
+.drawer-links{
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-links a{
+  padding: 12px 14px;
+  text-decoration: none;
+  color: #111;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawer-links a:hover{
+  background: #f6f6f6;
+}
+
+/* logo */
+.drawer-links .logo-item{
+  display:flex;
+  justify-content:center;
+  padding: 14px 0;
+}
+
+.drawer-links .logo-item img{
+  height: 34px;
+}
