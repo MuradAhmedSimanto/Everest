@@ -36,37 +36,64 @@
   <i class="fa-solid fa-user menu-icon" id="profileIcon"></i>
   <i class="fa-solid fa-video menu-icon"></i>
   <i class="fa-solid fa-user-group" id="friendIcon"></i>
-
-  <div class="menu-wrapper">
-    <i class="fa-solid fa-bars" id="menuBtn"></i>
-
-    <div class="dropdown-menu" id="dropdownMenu">
-      <a href="#" id="menuProfile">
-  <i class="fa-solid fa-user"></i> Profile
-</a>
-
-<a href="#" id="changeNameBtn" class="menu-subitem">
-    <i class="fa-solid fa-pen"></i> Change name
-  </a>
-      <a href="#" id="signupBtn">
- <i class="fa-solid fa-user-plus"></i> Signup</a>
-
-      <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
-      
-      <a href="#" id="loginMenuBtn">
-  <i class="fa-solid fa-right-to-bracket"></i> Login
-</a>
-
-
-
-       <a class="logo-item">
-    <img src="ChatGPT Image Jan 19, 2026, 07_18_08 PM.png" alt="MAS">
-  </a>
-
-    </div>
- 
-  </div>
+  <i class="fa-solid fa-bars menu-icon" id="menuBtn"></i>
 </div>
+  <!-- Drawer Overlay -->
+<div id="drawerOverlay" class="drawer-overlay"></div>
+
+<!-- Left Drawer -->
+<aside id="leftDrawer" class="left-drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div class="drawer-user">
+      <img class="drawer-avatar" id="drawerAvatar" src="https://i.imgur.com/6VBx3io.png" alt="">
+      <div class="drawer-user-meta">
+        <div class="drawer-name-row">
+          <div class="drawer-name" id="drawerName">Your Name</div>
+
+          <span id="drawerVerifiedBadge"
+                class="verified-badge"
+                data-verified-uid=""
+                title="Verified"
+                style="display:none;">
+            <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
+                fill="#ff1f1f" />
+              <path
+                d="M9.3 12.6l1.9 1.9 4.2-4.3"
+                fill="none"
+                stroke="#ffffff"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </span>
+        </div>
+
+        <div class="drawer-meta">
+          <span><strong id="drawerFollowing">0</strong> Following</span>
+          <span> • </span>
+          <span><strong id="drawerFollowers">0</strong> Followers</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="drawerCloseBtn" class="drawer-close" aria-label="Close">✕</button>
+  </div>
+
+  <nav class="drawer-links">
+    <a href="#" id="menuProfile"><i class="fa-solid fa-user"></i> Profile</a>
+    <a href="#" id="changeNameBtn"><i class="fa-solid fa-pen"></i> Change name</a>
+    <a href="#" id="signupBtn"><i class="fa-solid fa-user-plus"></i> Signup</a>
+    <a href="#" id="settingsBtn"><i class="fa-solid fa-gear"></i> Settings</a>
+    <a href="#" id="loginMenuBtn"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+
+    <a class="logo-item">
+      <img src="ChatGPT Image Jan 19, 2026, 07_18_08 PM.png" alt="MAS">
+    </a>
+  </nav>
+</aside>
+
 
 
 <!-- NOTIFICATION PAGE -->
