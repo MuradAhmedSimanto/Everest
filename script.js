@@ -1728,20 +1728,23 @@ function setLoginLoading(isLoading) {
   loginBtn.textContent = isLoading ? "Logging in..." : "Login";
 }
 
-//LOGIN BACK ARROW 
-// ✅ LOGIN BACK ARROW (works always)
-const loginBackBtn = document.getElementById("loginBackBtn");
 
-if (loginBackBtn) {
-  loginBackBtn.addEventListener("click", (e) => {
+// MODAL BACK (works for any modal)
+function bindBack(btnId, modalId){
+  const btn = document.getElementById(btnId);
+  const modal = document.getElementById(modalId);
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // closest modal খুঁজে বন্ধ করবে (safe)
-    const modal = loginBackBtn.closest("#loginModal") || document.getElementById("loginModal");
-    if (modal) modal.style.display = "none";
-  });
+    modal.style.display = "none";
+  }, true); // ✅ capture phase, তাই stopPropagation থাকলেও কাজ করবে
 }
+
+bindBack("loginBackBtn", "loginModal");
+bindBack("changeNameBackBtn", "changeNameModal");
+
 
 if (loginMenuBtn) {
   loginMenuBtn.onclick = (e) => {
