@@ -123,8 +123,6 @@
       class="message-search"
       placeholder="Search messages..."
     />
-    
-
   </div>
   <div class="message-list">
     <div class="message-item">
@@ -133,6 +131,43 @@
     </div>
   </div>
 </div>
+
+
+<!-- language/dark mode -->
+<!-- SETTINGS PAGE -->
+<div id="settingsPage" class="settings-page" style="display:none;">
+  <div class="settings-header">
+    <i class="fa-solid fa-arrow-left settings-back" id="settingsBackBtn"></i>
+    <h2>Settings</h2>
+  </div>
+
+  <div class="settings-list">
+    <div class="settings-item" id="languageItem">
+      <div class="si-left">
+        <i class="fa-solid fa-language"></i>
+        <span>Language</span>
+      </div>
+      <span class="si-right" id="currentLanguage">English</span>
+    </div>
+
+    <div class="settings-item">
+      <div class="si-left">
+        <i class="fa-solid fa-moon"></i>
+        <span>Dark mode</span>
+      </div>
+
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 
 <!-- HOME PAGE -->
 <div id="homePage">
