@@ -45,6 +45,9 @@
   <i class="fa-solid fa-user"></i> Profile
 </a>
 
+<a href="#" id="changeNameBtn" class="menu-subitem">
+    <i class="fa-solid fa-pen"></i> Change name
+  </a>
       <a href="#" id="signupBtn">
  <i class="fa-solid fa-user-plus"></i> Signup</a>
 
@@ -369,6 +372,23 @@
     </div>
   </div>
 </div>
+
+<!-- change name model model -->
+<div class="auth-modal" id="changeNameModal" style="display:none;">
+  <div class="auth-box">
+    <h5>Change name</h5>
+
+    <input type="text" id="newFirstName" placeholder="First name">
+    <input type="text" id="newLastName" placeholder="Last name">
+
+    <button id="saveNameBtn" class="btn-danger" type="button">
+  <span class="btn-text">Save</span>
+  <span class="btn-spinner" aria-hidden="true"></span>
+</button>
+<p id="changeNameMsg"></p>
+  </div>
+</div>
+
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
