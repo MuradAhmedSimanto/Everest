@@ -32,15 +32,66 @@ let posts = [];
 
 
 
-/* ================= MENU ================= */
+/* ================= LEFT DRAWER MENU ================= */
 const menuBtn = document.getElementById("menuBtn");
-const dropdownMenu = document.getElementById("dropdownMenu");
+const leftDrawer = document.getElementById("leftDrawer");
+const drawerOverlay = document.getElementById("drawerOverlay");
+const drawerCloseBtn = document.getElementById("drawerCloseBtn");
 
-menuBtn.onclick = () => dropdownMenu.classList.toggle("show");
+function openDrawer(){
+  if (!leftDrawer || !drawerOverlay) return;
 
-window.addEventListener("click", e => {
-  if (!e.target.closest(".menu-wrapper")) dropdownMenu.classList.remove("show");
+  // header sync (name, pic, badge uid)
+  const dn = document.getElementById("drawerName");
+  if (dn) dn.textContent = (MEMORY_PROFILE_NAME || "Your Name");
+
+  const av = document.getElementById("drawerAvatar");
+  const pp = document.getElementById("profilePicBig")?.src || document.getElementById("profilePic")?.src;
+  if (av && pp) av.src = pp;
+
+  const dvb = document.getElementById("drawerVerifiedBadge");
+  if (dvb) dvb.dataset.verifiedUid = auth.currentUser?.uid || "";
+
+  // open
+  leftDrawer.classList.add("open");
+  drawerOverlay.classList.add("open");
+  document.body.classList.add("drawer-open");
+  leftDrawer.setAttribute("aria-hidden", "false");
+
+  // refresh verified badge display using your existing hydrator
+  VERIFIED_CACHE?.clear?.();
+  hydrateVerifiedBadges?.();
+}
+
+function closeDrawer(){
+  if (!leftDrawer || !drawerOverlay) return;
+  leftDrawer.classList.remove("open");
+  drawerOverlay.classList.remove("open");
+  document.body.classList.remove("drawer-open");
+  leftDrawer.setAttribute("aria-hidden", "true");
+}
+
+menuBtn?.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  openDrawer();
 });
+
+drawerOverlay?.addEventListener("click", closeDrawer);
+drawerCloseBtn?.addEventListener("click", closeDrawer);
+
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape") closeDrawer();
+});
+
+// drawer এর ভিতরে যে কোন link চাপলে drawer বন্ধ
+leftDrawer?.addEventListener("click", (e)=>{
+  const a = e.target.closest("a");
+  if (!a) return;
+  if (a.classList.contains("logo-item")) return;
+  closeDrawer();
+});
+
 
 /* ================= ACTIVE ICON ================= */
 const icons = document.querySelectorAll(".menu-icon");
