@@ -1105,87 +1105,102 @@ transition: none;          /* animation remove */
  
 
 
+/* ================= LOGIN MODAL (REPLACE FULL) ================= */
 
-/* ================= LOGIN BUTTON (WITH SPINNER) ================= */
+/* overlay */
+#loginModal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: none;              /* JS দিয়ে flex হবে */
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+/* the white box */
+#loginModal .auth-box{
+  width: min(520px, 92vw);
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+}
+
+/* optional: title spacing (যদি title থাকে) */
+#loginModal .auth-title{
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+/* inputs */
+#loginModal input{
+  width: 100%;
+  padding: 12px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  outline: none;
+  background: #fafafa;
+  margin-top: 10px;
+}
+
+#loginModal input:focus{
+  border-color: #ff1f1f;
+  background: #fff;
+}
+
+/* login button */
 #loginModal #loginBtn{
   width: 100%;
-  margin-top: 10px;
-  padding: 14px;
-
-  background: linear-gradient(135deg, #ff1f1f, #ff6b6b);
-  color: #fff;
-
+  margin-top: 14px;
   border: none;
-  border-radius: 18px;
-
-  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ff1f1f;
+  color: #fff;
   font-weight: 800;
   cursor: pointer;
-
-  box-shadow: 0 12px 26px rgba(255,31,31,0.45);
-  transition: transform .2s ease, box-shadow .2s ease;
-
-  position: relative; /* 🔑 spinner এর জন্য */
-  overflow: hidden;
 }
 
-/* hover */
-#loginModal #loginBtn:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 18px 36px rgba(255,31,31,0.6);
-}
-
-/* disabled state */
-#loginModal #loginBtn:disabled{
-  cursor: not-allowed;
-  opacity: 0.9;
-}
-
-/* ================= SPINNER STATE ================= */
 #loginModal #loginBtn.loading{
-  color: transparent; /* লেখা hide */
+  opacity: .8;
+  cursor: not-allowed;
 }
 
-/* spinner */
-#loginModal #loginBtn.loading::after{
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-
-  width: 20px;
-  height: 20px;
-
-  margin: -10px 0 0 -10px;
-
-  border: 3px solid rgba(255,255,255,0.5);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-
-  animation: loginSpin 0.9s linear infinite;
-}
-
-@keyframes loginSpin{
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* ================= LOGIN MESSAGE ================= */
-#loginSuccess{
-  display: none;            /* 🔥 default hidden */
-  color: #28a745;
-  font-weight: 700;
-  margin-top: 12px;
-  text-align: center;
-}
-
-#loginMsg{
-  color: #ff2a2a;
-  font-weight: 600;
+/* msg */
+#loginModal #loginMsg{
   margin-top: 10px;
-  text-align: center;
+  color: #cc0000;
+  font-size: 14px;
 }
 
+/* ✅ MOBILE FULL SCREEN */
+@media (max-width: 560px){
+  #loginModal{
+    background: #fff;                 /* full screen হলে overlay দরকার নেই */
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  #loginModal .auth-box{
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* content scroll যদি বেশি হয় */
+  #loginModal .auth-box{
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 
 
