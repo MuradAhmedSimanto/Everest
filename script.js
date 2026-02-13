@@ -164,6 +164,68 @@ messageIcon.onclick = () => {
   window.scrollTo(0, 0);
 };
 
+
+
+
+
+
+
+
+/* ================= SETTINGS: CLEAN PAGE MODE ================= */
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsPage = document.getElementById("settingsPage");
+const settingsBackBtn = document.getElementById("settingsBackBtn");
+
+let PREV_PAGE = "home";
+
+function hideAllPages(){
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  if (settingsPage) settingsPage.style.display = "none";
+}
+
+function detectCurrentPage(){
+  if (profilePage.style.display === "block") return "profile";
+  if (notificationPage.style.display === "block") return "notification";
+  if (messagePage.style.display === "block") return "message";
+  return "home";
+}
+
+function showPrevPage(){
+  hideAllPages();
+  document.body.classList.remove("settings-open");
+
+  if (PREV_PAGE === "profile") profilePage.style.display = "block";
+  else if (PREV_PAGE === "notification") notificationPage.style.display = "block";
+  else if (PREV_PAGE === "message") messagePage.style.display = "block";
+  else homePage.style.display = "block";
+
+  window.scrollTo(0,0);
+}
+
+function openSettings(){
+  PREV_PAGE = detectCurrentPage();
+
+  hideAllPages();
+  document.body.classList.add("settings-open");
+  if (settingsPage) settingsPage.style.display = "block";
+
+  window.scrollTo(0,0);
+}
+
+settingsBtn?.addEventListener("click", (e)=>{
+  e.preventDefault();
+  openSettings();
+});
+
+settingsBackBtn?.addEventListener("click", (e)=>{
+  e.preventDefault();
+  showPrevPage();
+});
+
+
 /* ================= POST SYSTEM ================= */
 function createPost({
   postId,
