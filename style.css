@@ -2490,28 +2490,444 @@ body.settings-open .menu-bar{
 .switch input:checked + .slider{ background: #111111; }
 .switch input:checked + .slider:before{ transform: translateX(20px); }
 
-/* ============================= */
-/*            DARK MODE          */
-/* ============================= */
+/*dark mode*/
+/* =========================
+   THEME TOKENS
+   ========================= */
+:root{
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
 
-body.dark .settings-page{ background: #0f0f0f; }
+  --navbar: #ffffff;
+  --navbar-text: #111827;
 
-body.dark .settings-header{
-  background: #0f0f0f;
-  border: none;
-  box-shadow: none;
+  --always-light-bg: #ffffff;
+  --always-light-text: #111827;
+  --always-light-border: #e5e7eb;
+
+  --accent: #ff2d2d;
 }
-body.dark .settings-header h2{ color: #fff; }
 
-body.dark .settings-list{ background: #0f0f0f; }
+body.dark{
+  --bg: #0f172a;
+  --card: #111c33;
+  --text: #e5e7eb;
+  --muted: #a1a1aa;
+  --border: rgba(255,255,255,.08);
 
-body.dark .settings-item{
-  border-bottom: 1px solid #1f1f1f;
+  --navbar: #111c33;
+  --navbar-text: #ffffff;
 }
 
-body.dark .si-left{ color:#fff; }
-body.dark .si-right{ color:#aaaaaa; }
+/* =========================
+   BASE
+   ========================= */
+html, body{ height: 100%; }
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
 
-body.dark .slider{ background: #333; }
-body.dark .switch input:checked + .slider{ background: #ffffff; }
-body.dark .switch input:checked + .slider:before{ background: #0f0f0f; }
+h1,h2,h3,h4,h5,h6{ color: var(--text); }
+
+/* =========================
+   COMMON SURFACES
+   ========================= */
+.post,
+.settings-page,
+.auth-box,
+.create-post-box,
+.dropdown-menu{
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.post .post-update-text,
+.post .reaction-text,
+.si-right,
+.cactions,
+.rrow,
+.no-comments{ color: var(--muted); }
+
+.post,
+.settings-header,
+.settings-item,
+.post-header,
+.post-actions{ border-color: var(--border); }
+
+/* =========================
+   NAVBAR
+   ========================= */
+.navbar{
+  background: var(--navbar) !important;
+  border-bottom: 1px solid var(--border);
+  color: var(--navbar-text) !important;
+}
+
+/* ✅ Website name always bright red */
+.navbar .logo{
+  color: var(--accent) !important;
+  font-weight: 800;
+}
+
+/* navbar icons/text */
+.navbar .top-icons,
+.navbar .top-icons a,
+.navbar .top-icons i,
+.navbar a,
+.navbar button,
+.navbar span,
+.navbar div{
+  color: var(--navbar-text) !important;
+}
+.navbar svg{ fill: var(--navbar-text) !important; }
+
+.topbar,
+.header,
+.app-header{
+  background: var(--navbar) !important;
+  color: var(--navbar-text) !important;
+}
+
+/* =========================
+   SETTINGS TOGGLE
+   ========================= */
+.switch{
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+}
+.switch input{
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider{
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #cfd2d6;
+  transition: .2s;
+  border-radius: 999px;
+}
+.slider:before{
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  transition: .2s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider{ background: var(--accent); }
+.switch input:checked + .slider:before{ transform: translateX(20px); }
+
+/* =========================
+   DRAWER ALWAYS LIGHT
+   ========================= */
+#leftDrawer,
+.left-drawer,
+.drawer{
+  background: var(--always-light-bg) !important;
+  color: var(--always-light-text) !important;
+  border-right: 1px solid var(--always-light-border) !important;
+}
+#leftDrawer *{ color: var(--always-light-text) !important; }
+
+#drawerOverlay{ background: rgba(0,0,0,.45); }
+
+/* =========================
+   BUTTONS / LINKS (general)
+   ========================= */
+a{ color: inherit; }
+
+.action-btn,
+button{ color: var(--text); }
+
+.action-btn.like-btn .like-text{ color: #65676b; }
+body.dark .action-btn{ color: var(--text); }
+
+/* =========================
+   DARK: MENU BAR + MIND BOX
+   ========================= */
+body.dark .menu-bar,
+body.dark .menubar,
+body.dark .bottom-nav,
+body.dark .nav-bar{
+  background: #111c33 !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+body.dark .menu-bar .menu-icon,
+body.dark .menu-bar i,
+body.dark .menu-bar svg{
+  color: #e5e7eb !important;
+  fill: #e5e7eb !important;
+}
+body.dark .menu-bar .menu-icon.active,
+body.dark .menu-bar .menu-icon.active i,
+body.dark .menu-bar .menu-icon.active svg{
+  color: var(--accent) !important;
+  fill: var(--accent) !important;
+}
+
+/* composer container */
+body.dark .create-post,
+body.dark .mind-wrap,
+body.dark .mind-container,
+body.dark .mind-box,
+body.dark .post-box,
+body.dark .composer,
+body.dark .status-box{
+  background: #111c33 !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* composer input */
+body.dark .mind,
+body.dark .mind input,
+body.dark .mind textarea,
+body.dark .mind-box input,
+body.dark .mind-box textarea{
+  background: #0f172a !important;
+  color: #e5e7eb !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+body.dark .mind input::placeholder,
+body.dark .mind textarea::placeholder,
+body.dark .mind-box input::placeholder,
+body.dark .mind-box textarea::placeholder{
+  color: rgba(229,231,235,.65) !important;
+}
+
+/* =========================
+   PROFILE PAGE (matches your HTML)
+   ========================= */
+body.dark #profilePage{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+body.dark #profilePage .follow-info,
+body.dark #profilePage .profile-name-row,
+body.dark #profilePage .profile-header,
+body.dark #profilePage .profile-actions{
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark #profilePage #profileName{ color: var(--text) !important; }
+
+body.dark #profilePage .follow-info span{ color: var(--muted) !important; }
+body.dark #profilePage .follow-info strong{ color: var(--text) !important; }
+
+body.dark #profilePage .profile-text,
+body.dark #profilePage #bioText{ color: var(--text) !important; }
+
+body.dark #profilePage #bioInput{
+  background: #0f172a !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+body.dark #profilePage #bioInput::placeholder{
+  color: rgba(229,231,235,.65) !important;
+}
+
+body.dark #profilePage #saveBioBtn{
+  background: var(--accent) !important;
+  color: #fff !important;
+  border: 0 !important;
+}
+
+/* ✅ Follow button always red (everywhere) */
+.follow-btn{
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* other profile action buttons keep dark style */
+body.dark #profilePage .message-btn,
+body.dark #profilePage .more-btn{
+  background: #111c33 !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+body.dark #profileFeed{ background: transparent !important; }
+
+/* ✅ Camera buttons never change (cover/profile) */
+#coverCam,
+#profileCam{
+  background: rgba(255,255,255,0.85) !important;
+  color: #111827 !important;
+  border-radius: 999px;
+}
+
+/* =========================
+   COMMENTS MODAL ALWAYS LIGHT (your HTML)
+   ========================= */
+#commentsModal.cmodal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45) !important;
+  z-index: 9999;
+}
+
+#commentsModal .cmodal-sheet,
+#commentsModal .cmodal-head,
+#commentsModal .cmodal-list,
+#commentsModal .cmodal-inputbar{
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+#commentsModal .cmodal-head{ border-bottom: 1px solid #e5e7eb !important; }
+#commentsModal .cmodal-inputbar{ border-top: 1px solid #e5e7eb !important; }
+
+#commentsModal .cmodal-title,
+#commentsModal .cmodal-close{
+  color: #111827 !important;
+}
+
+#commentsModal .cmodal-close{
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+#commentsModal #cmodalInput{
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb !important;
+}
+#commentsModal #cmodalInput::placeholder{ color: #6b7280 !important; }
+
+#commentsModal #cmodalSend{
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border: 0;
+  cursor: pointer;
+}
+
+
+/* ✅ Back icon never changes in dark mode */
+#changeNameBackBtn{
+  color: #111827 !important;      /* always visible */
+  opacity: 1 !important;
+}
+
+/* dark mode এও একই থাকবে */
+body.dark #changeNameBackBtn{
+  color: #111827 !important;
+}
+
+/*message/notification not efect*/
+/* =========================
+   FIX: Message / Notification / Settings
+   No fade, no blur in dark mode
+   ========================= */
+
+body.dark #notificationPage,
+body.dark #messagePage
+{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Headings */
+body.dark #notificationPage h2,
+body.dark #messagePage h2
+{
+  color: var(--text) !important;
+  opacity: 1 !important;
+}
+
+/* Notification items */
+body.dark .notification-item{
+  background: var(--card) !important;
+  color: var(--text) !important;
+  opacity: 1 !important;
+}
+
+/* Message search box */
+body.dark .message-search{
+  background: #0f172a !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+body.dark .message-search::placeholder{
+  color: rgba(229,231,235,.65) !important;
+}
+
+
+/* =========================
+   VERIFIED BADGE ALWAYS VISIBLE
+   ========================= */
+
+.verified-badge{
+  opacity: 1 !important;
+  filter: none !important;
+  visibility: visible !important;
+}
+
+body.dark .verified-badge{
+  opacity: 1 !important;
+  filter: none !important;
+  visibility: visible !important;
+}
+
+/* ✅ Settings back arrow never changes (no dark mode effect) */
+#settingsBackBtn,
+.settings-back{
+  color: #111827 !important;     /* always same */
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* dark mode হলেও same থাকবে */
+body.dark #settingsBackBtn,
+body.dark .settings-back{
+  color: #111827 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+
+
+
+
+
+/* Force dark background for the actual opened post menu */
+body.dark .pm-item{
+  background: #111c33 !important;
+}
+
+body.dark .pm-item{
+  color: #e5e7eb !important;
+}
+
+/* If parent has no class, style the container via parent of pm-item */
+body.dark .pm-item{
+  border: none !important;
+}
+
+body.dark .pm-item{
+  display: block;
+}
+
+/* Make parent container dark */
+body.dark .pm-item:first-child{
+  background: #111c33 !important;
+}
