@@ -226,6 +226,8 @@ settingsBackBtn?.addEventListener("click", (e)=>{
 });
 
 
+
+
 /* ================= POST SYSTEM ================= */
 function createPost({
   postId,
@@ -842,9 +844,13 @@ function showChangeMenu(){
 }
 
 function closeAllDropdown(){
-  dropdownMenu.classList.remove("show");
-  showMainMenu(); // reset
+  const dropdownMenu =
+    document.getElementById("dropdownMenu") || document.querySelector(".dropdown-menu");
+
+  if (dropdownMenu) dropdownMenu.classList.remove("show");
+  showMainMenu();
 }
+
 
 // Profile -> open change panel
 if (menuProfileEl) {
@@ -2482,3 +2488,23 @@ cmodalInput.addEventListener("input", () => {
     cmodalSend.style.color = "#cfd2d6";  // light grey
   }
 });
+
+
+// ================= INIT THEME =================
+(function initTheme(){
+  const toggle = document.getElementById("darkModeToggle");
+  if (!toggle) return;
+
+  // ✅ default always LIGHT if nothing saved
+  const saved = localStorage.getItem("theme"); // "dark" | "light" | null
+  const theme = (saved === "dark" || saved === "light") ? saved : "light";
+
+  document.body.classList.toggle("dark", theme === "dark");
+  toggle.checked = (theme === "dark");
+
+  toggle.addEventListener("change", () => {
+    const isDark = toggle.checked;
+    document.body.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  });
+})();
