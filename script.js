@@ -1746,47 +1746,35 @@ async function hydratePostUserNames() {
 
 
 
-
-
-
-//user veryfied
-const VERIFIED_CACHE = new Map();
+//veryfi badge//
+// ===== VERIFIED BADGE (FAST + GUEST FRIENDLY) =====
+const VERIFIED_CACHE = new Map(); // uid -> true/false
 
 async function hydrateVerifiedBadges() {
-  const badges = document.querySelectorAll(".verified-badge[data-verified-uid]");
+  const badges = Array.from(document.querySelectorAll(".verified-badge[data-verified-uid]"));
+  if (!badges.length) return;
 
-  for (const badge of badges) {
-    const uid = badge.dataset.verifiedUid;
+  const uids = Array.from(new Set(
+    badges.map(b => (b.dataset.verifiedUid || "").trim()).filter(Boolean)
+  ));
 
-    // cache hit
-    if (VERIFIED_CACHE.has(uid)) {
-      badge.style.display = VERIFIED_CACHE.get(uid) ? "inline-flex" : "none";
-      continue;
-    }
+  const need = uids.filter(uid => !VERIFIED_CACHE.has(uid));
 
-    // fetch user doc
-    const doc = await db.collection("users").doc(uid).get();
-    const verified = !!(doc.exists && doc.data().verified);
+  if (need.length) {
+    const docs = await Promise.all(
+      need.map(uid => db.collection("users").doc(uid).get().catch(() => null))
+    );
 
-    VERIFIED_CACHE.set(uid, verified);
-    badge.style.display = verified ? "inline-flex" : "none";
+    docs.forEach((snap, i) => {
+      const uid = need[i];
+      const verified = !!(snap && snap.exists && snap.data()?.verified === true);
+      VERIFIED_CACHE.set(uid, verified);
+    });
   }
-}
 
-
-
-
-
-async function hydrateFirebaseVerifiedBadges() {
-  const badges = document.querySelectorAll(".firebase-verified");
-
-  for (const badge of badges) {
-    const uid = badge.dataset.verifiedUid;
-    const snap = await db.collection("users").doc(uid).get();
-
-    if (snap.exists && snap.data().verified === true) {
-      badge.style.display = "inline-flex";
-    }
+  for (const b of badges) {
+    const uid = (b.dataset.verifiedUid || "").trim();
+    b.style.display = (uid && VERIFIED_CACHE.get(uid) === true) ? "inline-flex" : "none";
   }
 }
 
