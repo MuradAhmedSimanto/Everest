@@ -1209,7 +1209,7 @@ transition: none;          /* animation remove */
 
 #loginModal .login-back{
   position: absolute;
-  top: 30px;
+  top: 18px;
   left: 18px;
 
   border: none;
@@ -2166,6 +2166,19 @@ body.profile-mode #bioText{
   to { transform: rotate(360deg); }
 }
 
+
+#changeNameModal .auth-box{
+  position: relative;
+}
+
+#changeNameBackBtn{
+  position: absolute;
+  top: 36px;   /* 👈 30 ছিল, বাড়াও = আরও নিচে নামবে */
+  left: 16px;
+}
+
+
+
 /*no break cover*/
 /* ========== NO-FLASH COVER LOCK (ALWAYS ON PROFILE PAGE) ========== */
 
@@ -2832,10 +2845,6 @@ body.dark #changeNameBackBtn{
 }
 
 /*message/notification not efect*/
-/* =========================
-   FIX: Message / Notification / Settings
-   No fade, no blur in dark mode
-   ========================= */
 
 body.dark #notificationPage,
 body.dark #messagePage
@@ -2931,4 +2940,3 @@ body.dark .pm-item{
 body.dark .pm-item:first-child{
   background: #111c33 !important;
 }
-
