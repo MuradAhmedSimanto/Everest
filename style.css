@@ -2918,62 +2918,88 @@ body.dark .pm-item:first-child{
 }
 
 /*post model*/
-/* ===== MEDIA POST MODAL — MOBILE FULL SCREEN FIXED ===== */
-@media (max-width: 560px){
+/* =========================
+   MEDIA POST MODAL - MOBILE FULL SCREEN + FIT MEDIA
+   ========================= */
 
-  /* modal container */
-  #mediaCaptionModal{
-    background:#fff !important;
-    align-items:stretch !important;
-    justify-content:stretch !important;
-  }
-
-  /* full screen modal box */
-  #mediaCaptionModal .create-post-box{
-    width:100vw !important;
-    height:100dvh !important;
-    max-width:none !important;
-
-    border-radius:0 !important;
-    box-shadow:none !important;
-
-    display:flex !important;
-    flex-direction:column !important;
-
-    padding:16px !important;
-    overflow:hidden !important; /* 🔥 modal আর বড় হবে না */
-  }
-
-  /* caption input fixed */
-  #mediaCaptionModal #mediaCaptionInput{
-    flex-shrink:0;
-  }
-
-  /* preview area flexible */
-  #mediaCaptionModal .post-preview{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    margin-top:12px;
-  }
-
-  /* image / video auto fit */
-  #mediaCaptionModal .post-preview img,
-  #mediaCaptionModal .post-preview video{
-    max-height:100%;
-    max-width:100%;
-    object-fit:contain;   /* 🔥 বড় হলেও fit হবে */
-  }
-
-  /* post button stays bottom */
-  #mediaPostBtn{
-    margin-top:14px;
-    flex-shrink:0;
-  }
-
+/* Base modal */
+#mediaCaptionModal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999; /* keep above everything */
 }
 
+/* ✅ Mobile full screen */
+@media (max-width: 560px){
+  #mediaCaptionModal{
+    background: #fff;          /* full screen হলে overlay dark না */
+    backdrop-filter: none;
+    align-items: stretch;
+    justify-content: stretch;
+  }
 
+  #mediaCaptionModal .create-post-box{
+    width: 100vw;
+    height: 100dvh;            /* mobile safe */
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
 
+    padding-top: calc(14px + env(safe-area-inset-top));
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;          /* ভিতরে preview scroll manage হবে */
+  }
+
+  /* caption area + controls natural */
+  #mediaCaptionModal .create-post-box h3{
+    margin: 4px 0 6px;
+  }
+
+  /* ✅ preview takes remaining height */
+  #mediaCaptionModal .post-preview{
+    flex: 1 1 auto;
+    min-height: 0;             /* important for flex overflow */
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;          /* black like FB */
+  }
+
+  /* ✅ Fit big image/video inside preview */
+  #mediaCaptionModal .post-preview img,
+  #mediaCaptionModal .post-preview video{
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;       /* ✅ no crop, fit inside */
+    background: #000;
+    border-radius: 0;
+    display: block;
+  }
+
+  /* caption input stays nice */
+  #mediaCaptionInput{
+    flex: 0 0 auto;
+  }
+
+  /* button sticks at bottom */
+  #mediaPostBtn{
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+}
+
+/* ✅ Desktop/tablet: keep your current look but still fit nicely */
+#mediaCaptionModal .post-preview img,
+#mediaCaptionModal .post-preview video{
+  object-fit: contain;   /* বড় হলে crop না করে fit */
+  background: #000;
+}
