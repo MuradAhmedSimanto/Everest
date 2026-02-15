@@ -2916,3 +2916,29 @@ body.dark .pm-item{
 body.dark .pm-item:first-child{
   background: #111c33 !important;
 }
+
+/*post model*/
+/* ✅ MEDIA POST MODAL — MOBILE FULL SCREEN */
+@media (max-width: 560px){
+  #mediaCaptionModal{
+    background: #fff !important;        /* dark overlay off */
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+
+  #mediaCaptionModal .create-post-box{
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
