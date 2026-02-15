@@ -769,8 +769,9 @@ transition: none;          /* animation remove */
 }
 /* caption section*/
 /* =========================
-   MEDIA CAPTION MODAL (REPLACE)
-   HTML unchanged
+   MEDIA CAPTION MODAL (REPLACE v2)
+   - Title black
+   - No scrolling modal/page
    ========================= */
 
 #mediaCaptionModal{
@@ -778,17 +779,18 @@ transition: none;          /* animation remove */
   inset: 0;
   background: rgba(0,0,0,.55);
   backdrop-filter: blur(6px);
-  display: none;              /* JS দিয়ে flex হবে */
+  display: none;               /* JS দিয়ে flex হবে */
   align-items: center;
   justify-content: center;
   z-index: 99999;
+
+  overflow: hidden;            /* ✅ no page scroll */
 }
 
 /* modal box */
 #mediaCaptionModal .auth-box{
   width: min(520px, 92vw);
-  max-height: min(86vh, 720px);
-
+  height: min(86vh, 720px);    /* ✅ fixed height so no scroll */
   background: #fff;
   border-radius: 18px;
   padding: 16px;
@@ -797,15 +799,23 @@ transition: none;          /* animation remove */
   flex-direction: column;
   gap: 12px;
 
-  overflow: hidden;           /* ✅ big media break করবে না */
+  overflow: hidden;            /* ✅ no inner scroll */
   box-shadow: 0 20px 40px rgba(0,0,0,.25);
+}
+
+/* ✅ title black */
+#mediaCaptionModal .auth-box h3{
+  margin: 0;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;                 /* ✅ black */
 }
 
 /* caption */
 #mediaCaptionInput{
   width: 100%;
-  min-height: 90px;
-  max-height: 170px;
+  height: 90px;                /* ✅ fixed (no textarea scroll growth) */
   resize: none;
 
   border: 1px solid #ddd;
@@ -819,24 +829,24 @@ transition: none;          /* animation remove */
   border-color: #ff2d2d;
 }
 
-/* ✅ image + video (no crop, no overflow) */
+/* ✅ media takes remaining space, no overflow */
 #mediaPreview,
 #videoPreview{
   width: 100% !important;
-  height: auto !important;
-  max-height: 52vh !important;
+  flex: 1 1 auto;              /* ✅ take remaining height */
+  min-height: 0;               /* ✅ important for flex media */
+  max-height: none !important;
 
   display: block;
   object-fit: contain !important;
   background: #000;
-
   border-radius: 12px;
 }
 
 /* post button */
 #mediaPostBtn{
   width: 100%;
-  margin-top: auto;           /* ✅ always bottom */
+  margin-top: 0;
   padding: 12px;
 
   border: none;
@@ -854,8 +864,13 @@ transition: none;          /* animation remove */
   transform: scale(.98);
 }
 
+/* ✅ lock body scroll when modal open (JS class add করলে best) */
+body.modal-open{
+  overflow: hidden;
+}
+
 /* =========================
-   MOBILE FULL SCREEN
+   MOBILE FULL SCREEN (NO SCROLL)
    ========================= */
 @media (max-width: 560px){
   #mediaCaptionModal{
@@ -868,8 +883,6 @@ transition: none;          /* animation remove */
   #mediaCaptionModal .auth-box{
     width: 100vw;
     height: 100dvh;
-    max-height: none;
-
     border-radius: 0;
     box-shadow: none;
 
@@ -881,22 +894,14 @@ transition: none;          /* animation remove */
 
   #mediaPreview,
   #videoPreview{
-    flex: 1 1 auto;
-    min-height: 0;
-
-    width: 100% !important;
-    height: 100% !important;
-    max-height: none !important;
-
-    object-fit: contain !important;
     border-radius: 14px;
   }
 
   #mediaCaptionInput{
-    min-height: 70px;
-    max-height: 120px;
+    height: 70px;
   }
 }
+
 
 /* ===== POST FULL WIDTH (FB STYLE) ===== */
 .feed,
