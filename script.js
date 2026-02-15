@@ -1097,7 +1097,7 @@ imageInput.onchange = () => {
     selectedMediaType = file.type.startsWith("image") ? "image" : "video";
 
     document.getElementById("mediaCaptionModal").style.display = "flex";
-    document.body.classList.add("modal-open");
+    
 
 
     const img = document.getElementById("mediaPreview");
