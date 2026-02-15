@@ -275,45 +275,33 @@
   </div>
   
 <div id="profileFeed"></div>
-
-
 </div>
-
-
-
-
 </div>
-
-
-
-
 
 <!-- AUTH MODAL -->
 <div class="auth-modal" id="authModal">
   <div class="auth-box">
-
-    <h3>Signup</h3>
-
+     <button type="button" class="auth-back-ico" id="step1Arrow" aria-label="Back">←</button>
+   <h3>Signup</h3>
     <!-- STEP 1 -->
     <div id="stepOne">
       <input type="text" id="authContact" placeholder="Phone number or Email">
       <input type="text" id="firstName" placeholder="First name">
       <input type="text" id="lastName" placeholder="Last name">
-
       <select id="gender">
         <option value="">Select gender</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
         <option value="Other">Other</option>
       </select>
-
       <input type="date" id="dob">
 
       <button id="continueBtn" type="button">Continue</button>
     </div>
-
     <!-- STEP 2 -->
+
     <div id="stepTwo" style="display:none;">
+      
       <input type="password" id="password" placeholder="Enter password">
       <input type="password" id="confirmPassword" placeholder="Confirm password">
 
@@ -341,9 +329,6 @@
   </div>
 </div>
 
-
-
-
   <!-- EDIT POST MODAL -->
 <div id="editPostModal" class="auth-modal" style="display:none;">
   <div class="auth-box">
@@ -357,9 +342,7 @@
 
     <img
       id="editPostImage"
-      style="display:none; width:100%; border-radius:8px;"
-    >
-
+      style="display:none; width:100%; border-radius:8px;">
     <video
       id="editPostVideo"
       controls
