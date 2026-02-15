@@ -2918,27 +2918,62 @@ body.dark .pm-item:first-child{
 }
 
 /*post model*/
-/* ✅ MEDIA POST MODAL — MOBILE FULL SCREEN */
+/* ===== MEDIA POST MODAL — MOBILE FULL SCREEN FIXED ===== */
 @media (max-width: 560px){
+
+  /* modal container */
   #mediaCaptionModal{
-    background: #fff !important;        /* dark overlay off */
-    align-items: stretch !important;
-    justify-content: stretch !important;
+    background:#fff !important;
+    align-items:stretch !important;
+    justify-content:stretch !important;
   }
 
+  /* full screen modal box */
   #mediaCaptionModal .create-post-box{
-    width: 100vw !important;
-    height: 100dvh !important;
-    max-width: none !important;
+    width:100vw !important;
+    height:100dvh !important;
+    max-width:none !important;
 
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
 
-    padding-top: calc(16px + env(safe-area-inset-top)) !important;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    display:flex !important;
+    flex-direction:column !important;
 
-    overflow: auto !important;
-    -webkit-overflow-scrolling: touch;
+    padding:16px !important;
+    overflow:hidden !important; /* 🔥 modal আর বড় হবে না */
   }
+
+  /* caption input fixed */
+  #mediaCaptionModal #mediaCaptionInput{
+    flex-shrink:0;
+  }
+
+  /* preview area flexible */
+  #mediaCaptionModal .post-preview{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    margin-top:12px;
+  }
+
+  /* image / video auto fit */
+  #mediaCaptionModal .post-preview img,
+  #mediaCaptionModal .post-preview video{
+    max-height:100%;
+    max-width:100%;
+    object-fit:contain;   /* 🔥 বড় হলেও fit হবে */
+  }
+
+  /* post button stays bottom */
+  #mediaPostBtn{
+    margin-top:14px;
+    flex-shrink:0;
+  }
+
 }
+
+
 
