@@ -47,7 +47,7 @@ body.nav-hidden .menu-bar{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e4e6eb;
+  border-bottom: none !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -2554,7 +2554,7 @@ h1,h2,h3,h4,h5,h6{ color: var(--text); }
    ========================= */
 .navbar{
   background: var(--navbar) !important;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none !important;
   color: var(--navbar-text) !important;
 }
 
