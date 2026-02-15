@@ -580,6 +580,40 @@ const authMsg   = document.getElementById("authMsg");
 
 const stepOne = document.getElementById("stepOne");
 const stepTwo = document.getElementById("stepTwo");
+//sinup model back aro//
+const step1Arrow = document.getElementById("step1Arrow");
+const step2Arrow = document.getElementById("step2Arrow");
+
+function goStep1(){
+  stepOne.style.display = "block";
+  stepTwo.style.display = "none";
+  if (authMsg) authMsg.textContent = "";
+
+  // optional: password clear
+  const p1 = document.getElementById("password");
+  const p2 = document.getElementById("confirmPassword");
+  if (p1) p1.value = "";
+  if (p2) p2.value = "";
+}
+
+// STEP 1 arrow: close modal + open drawer
+step1Arrow?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  goStep1();
+  authModal.style.display = "none";
+
+  // drawer open (তোমার already আছে)
+  if (typeof openDrawer === "function") openDrawer();
+});
+
+// STEP 2 arrow: go back to step 1
+step2Arrow?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  goStep1();
+});
 
 /* ================= SIGNUP PROMPT ================= */
 function promptSignup(message = "Please signup to react") {
