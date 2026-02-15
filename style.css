@@ -1209,7 +1209,7 @@ transition: none;          /* animation remove */
 
 #loginModal .login-back{
   position: absolute;
-  top: 18px;
+  top: 30px;
   left: 18px;
 
   border: none;
@@ -2931,3 +2931,4 @@ body.dark .pm-item{
 body.dark .pm-item:first-child{
   background: #111c33 !important;
 }
+
