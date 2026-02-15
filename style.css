@@ -325,45 +325,6 @@ body.nav-hidden .menu-bar{
   box-shadow: 0 14px 30px rgba(255,31,31,0.55);
 }
 
-/*sinup model back*/
-.auth-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom: 16px;
-}
-
-.auth-back-ico{
-  width:42px;
-  height:42px;
-  border:none;
-  background: transparent;
-  font-size: 26px;
-  line-height: 42px;
-  cursor:pointer;
-  color:#111;
-  border-radius: 12px;
-  transition: .15s ease;
-}
-
-.auth-back-ico:hover{
-  background:#f2f2f2;
-}
-
-.auth-title{
-  margin:0;
-  font-size: 28px;
-  font-weight: 900;
-  color:#ff1f1f;
-  text-align:center;
-  flex:1;
-}
-
-.auth-right-space{
-  width:42px;
-  height:42px;
-}
-
 /* ================= PROFILE ACTIONS (PREMIUM) ================= */
 
 .profile-actions {
