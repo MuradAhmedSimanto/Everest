@@ -767,12 +767,7 @@ transition: none;          /* animation remove */
   color: #e41e3f;
   font-weight: 600;
 }
-/* caption section*/
-/* =========================
-   MEDIA CAPTION MODAL (REPLACE v2)
-   - Title black
-   - No scrolling modal/page
-   ========================= */
+/*post model*/
 
 #mediaCaptionModal{
   position: fixed;
@@ -900,6 +895,10 @@ body.modal-open{
   #mediaCaptionInput{
     height: 70px;
   }
+}
+/*caption right side*/
+.post .post-text{
+  padding: 8px 16px !important;
 }
 
 
@@ -2936,4 +2935,6 @@ body.dark .pm-item{
 body.dark .pm-item:first-child{
   background: #111c33 !important;
 }
+
+
 
