@@ -2939,30 +2939,47 @@ body.dark .pm-item:first-child{
 
 /*rells*/
 /* ===== REELS (TikTok style) - FULLSCREEN ONLY ===== */
+/* ================== REELS (TikTok 1-swipe 1-video) ================== */
+
+/* full screen overlay page */
 #reelsPage{
-  position: fixed;          /* ✅ layout থেকে বের হবে */
-  inset: 0;                 /* top:0 right:0 bottom:0 left:0 */
+  position: fixed;
+  inset: 0;
   background:#000;
-  z-index: 999999;          /* ✅ সবকিছুর উপর */
+  z-index: 999999;
   overflow: hidden;
-  display: none;            /* ✅ default hidden */
+  display: none;
 }
 
-/* reels container */
+/* ✅ container = scroll area */
 .reels-wrap{
-  height: 100%;
+  height: 100svh;                 /* modern mobile safe viewport */
+  height: 100vh;                  /* fallback */
   width: 100%;
   overflow-y: auto;
-  scroll-snap-type: y mandatory;
+  overflow-x: hidden;
+
+  scroll-snap-type: y mandatory;  /* ✅ snap */
+  scroll-padding-top: 0px;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* ✅ prevents rubber band */
+
+  scrollbar-width: none;          /* firefox hide scrollbar */
+}
+.reels-wrap::-webkit-scrollbar{   /* chrome hide scrollbar */
+  width: 0;
+  height: 0;
 }
 
-/* each reel full screen */
+/* ✅ each reel = exactly 1 screen */
 .reel{
   position: relative;
-  height: 100vh;            /* ✅ একেকটা reel পুরো স্ক্রিন */
+  height: 100svh;
+  height: 100vh;
   width: 100%;
+
   scroll-snap-align: start;
+  scroll-snap-stop: always;       /* ✅ one swipe = one snap */
   background:#000;
 }
 
@@ -3028,6 +3045,7 @@ body.dark .pm-item:first-child{
   overflow:hidden;
 }
 
+/* actions */
 .reel-actions{
   display:flex;
   flex-direction:column;
@@ -3037,7 +3055,7 @@ body.dark .pm-item:first-child{
   pointer-events:auto;
 }
 
-.reel-btn{
+.reel-btn, .reel-act{
   width:44px;
   height:44px;
   border-radius:50%;
@@ -3051,20 +3069,27 @@ body.dark .pm-item:first-child{
   user-select:none;
 }
 
-.reel-mute{
+/* mute button (top right) */
+.reel-mute-btn, .reel-mute{
   position:absolute;
   top: 12px;
   right: 12px;
-  z-index: 3;
+  z-index: 6;
   pointer-events:auto;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background: rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
 }
 
-/* ✅ reels open থাকলে home page scroll বন্ধ */
+/* ✅ reels open থাকলে body scroll বন্ধ */
 body.reels-open{
   overflow: hidden;
 }
 
-/*rells back aro*/
+/* header (back + title) */
 .reels-header{
   position: absolute;
   top: 0;
@@ -3076,7 +3101,8 @@ body.reels-open{
   gap: 12px;
   padding: 0 14px;
   background: linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
-  z-index: 5;
+  z-index: 7;
+  pointer-events: auto;
 }
 
 .reels-back{
