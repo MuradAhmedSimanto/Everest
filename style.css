@@ -2937,4 +2937,162 @@ body.dark .pm-item:first-child{
 }
 
 
+/*rells*/
+/* ===== REELS (TikTok style) - FULLSCREEN ONLY ===== */
+#reelsPage{
+  position: fixed;          /* ✅ layout থেকে বের হবে */
+  inset: 0;                 /* top:0 right:0 bottom:0 left:0 */
+  background:#000;
+  z-index: 999999;          /* ✅ সবকিছুর উপর */
+  overflow: hidden;
+  display: none;            /* ✅ default hidden */
+}
 
+/* reels container */
+.reels-wrap{
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* each reel full screen */
+.reel{
+  position: relative;
+  height: 100vh;            /* ✅ একেকটা reel পুরো স্ক্রিন */
+  width: 100%;
+  scroll-snap-align: start;
+  background:#000;
+}
+
+/* video full cover */
+.reel video,
+.reel-video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+  background:#000;
+}
+
+/* overlay */
+.reel-overlay{
+  position:absolute;
+  left: 12px;
+  bottom: 16px;
+  right: 12px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  pointer-events:none;
+}
+
+.reel-user{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  max-width: 78%;
+}
+
+.reel-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,.35);
+  background:#222;
+}
+
+.reel-meta{
+  color:#fff;
+  line-height:1.15;
+}
+
+.reel-name{
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:15px;
+}
+
+.reel-caption{
+  margin-top:6px;
+  font-size:13px;
+  opacity:.9;
+  max-width: 95%;
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow:hidden;
+}
+
+.reel-actions{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:center;
+  margin-bottom: 8px;
+  pointer-events:auto;
+}
+
+.reel-btn{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background: rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;
+  user-select:none;
+}
+
+.reel-mute{
+  position:absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  pointer-events:auto;
+}
+
+/* ✅ reels open থাকলে home page scroll বন্ধ */
+body.reels-open{
+  overflow: hidden;
+}
+
+/*rells back aro*/
+.reels-header{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
+  z-index: 5;
+}
+
+.reels-back{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.reels-title{
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+}
