@@ -1733,6 +1733,7 @@ auth.onAuthStateChanged((user) => {
   postsUnsub = db.collection("posts")
     .orderBy("createdAt", "desc")
     .onSnapshot((snapshot) => {
+      REELS_SNAPSHOT = snapshot; 
       const feed = document.getElementById("feed");
       const profileFeed = document.getElementById("profileFeed");
 
@@ -1780,6 +1781,340 @@ auth.onAuthStateChanged((user) => {
     }, (err) => {
       console.error("posts listener error:", err);
     });
+});
+
+
+
+
+
+
+
+
+
+
+//rells//
+/* ================= REELS MODULE (TikTok style | FINAL CLEAN REPLACE) ================= */
+
+const reelsIcon    = document.getElementById("reelsIcon");
+const reelsPage    = document.getElementById("reelsPage");
+const reelsWrap    = document.getElementById("reelsWrap");
+const reelsBackBtn = document.getElementById("reelsBackBtn");
+
+let REELS_SNAPSHOT = null;   // তোমার posts onSnapshot এর snapshot এখানে assign হবে
+let REELS_OBSERVER = null;
+let REELS_MUTED    = true;
+
+const REELS_AVATAR_CACHE = new Map(); // uid -> photo
+
+function esc(s=""){ return String(s).replace(/[<>]/g,""); }
+
+/* ---- hard stop ---- */
+function stopAllReels(){
+  document.querySelectorAll("#reelsWrap video").forEach(v => {
+    try { v.pause(); } catch(e){}
+  });
+  if (REELS_OBSERVER) {
+    try { REELS_OBSERVER.disconnect(); } catch(e){}
+    REELS_OBSERVER = null;
+  }
+}
+
+function hideReelsPage(){
+  if (!reelsPage) return;
+  stopAllReels();
+  reelsPage.style.display = "none";
+}
+
+/* ---- IMPORTANT: show navbar/menu after leaving reels ---- */
+function forceShowNav(){
+  document.body.classList.remove("nav-hidden");
+  document.querySelector(".navbar")?.classList.remove("fb-hide");
+}
+
+/* ---- go home safely ---- */
+function goHomeFromReels(){
+  hideReelsPage();
+
+  // show home only
+  homePage.style.display = "block";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  if (typeof settingsPage !== "undefined" && settingsPage) settingsPage.style.display = "none";
+
+  forceShowNav();
+  setActive(homeIcon);
+  window.scrollTo(0,0);
+}
+
+/* ---- open reels ---- */
+function openReelsPage(){
+  if (!reelsPage || !reelsWrap) return;
+
+  // hide others
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  if (typeof settingsPage !== "undefined" && settingsPage) settingsPage.style.display = "none";
+
+  reelsPage.style.display = "block";
+  icons.forEach(i => i.classList.remove("active"));
+  reelsIcon?.classList.add("active");
+
+  window.scrollTo(0,0);
+  renderReels();
+}
+
+/* ---- build reel ---- */
+function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
+  const safeCaption = esc(caption || "");
+  const safeName    = esc(userName || "User");
+
+  return `
+    <div class="reel" data-id="${postId}">
+      <video class="reel-video"
+        src="${media}"
+        playsinline
+        webkit-playsinline
+        preload="metadata"
+        muted
+        loop></video>
+
+      <button class="reel-mute-btn" data-act="mute" type="button">${REELS_MUTED ? "🔇" : "🔊"}</button>
+
+      <div class="reel-overlay">
+        <div class="reel-user">
+          <img class="reel-avatar"
+               data-uid="${userId}"
+               src="${userPhoto || "https://i.imgur.com/6VBx3io.png"}"
+               onerror="this.onerror=null; this.src='https://i.imgur.com/6VBx3io.png';" />
+
+          <div class="reel-meta">
+            <div class="reel-name">
+              <span class="uname" data-uid="${userId}">${safeName}</span>
+
+              <span class="verified-badge"
+                    data-verified-uid="${userId}"
+                    title="Verified"
+                    style="display:none;">
+                <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+                  <path d="M9.3 12.6l1.9 1.9 4.2-4.3"
+                        fill="none"
+                        stroke="#ffffff"
+                        stroke-width="2.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+
+            ${safeCaption ? `<div class="reel-caption">${safeCaption}</div>` : ``}
+          </div>
+        </div>
+
+        <div class="reel-actions">
+          <button class="reel-act" data-act="like" type="button">❤️</button>
+          <button class="reel-act" data-act="comment" type="button">💬</button>
+          <button class="reel-act" data-act="share" type="button">↗️</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---- avatar fix (real profilePic) ---- */
+async function hydrateReelsAvatars(){
+  const imgs = Array.from(document.querySelectorAll("#reelsWrap .reel-avatar[data-uid]"));
+  const uids = Array.from(new Set(imgs.map(x => x.dataset.uid).filter(Boolean)));
+
+  const need = uids.filter(uid => !REELS_AVATAR_CACHE.has(uid));
+  if (need.length){
+    const docs = await Promise.all(
+      need.map(uid => db.collection("users").doc(uid).get().catch(()=>null))
+    );
+    docs.forEach((snap, i) => {
+      const uid = need[i];
+      const photo = (snap && snap.exists) ? (snap.data()?.profilePic || "") : "";
+      REELS_AVATAR_CACHE.set(uid, photo || "");
+    });
+  }
+
+  imgs.forEach(img => {
+    const uid = img.dataset.uid;
+    const photo = REELS_AVATAR_CACHE.get(uid) || "";
+    if (photo) img.src = photo;
+  });
+}
+
+/* ---- render reels from snapshot ---- */
+function renderReels(){
+  if (!reelsWrap) return;
+
+  stopAllReels();
+  reelsWrap.innerHTML = "";
+
+  if (!REELS_SNAPSHOT){
+    reelsWrap.innerHTML = `<div style="color:#fff;padding:18px;">No reels yet</div>`;
+    return;
+  }
+
+  const docs = [];
+  REELS_SNAPSHOT.forEach(d => docs.push(d));
+
+  let html = "";
+  docs.forEach((doc) => {
+    const p = doc.data() || {};
+    if (p.type !== "video") return;
+
+    html += buildReelCard({
+      postId: doc.id,
+      userId: p.userId,
+      media: p.media,
+      caption: p.caption,
+      userName: p.userName,
+      userPhoto: p.userPhoto
+    });
+  });
+
+  reelsWrap.innerHTML = html || `<div style="color:#fff;padding:18px;">No video posts</div>`;
+
+  // ✅ name + badge from your existing modules
+  hydratePostUserNames?.();
+  VERIFIED_CACHE?.clear?.();
+  hydrateVerifiedBadges?.();
+
+  // ✅ avatar fix
+  hydrateReelsAvatars();
+
+  setupReelsIntersectionObserver();
+}
+
+/* ---- autoplay visibility ---- */
+function setupReelsIntersectionObserver(){
+  const reels = Array.from(document.querySelectorAll("#reelsWrap .reel"));
+  if (!reels.length) return;
+
+  REELS_OBSERVER = new IntersectionObserver((entries) => {
+    entries.forEach((ent) => {
+      const reel = ent.target;
+      const v = reel.querySelector("video");
+      if (!v) return;
+
+      if (ent.isIntersecting && ent.intersectionRatio >= 0.75){
+        document.querySelectorAll("#reelsWrap video").forEach(x => {
+          if (x !== v) { try { x.pause(); } catch(e){} }
+        });
+
+        v.muted = REELS_MUTED;
+        const p = v.play();
+        if (p && p.catch) p.catch(()=>{});
+      } else {
+        try { v.pause(); } catch(e){}
+      }
+    });
+  }, { threshold: [0.75] });
+
+  reels.forEach(r => REELS_OBSERVER.observe(r));
+
+  setTimeout(() => {
+    const first = reels[0]?.querySelector("video");
+    if (!first) return;
+    first.muted = REELS_MUTED;
+    const p = first.play();
+    if (p && p.catch) p.catch(()=>{});
+  }, 80);
+}
+
+/* ---- interactions inside reels ---- */
+document.addEventListener("click", (e) => {
+  if (!reelsPage || reelsPage.style.display !== "block") return;
+
+  // back button
+  if (e.target.closest("#reelsBackBtn")){
+    e.preventDefault();
+    e.stopPropagation();
+    goHomeFromReels();
+    return;
+  }
+
+  const reel = e.target.closest("#reelsWrap .reel");
+  if (!reel) return;
+
+  const act = e.target.closest("[data-act]")?.dataset?.act;
+  const postId = reel.dataset.id;
+  const v = reel.querySelector("video");
+
+  if (act === "mute"){
+    REELS_MUTED = !REELS_MUTED;
+    document.querySelectorAll("#reelsWrap video").forEach(x => x.muted = REELS_MUTED);
+    document.querySelectorAll("#reelsWrap .reel-mute-btn").forEach(btn => {
+      btn.textContent = REELS_MUTED ? "🔇" : "🔊";
+    });
+    return;
+  }
+
+  if (act === "comment"){
+    if (typeof openCommentsModal === "function") openCommentsModal(postId);
+    return;
+  }
+
+  if (act === "share"){
+    const url = location.href.split("#")[0] + "#reel=" + postId;
+    navigator.clipboard?.writeText(url).then(()=> alert("Link copied"))
+      .catch(()=> prompt("Copy this link:", url));
+    return;
+  }
+
+  if (act === "like"){
+    // পরে চাইলে reaction connect করব
+    return;
+  }
+
+  // tap video play/pause
+  if (e.target.tagName === "VIDEO" && v){
+    if (v.paused) {
+      v.muted = REELS_MUTED;
+      const p = v.play();
+      if (p && p.catch) p.catch(()=>{});
+    } else {
+      try { v.pause(); } catch(e){}
+    }
+  }
+});
+
+/* ---- open reels icon ---- */
+reelsIcon?.addEventListener("click", (e) => {
+  e.preventDefault();
+  openReelsPage();
+});
+
+/* ---- LEAK FIX: any other nav icon clicked => reels hide ---- */
+function wrapClick(originalFn){
+  return function(){
+    hideReelsPage();
+    return (typeof originalFn === "function") ? originalFn.apply(this, arguments) : undefined;
+  };
+}
+
+homeIcon.onclick         = wrapClick(homeIcon.onclick);
+profileIcon.onclick      = wrapClick(profileIcon.onclick);
+notificationIcon.onclick = wrapClick(notificationIcon.onclick);
+messageIcon.onclick      = wrapClick(messageIcon.onclick);
+
+/* ---- esc => go home ---- */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && reelsPage?.style.display === "block"){
+    goHomeFromReels();
+  }
+});
+
+/* ---- optional direct back button handler ---- */
+reelsBackBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  goHomeFromReels();
 });
 
 
