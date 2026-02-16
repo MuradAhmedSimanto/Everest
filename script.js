@@ -2121,8 +2121,14 @@ document.addEventListener("click", (e) => {
 /* ---- open reels icon ---- */
 reelsIcon?.addEventListener("click", (e) => {
   e.preventDefault();
+
+  // ✅ user gesture = sound unlock ready
+  REELS_SOUND_UNLOCKED = true;
+  REELS_USER_MUTED = false;
+
   openReelsPage();
 });
+
 
 /* ---- LEAK FIX: any other nav icon clicked => reels hide ---- */
 function wrapClick(originalFn){
