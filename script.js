@@ -1,3 +1,40 @@
+
+async function uploadToCloudinary(file) {
+  const cloudName = "ddn8et0q4";
+  const uploadPreset = "everest_unsigned";
+
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error?.message || "Upload failed");
+  }
+
+  // Fast CDN delivery
+  return data.secure_url.replace("/upload/", "/upload/f_auto,q_auto/");
+}
+
+
+
+
+
+
+
+
+
+
+
+
 let MEMORY_POSTS = [];
 
 
@@ -1082,60 +1119,62 @@ document.getElementById("cancelEditPostBtn").onclick = () => {
 
 
 
-
-
-let selectedMedia = null;
+// ✅ Cloudinary upload এর জন্য file রাখবো
+let selectedFile = null;
 let selectedMediaType = null;
 
 imageInput.onchange = () => {
   const file = imageInput.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    selectedMedia = reader.result;
-    selectedMediaType = file.type.startsWith("image") ? "image" : "video";
+  selectedFile = file;
+  selectedMediaType = file.type.startsWith("image") ? "image" : "video";
 
-    document.getElementById("mediaCaptionModal").style.display = "flex";
-    
+  // ✅ fast preview (no base64)
+  const previewURL = URL.createObjectURL(file);
 
+  document.getElementById("mediaCaptionModal").style.display = "flex";
 
-    const img = document.getElementById("mediaPreview");
-    const video = document.getElementById("videoPreview");
+  const img = document.getElementById("mediaPreview");
+  const video = document.getElementById("videoPreview");
 
-    if (selectedMediaType === "image") {
-      img.src = selectedMedia;
-      img.style.display = "block";
-      video.style.display = "none";
-    } else {
-      video.src = selectedMedia;
-      video.style.display = "block";
-      img.style.display = "none";
-    }
-  };
+  if (selectedMediaType === "image") {
+    img.src = previewURL;
+    img.style.display = "block";
+    video.style.display = "none";
+  } else {
+    video.src = previewURL;
+    video.style.display = "block";
+    img.style.display = "none";
+  }
 
-  reader.readAsDataURL(file);
+  // reset input (same file আবার select করতে পারবে)
   imageInput.value = "";
 };
 
 
-document.getElementById("mediaPostBtn").onclick = () => {
-  const caption = document.getElementById("mediaCaptionInput").value.trim();
-
-savePostToFirebase({
-  type: selectedMediaType,
-  media: selectedMedia,
-  caption: caption
-});
-
-
-  document.getElementById("mediaCaptionInput").value = "";
-  document.getElementById("mediaCaptionModal").style.display = "none";
-};
-
 
 
  
+document.getElementById("mediaPostBtn").onclick = async () => {
+  const caption = document.getElementById("mediaCaptionInput").value.trim();
+
+  try {
+    const mediaUrl = await uploadToCloudinary(selectedFile);
+
+    await savePostToFirebase({
+      type: selectedMediaType,
+      media: mediaUrl,
+      caption: caption
+    });
+
+    document.getElementById("mediaCaptionInput").value = "";
+    document.getElementById("mediaCaptionModal").style.display = "none";
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+};
 
 
 
