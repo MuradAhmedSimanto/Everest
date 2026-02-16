@@ -1793,22 +1793,25 @@ auth.onAuthStateChanged((user) => {
 
 
 //rells//
-/* ================= REELS MODULE (TikTok style | FINAL CLEAN REPLACE) ================= */
+/* ================= REELS MODULE (TikTok style | FINAL REPLACE) ================= */
 
 const reelsIcon    = document.getElementById("reelsIcon");
 const reelsPage    = document.getElementById("reelsPage");
 const reelsWrap    = document.getElementById("reelsWrap");
 const reelsBackBtn = document.getElementById("reelsBackBtn");
 
-let REELS_SNAPSHOT = null;   // তোমার posts onSnapshot এর snapshot এখানে assign হবে
+let REELS_SNAPSHOT = null;     // তোমার posts onSnapshot snapshot এখানে assign হবে
 let REELS_OBSERVER = null;
-let REELS_MUTED    = true;
+
+// sound rules
+let REELS_SOUND_UNLOCKED = false; // user first tap
+let REELS_USER_MUTED = false;     // user toggle (false => sound on)
 
 const REELS_AVATAR_CACHE = new Map(); // uid -> photo
 
 function esc(s=""){ return String(s).replace(/[<>]/g,""); }
 
-/* ---- hard stop ---- */
+/* ---- stop everything ---- */
 function stopAllReels(){
   document.querySelectorAll("#reelsWrap video").forEach(v => {
     try { v.pause(); } catch(e){}
@@ -1835,7 +1838,6 @@ function forceShowNav(){
 function goHomeFromReels(){
   hideReelsPage();
 
-  // show home only
   homePage.style.display = "block";
   profilePage.style.display = "none";
   notificationPage.style.display = "none";
@@ -1851,7 +1853,6 @@ function goHomeFromReels(){
 function openReelsPage(){
   if (!reelsPage || !reelsWrap) return;
 
-  // hide others
   homePage.style.display = "none";
   profilePage.style.display = "none";
   notificationPage.style.display = "none";
@@ -1866,6 +1867,24 @@ function openReelsPage(){
   renderReels();
 }
 
+/* ---- sound: only current can be unmuted ---- */
+function setCurrentReelSound(currentVideo){
+  // mute all other videos
+  document.querySelectorAll("#reelsWrap video").forEach(v => {
+    if (v !== currentVideo) v.muted = true;
+  });
+
+  if (!currentVideo) return;
+
+  // browser policy: unlock ছাড়া auto sound হবে না
+  currentVideo.muted = REELS_SOUND_UNLOCKED ? REELS_USER_MUTED : true;
+
+  // update all icons based on user toggle
+  document.querySelectorAll("#reelsWrap .reel-mute-btn").forEach(btn => {
+    btn.textContent = REELS_USER_MUTED ? "🔇" : "🔊";
+  });
+}
+
 /* ---- build reel ---- */
 function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
   const safeCaption = esc(caption || "");
@@ -1878,10 +1897,9 @@ function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
         playsinline
         webkit-playsinline
         preload="metadata"
-        muted
         loop></video>
 
-      <button class="reel-mute-btn" data-act="mute" type="button">${REELS_MUTED ? "🔇" : "🔊"}</button>
+      <button class="reel-mute-btn" data-act="mute" type="button">🔇</button>
 
       <div class="reel-overlay">
         <div class="reel-user">
@@ -1980,21 +1998,26 @@ function renderReels(){
 
   reelsWrap.innerHTML = html || `<div style="color:#fff;padding:18px;">No video posts</div>`;
 
-  // ✅ name + badge from your existing modules
+  // your existing modules
   hydratePostUserNames?.();
   VERIFIED_CACHE?.clear?.();
   hydrateVerifiedBadges?.();
 
-  // ✅ avatar fix
+  // avatar fix
   hydrateReelsAvatars();
 
   setupReelsIntersectionObserver();
 }
 
-/* ---- autoplay visibility ---- */
+/* ---- autoplay visibility: current plays, current sound rules applied ---- */
 function setupReelsIntersectionObserver(){
   const reels = Array.from(document.querySelectorAll("#reelsWrap .reel"));
   if (!reels.length) return;
+
+  if (REELS_OBSERVER) {
+    try { REELS_OBSERVER.disconnect(); } catch(e){}
+    REELS_OBSERVER = null;
+  }
 
   REELS_OBSERVER = new IntersectionObserver((entries) => {
     entries.forEach((ent) => {
@@ -2003,11 +2026,14 @@ function setupReelsIntersectionObserver(){
       if (!v) return;
 
       if (ent.isIntersecting && ent.intersectionRatio >= 0.75){
+        // pause others
         document.querySelectorAll("#reelsWrap video").forEach(x => {
           if (x !== v) { try { x.pause(); } catch(e){} }
         });
 
-        v.muted = REELS_MUTED;
+        // ✅ current auto unmute (only if unlocked), others mute
+        setCurrentReelSound(v);
+
         const p = v.play();
         if (p && p.catch) p.catch(()=>{});
       } else {
@@ -2018,10 +2044,11 @@ function setupReelsIntersectionObserver(){
 
   reels.forEach(r => REELS_OBSERVER.observe(r));
 
+  // start first (muted থাকবে, unlock না হওয়া পর্যন্ত)
   setTimeout(() => {
     const first = reels[0]?.querySelector("video");
     if (!first) return;
-    first.muted = REELS_MUTED;
+    setCurrentReelSound(first);
     const p = first.play();
     if (p && p.catch) p.catch(()=>{});
   }, 80);
@@ -2031,7 +2058,7 @@ function setupReelsIntersectionObserver(){
 document.addEventListener("click", (e) => {
   if (!reelsPage || reelsPage.style.display !== "block") return;
 
-  // back button
+  // back arrow => home
   if (e.target.closest("#reelsBackBtn")){
     e.preventDefault();
     e.stopPropagation();
@@ -2046,12 +2073,17 @@ document.addEventListener("click", (e) => {
   const postId = reel.dataset.id;
   const v = reel.querySelector("video");
 
+  // mute toggle (current only)
   if (act === "mute"){
-    REELS_MUTED = !REELS_MUTED;
-    document.querySelectorAll("#reelsWrap video").forEach(x => x.muted = REELS_MUTED);
-    document.querySelectorAll("#reelsWrap .reel-mute-btn").forEach(btn => {
-      btn.textContent = REELS_MUTED ? "🔇" : "🔊";
-    });
+    REELS_SOUND_UNLOCKED = true;     // user gesture
+    REELS_USER_MUTED = !REELS_USER_MUTED;
+    setCurrentReelSound(v);
+
+    // keep playing
+    if (v) {
+      const p = v.play();
+      if (p && p.catch) p.catch(()=>{});
+    }
     return;
   }
 
@@ -2072,10 +2104,12 @@ document.addEventListener("click", (e) => {
     return;
   }
 
-  // tap video play/pause
+  // tap video: unlock sound + play/pause
   if (e.target.tagName === "VIDEO" && v){
+    REELS_SOUND_UNLOCKED = true;
+    setCurrentReelSound(v);
+
     if (v.paused) {
-      v.muted = REELS_MUTED;
       const p = v.play();
       if (p && p.catch) p.catch(()=>{});
     } else {
@@ -2108,13 +2142,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && reelsPage?.style.display === "block"){
     goHomeFromReels();
   }
-});
-
-/* ---- optional direct back button handler ---- */
-reelsBackBtn?.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  goHomeFromReels();
 });
 
 
