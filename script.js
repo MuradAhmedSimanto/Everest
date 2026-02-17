@@ -1816,11 +1816,17 @@ function stopAllReels(){
   document.querySelectorAll("#reelsWrap video").forEach(v => {
     try { v.pause(); } catch(e){}
   });
+
+  // ✅ stop like listeners
+  REELS_LIKE_UNSUBS.forEach(un => { try{ un && un(); }catch(e){} });
+  REELS_LIKE_UNSUBS.clear();
+
   if (REELS_OBSERVER) {
     try { REELS_OBSERVER.disconnect(); } catch(e){}
     REELS_OBSERVER = null;
   }
 }
+
 
 function hideReelsPage(){
   if (!reelsPage) return;
@@ -1885,13 +1891,18 @@ function setCurrentReelSound(currentVideo){
   });
 }
 
+/*like coment shere*/
 /* ---- build reel ---- */
-function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
+function buildReelCard({ postId, userId, media, caption, userName, userPhoto }) {
   const safeCaption = esc(caption || "");
   const safeName    = esc(userName || "User");
 
+  const me = auth.currentUser?.uid || "";
+  const isOwner = (me && me === userId);
+
   return `
-    <div class="reel" data-id="${postId}">
+    <div class="reel" data-id="${postId}" data-owner="${userId}">
+      
       <video class="reel-video"
         src="${media}"
         playsinline
@@ -1899,9 +1910,14 @@ function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
         preload="metadata"
         loop></video>
 
-      <button class="reel-mute-btn" data-act="mute" type="button">🔇</button>
+      <!-- TOP RIGHT (mute only) -->
+      <div class="reel-top-actions">
+        <button class="reel-mute-btn" data-act="mute" type="button">🔇</button>
+      </div>
 
       <div class="reel-overlay">
+        
+        <!-- USER + CAPTION -->
         <div class="reel-user">
           <img class="reel-avatar"
                data-uid="${userId}"
@@ -1914,10 +1930,10 @@ function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
 
               <span class="verified-badge"
                     data-verified-uid="${userId}"
-                    title="Verified"
                     style="display:none;">
-                <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+                <svg class="verified-icon" viewBox="0 0 24 24">
+                  <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
+                        fill="#ff1f1f"/>
                   <path d="M9.3 12.6l1.9 1.9 4.2-4.3"
                         fill="none"
                         stroke="#ffffff"
@@ -1932,11 +1948,61 @@ function buildReelCard({ postId, userId, media, caption, userName, userPhoto }){
           </div>
         </div>
 
+        <!-- RIGHT SIDE ACTIONS -->
         <div class="reel-actions">
-          <button class="reel-act" data-act="like" type="button">❤️</button>
-          <button class="reel-act" data-act="comment" type="button">💬</button>
-          <button class="reel-act" data-act="share" type="button">↗️</button>
+
+          <div class="reel-action-item" data-act="like">
+            <i class="fa-regular fa-heart"></i>
+            <div class="reel-count" data-kind="like"></div>
+          </div>
+
+          <div class="reel-action-item" data-act="comment">
+            <i class="fa-regular fa-comment"></i>
+            <div class="reel-count" data-kind="comment"></div>
+          </div>
+
+          <div class="reel-action-item" data-act="share">
+            <i class="fa-solid fa-share"></i>
+            <div class="reel-count" data-kind="share"></div>
+          </div>
+
+          <div class="reel-action-item" data-act="save">
+            <i class="fa-regular fa-bookmark"></i>
+            <div class="reel-count" data-kind="save"></div>
+          </div>
+
+          <!-- 3 DOT AT BOTTOM -->
+          <div class="reel-action-item reel-more-wrap" data-act="more">
+            <i class="fa-solid fa-ellipsis"></i>
+
+            <div class="reel-more-menu">
+
+              ${isOwner ? `
+              <div class="rm-item" data-act="delete">
+                <i class="fa-solid fa-trash"></i>
+                <span>Delete</span>
+              </div>` : ``}
+
+              <div class="rm-item" data-act="download">
+                <i class="fa-solid fa-download"></i>
+                <span>Download</span>
+              </div>
+
+              <div class="rm-item" data-act="copylink">
+                <i class="fa-solid fa-link"></i>
+                <span>Copy link</span>
+              </div>
+
+              <div class="rm-item" data-act="report">
+                <i class="fa-regular fa-flag"></i>
+                <span>Report</span>
+              </div>
+
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
   `;
@@ -1998,6 +2064,22 @@ function renderReels(){
 
   reelsWrap.innerHTML = html || `<div style="color:#fff;padding:18px;">No video posts</div>`;
 
+
+
+
+  // ✅ hydrate save icon (logged-in only)
+  setTimeout(async () => {
+    if (!auth.currentUser) return;
+    const reels = Array.from(document.querySelectorAll("#reelsWrap .reel"));
+    for (const r of reels){
+      const postId = r.dataset.id;
+      const saved = await isReelSaved(postId);
+      paintSaveIcon(r, saved);
+    }
+  }, 0);
+
+
+
   // your existing modules
   hydratePostUserNames?.();
   VERIFIED_CACHE?.clear?.();
@@ -2054,8 +2136,130 @@ function setupReelsIntersectionObserver(){
   }, 80);
 }
 
+
+
+
+
+// ===== REELS LIKE/SAVE (MODULAR) =====
+const REELS_LIKE_UNSUBS = new Map(); // postId -> unsub
+const REELS_SAVE_CACHE = new Map();  // postId -> true/false (current user)
+
+// login guard
+function ensureLoggedInForReels(msg){
+  if (!auth.currentUser){
+    promptSignup(msg || "Please signup to use reels");
+    return false;
+  }
+  return true;
+}
+
+// Like = use existing posts/{postId}/reactions/{uid}
+// We store emoji ❤️ and type love so your system stays consistent.
+async function toggleReelLike(postId){
+  if (!ensureLoggedInForReels("Please signup to like")) return;
+
+  const uid = auth.currentUser.uid;
+  const rRef = db.collection("posts").doc(postId).collection("reactions").doc(uid);
+
+  const snap = await rRef.get();
+  if (snap.exists && snap.data()?.emoji === "❤️"){
+    await rRef.delete();
+    return;
+  }
+
+  // get user meta (reuse your cache)
+  let userName = (MEMORY_PROFILE_NAME || "").trim();
+  let userPhoto = "";
+
+  const us = await db.collection("users").doc(uid).get();
+  if (us.exists){
+    const d = us.data() || {};
+    userName = userName || [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+    userPhoto = d.profilePic || "";
+    MEMORY_PROFILE_NAME = userName || MEMORY_PROFILE_NAME;
+  }
+
+  await rRef.set({
+    type: "love",
+    emoji: "❤️",
+    userId: uid,
+    userName: userName || "User",
+    userPhoto: userPhoto || "",
+    createdAt: Date.now()
+  });
+}
+
+// Listen like count for a reel (only once)
+function bindReelLikeCount(postId, reelEl){
+  if (REELS_LIKE_UNSUBS.has(postId)) return;
+
+  const countEl = reelEl.querySelector('.reel-count[data-kind="like"]');
+  const unsub = db.collection("posts").doc(postId).collection("reactions")
+    .onSnapshot((snap)=>{
+      // count only ❤️
+      let c = 0;
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        if (x.emoji === "❤️") c++;
+      });
+     
+     if (countEl) {
+  countEl.textContent = (c > 0) ? String(c) : "";
+}
+});
+  
+
+  REELS_LIKE_UNSUBS.set(postId, unsub);
+}
+
+// Save system: users/{uid}/savedReels/{postId}
+async function isReelSaved(postId){
+  const uid = auth.currentUser?.uid;
+  if (!uid) return false;
+
+  if (REELS_SAVE_CACHE.has(postId)) return REELS_SAVE_CACHE.get(postId);
+
+  const s = await db.collection("users").doc(uid).collection("savedReels").doc(postId).get();
+  const saved = s.exists;
+  REELS_SAVE_CACHE.set(postId, saved);
+  return saved;
+}
+
+async function paintSaveIcon(reelEl, saved){
+  const btn = reelEl.querySelector(".reel-save");
+  if (!btn) return;
+  btn.textContent = saved ? "✅" : "🔖";
+}
+
+async function toggleReelSave(postId, reelEl){
+  if (!ensureLoggedInForReels("Please signup to save")) return;
+
+  const uid = auth.currentUser.uid;
+  const ref = db.collection("users").doc(uid).collection("savedReels").doc(postId);
+
+  const snap = await ref.get();
+  if (snap.exists){
+    await ref.delete();
+    REELS_SAVE_CACHE.set(postId, false);
+    paintSaveIcon(reelEl, false);
+  } else {
+    await ref.set({ postId, createdAt: Date.now() });
+    REELS_SAVE_CACHE.set(postId, true);
+    paintSaveIcon(reelEl, true);
+  }
+}
+
+// Close all 3dot menus
+function closeAllReelMenus(){
+  document.querySelectorAll("#reelsWrap .reel-more-menu.open").forEach(m => m.classList.remove("open"));
+}
+
+
+
+
+
 /* ---- interactions inside reels ---- */
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   if (!reelsPage || reelsPage.style.display !== "block") return;
 
   // back arrow => home
@@ -2067,45 +2271,114 @@ document.addEventListener("click", (e) => {
   }
 
   const reel = e.target.closest("#reelsWrap .reel");
-  if (!reel) return;
-
-  const act = e.target.closest("[data-act]")?.dataset?.act;
-  const postId = reel.dataset.id;
-  const v = reel.querySelector("video");
-
-  // mute toggle (current only)
-  if (act === "mute"){
-    REELS_SOUND_UNLOCKED = true;     // user gesture
-    REELS_USER_MUTED = !REELS_USER_MUTED;
-    setCurrentReelSound(v);
-
-    // keep playing
-    if (v) {
-      const p = v.play();
-      if (p && p.catch) p.catch(()=>{});
-    }
+  if (!reel) {
+    // outside click -> close menus
+    closeAllReelMenus();
     return;
   }
 
+  const act = e.target.closest("[data-act]")?.dataset?.act;
+  const postId = reel.dataset.id;
+  const ownerId = reel.dataset.owner;
+  const v = reel.querySelector("video");
+
+  // bind count once (cheap)
+  bindReelLikeCount(postId, reel);
+
+  // ===== 3dot menu =====
+  if (act === "more"){
+    e.preventDefault();
+    e.stopPropagation();
+    const menu = reel.querySelector(".reel-more-menu");
+    if (!menu) return;
+
+    // close other menus first
+    closeAllReelMenus();
+    menu.classList.toggle("open");
+    return;
+  }
+
+  if (act === "download"){
+    const video = reel.querySelector("video");
+    if (!video?.src) return;
+
+    const a = document.createElement("a");
+    a.href = video.src;
+    a.download = "reel.mp4";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    closeAllReelMenus();
+    return;
+  }
+
+  if (act === "copylink"){
+    const url = location.href.split("#")[0] + "#reel=" + postId;
+    navigator.clipboard?.writeText(url).then(()=> alert("Link copied"))
+      .catch(()=> prompt("Copy this link:", url));
+    closeAllReelMenus();
+    return;
+  }
+
+  if (act === "report"){
+    // lightweight: store a report doc
+    if (!ensureLoggedInForReels("Please signup to report")) return;
+
+    await db.collection("reports").add({
+      postId,
+      ownerId,
+      reporterId: auth.currentUser.uid,
+      createdAt: Date.now()
+    });
+
+    alert("Reported");
+    closeAllReelMenus();
+    return;
+  }
+
+  // ===== mute =====
+  if (act === "mute"){
+    REELS_SOUND_UNLOCKED = true;
+    REELS_USER_MUTED = !REELS_USER_MUTED;
+    setCurrentReelSound(v);
+    if (v) { const p = v.play(); if (p && p.catch) p.catch(()=>{}); }
+    return;
+  }
+
+  // ===== Like =====
+  if (act === "like"){
+    closeAllReelMenus();
+    await toggleReelLike(postId);
+    return;
+  }
+
+  // ===== Comment (reuse your existing modal) =====
   if (act === "comment"){
+    closeAllReelMenus();
     if (typeof openCommentsModal === "function") openCommentsModal(postId);
     return;
   }
 
+  // ===== Save =====
+  if (act === "save"){
+    closeAllReelMenus();
+    await toggleReelSave(postId, reel);
+    return;
+  }
+
+  // ===== Share =====
   if (act === "share"){
+    closeAllReelMenus();
     const url = location.href.split("#")[0] + "#reel=" + postId;
     navigator.clipboard?.writeText(url).then(()=> alert("Link copied"))
       .catch(()=> prompt("Copy this link:", url));
     return;
   }
 
-  if (act === "like"){
-    // পরে চাইলে reaction connect করব
-    return;
-  }
-
   // tap video: unlock sound + play/pause
   if (e.target.tagName === "VIDEO" && v){
+    closeAllReelMenus();
     REELS_SOUND_UNLOCKED = true;
     setCurrentReelSound(v);
 
@@ -2117,6 +2390,7 @@ document.addEventListener("click", (e) => {
     }
   }
 });
+
 
 /* ---- open reels icon ---- */
 reelsIcon?.addEventListener("click", (e) => {
@@ -2366,7 +2640,7 @@ setTimeout(() => {
     } catch (err) {
       // Firebase মাঝে মাঝে INVALID_LOGIN_CREDENTIALS দেয়
       const code = err?.code || "";
-      let msg = "Login failed. Email/Phone বা Password ভুল (অথবা account নেই)";
+      let msg = "Login failed. The email/phone or password is incorrect (account does not exist).//";
 
       if (code === "auth/user-not-found") msg = "এই account পাওয়া যায়নি";
       else if (code === "auth/wrong-password") msg = "Password ভুল";
