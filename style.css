@@ -165,14 +165,6 @@ body.nav-hidden .menu-bar{
   padding-bottom: 10px;
 }
 
-/* ONLY POST MEDIA — NOT PROFILE PIC */
-.post > img,
-.post > video {
-  width: 100%;
-  max-height: 420px;
-  object-fit: cover;
-  display: block;
-}
 
 
 
@@ -902,33 +894,9 @@ body.modal-open{
 }
 
 
-/* ===== POST FULL WIDTH (FB STYLE) ===== */
-.feed,
-#feed,
-#profileFeed {
-  max-width: 680px;
-  margin: 0 auto;
-}
 
-.post {
-  width: 100%;
-  background: #fff;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-.post-media img,
-.post-media video {
-  width: 100%;
-  max-height: 80vh;
-  object-fit: cover;
-  display: block;
-}
 
 /*like btn*/
-
-
 
 /* Edit Post Modal */
 #editPostModal {
@@ -3236,4 +3204,64 @@ body.reels-open{
 
 .rm-item:hover{
   background: rgba(255,255,255,.08);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== MEDIA PERFECT: HOME + PROFILE (FINAL) ===== */
+
+/* post radius এক জায়গায় */
+.post{
+  overflow:hidden;
+  border-radius:10px;
+}
+
+/* ✅ VIDEO: কাটবে না, fixed সুন্দর height */
+#feed .post-media video,
+#profileFeed .post-media video{
+  width:100%;
+  height:420px;
+  max-height:none;
+  object-fit:contain;     /* ✅ no crop */
+  background:#000;        /* ✅ black bars */
+  display:block;
+  border-radius:0;
+}
+
+/* ✅ IMAGE: (কাটবে না) */
+#feed .post-media img,
+#profileFeed .post-media img{
+  width:100%;
+  max-height:520px;       /* ✅ limit */
+  object-fit:contain;     /* ✅ no crop */
+  background:#000;
+  display:block;
+  border-radius:0;
+}
+
+/* Mobile */
+@media (max-width:560px){
+  #feed .post-media video,
+  #profileFeed .post-media video{
+    height:360px;
+  }
 }
