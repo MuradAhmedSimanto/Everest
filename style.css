@@ -2938,187 +2938,347 @@ body.dark .pm-item:first-child{
 
 
 /*rells*/
-/* ===== REELS (TikTok style) - FULLSCREEN ONLY ===== */
-/* ================== REELS (TikTok 1-swipe 1-video) ================== */
+/* =========================
+   REELS PAGE (TikTok-like)
+   FULL REPLACE CSS
+   ========================= */
 
-/* full screen overlay page */
+/* Root overlay */
 #reelsPage{
   position: fixed;
   inset: 0;
-  background:#000;
+  background: #000;
   z-index: 999999;
-  overflow: hidden;
   display: none;
+  overflow: hidden;               /* outer never scroll */
+  touch-action: none;             /* prevent page pan */
 }
 
-/* ✅ container = scroll area */
-.reels-wrap{
-  height: 100svh;                 /* modern mobile safe viewport */
-  height: 100vh;                  /* fallback */
+/* Disable body scroll when reels open */
+body.reels-open{
+  position: fixed;                /* real lock (better than overflow hidden) */
   width: 100%;
+  overflow: hidden;
+}
+
+/* ✅ Scroll container */
+.reels-wrap{
+  height: 100dvh;                 /* best for mobile dynamic bars */
+  height: 100svh;                 /* safe fallback */
+  height: 100vh;                  /* final fallback */
+  width: 100%;
+
   overflow-y: auto;
   overflow-x: hidden;
 
-  scroll-snap-type: y mandatory;  /* ✅ snap */
-  scroll-padding-top: 0px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain; /* ✅ prevents rubber band */
+  /* TikTok-like snap */
+  scroll-snap-type: y mandatory;
+  scroll-snap-stop: always;
 
-  scrollbar-width: none;          /* firefox hide scrollbar */
+  /* smoother scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+
+  /* avoid rubber band affecting page */
+  overscroll-behavior: contain;
+
+  /* reduce accidental horizontal pan */
+  touch-action: pan-y;
+
+  /* hide scrollbar */
+  scrollbar-width: none;
+  scroll-behavior: smooth;
 }
-.reels-wrap::-webkit-scrollbar{   /* chrome hide scrollbar */
+.reels-wrap::-webkit-scrollbar{
   width: 0;
   height: 0;
 }
 
-/* ✅ each reel = exactly 1 screen */
+/* ✅ Each reel is exactly one viewport */
 .reel{
   position: relative;
+  height: 100dvh;
   height: 100svh;
   height: 100vh;
   width: 100%;
 
   scroll-snap-align: start;
-  scroll-snap-stop: always;       /* ✅ one swipe = one snap */
+  scroll-snap-stop: always;
+
   background:#000;
+  overflow: hidden;               /* important for cover crop */
 }
 
-/* video full cover */
+/* ✅ Video cover + no layout shift */
 .reel video,
 .reel-video{
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display:block;
-  background:#000;
+  object-fit: cover;              /* full cover */
+  object-position: center;        /* center crop */
+  display: block;
+  background: #000;
+
+  /* reduce accidental tap delay / selection */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+
+  /* keeps iOS from messing with aspect */
+  transform: translateZ(0);
 }
 
-/* overlay */
-.reel-overlay{
-  position:absolute;
-  left: 12px;
-  bottom: 16px;
-  right: 12px;
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  pointer-events:none;
+/* Optional: if your videos have controls in HTML, hide them visually style-wise */
+.reel video::-webkit-media-controls{
+  display: none !important;
 }
 
-.reel-user{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  max-width: 78%;
-}
-
-.reel-avatar{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  object-fit:cover;
-  border:2px solid rgba(255,255,255,.35);
-  background:#222;
-}
-
-.reel-meta{
-  color:#fff;
-  line-height:1.15;
-}
-
-.reel-name{
-  font-weight:700;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:15px;
-}
-
-.reel-caption{
-  margin-top:6px;
-  font-size:13px;
-  opacity:.9;
-  max-width: 95%;
-  display:-webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow:hidden;
-}
-
-/* actions */
-.reel-actions{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  align-items:center;
-  margin-bottom: 8px;
-  pointer-events:auto;
-}
-
-.reel-btn, .reel-act{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background: rgba(255,255,255,.12);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  border:1px solid rgba(255,255,255,.18);
-  cursor:pointer;
-  user-select:none;
-}
-
-/* mute button (top right) */
-.reel-mute-btn, .reel-mute{
-  position:absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 6;
-  pointer-events:auto;
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background: rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.18);
-  color:#fff;
-}
-
-/* ✅ reels open থাকলে body scroll বন্ধ */
-body.reels-open{
-  overflow: hidden;
-}
-
-/* header (back + title) */
+/* ✅ Header (Back + title) */
 .reels-header{
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 55px;
+  height: 56px;
+
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 14px;
-  background: linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
-  z-index: 7;
+
+  background: linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,0));
+  z-index: 20;
   pointer-events: auto;
 }
 
 .reels-back{
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,.15);
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.18);
+
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   cursor: pointer;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .reels-title{
   color: #fff;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* ✅ Mute button (top right) */
+.reel-mute-btn,
+.reel-mute{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 21;
+  pointer-events: auto;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ✅ Overlay bottom (caption/user + actions) */
+.reel-overlay{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom)); /* safe area */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+
+  z-index: 15;
+  pointer-events: none;           /* allow video tap except buttons */
+}
+
+/* user area */
+.reel-user{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  max-width: 78%;
+  pointer-events: none;
+}
+
+.reel-avatar{
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,.35);
+  background: #222;
+  flex: 0 0 auto;
+}
+
+.reel-meta{
+  color: #fff;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.reel-name{
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reel-caption{
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: .92;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  max-width: 95%;
+}
+
+/* actions column */
+.reel-actions{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 6px;
+
+  pointer-events: auto;           /* clickable */
+  z-index: 16;
+}
+
+.reel-btn,
+.reel-act{
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  user-select: none;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition: transform .12s ease;
+}
+.reel-btn:active,
+.reel-act:active{
+  transform: scale(.94);
+}
+
+/* ✅ Make it feel “snappy” on fast flicks */
+.reels-wrap{
+  scroll-snap-type: y mandatory;
+}
+
+/* Optional: a subtle fade at bottom for readability */
+.reel::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height: 42%;
+  background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+  pointer-events:none;
+  z-index: 10;
+}
+
+
+
+
+/*like coment shere 3dot*/
+.reel-action-item{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.18);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  pointer-events:auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.reel-action-item i{
+  pointer-events:none; /* icon এ ক্লিক হলেও wrapper click ধরবে */
+}
+
+/* wrapper must be relative for menu position */
+.reel-more-wrap{ position: relative; }
+
+/* menu show/hide */
+.reel-more-wrap .reel-more-menu{
+  position:absolute;
+  right:52px;                 /* actions bar এর বামে menu */
+  bottom:0;
+  min-width:190px;
+  background: rgba(20,20,20,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  overflow:hidden;
+  display:none;
+  z-index:9999999;
+  pointer-events:auto;
+}
+
+.reel-more-wrap .reel-more-menu.open{ display:block; }
+
+.rm-item{
+  padding:12px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.rm-item i{
+  width:18px;
+  text-align:center;
+}
+
+.rm-item:hover{
+  background: rgba(255,255,255,.08);
 }
