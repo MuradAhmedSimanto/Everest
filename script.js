@@ -1866,6 +1866,8 @@ function openReelsPage(){
   if (typeof settingsPage !== "undefined" && settingsPage) settingsPage.style.display = "none";
 
   reelsPage.style.display = "block";
+  document.body.classList.add("reels-open");
+  document.body.classList.remove("reels-open");
   icons.forEach(i => i.classList.remove("active"));
   reelsIcon?.classList.add("active");
 
