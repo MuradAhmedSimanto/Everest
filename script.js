@@ -735,13 +735,12 @@ document.addEventListener("click", (e) => {
   if (!clickedUser) return;
 
   const uid = clickedUser.dataset.uid;
+  if (!uid) return;
 
-  if (!auth || !auth.currentUser) {
-    promptSignup("Please signup to view profiles");
-    return;
-  }
+  // ✅ Guest allowed to view profiles from posts
+  // (Navbar profile button still protected separately)
 
-  // ✅ instant prefill from DOM
+  // instant prefill from DOM (fast header render)
   const postEl = clickedUser.closest(".post");
   const nameEl = postEl?.querySelector(`.uname[data-uid="${uid}"]`);
   const imgEl  = postEl?.querySelector(`.post-user-pic[data-uid="${uid}"]`);
@@ -751,11 +750,13 @@ document.addEventListener("click", (e) => {
     photo: imgEl?.getAttribute("src") || imgEl?.src || ""
   };
 
-  // cache it (next time even faster)
+  // cache for speed
   cacheUserHeader(uid, prefill);
 
+  // open profile (guest-safe)
   openUserProfile(uid, prefill);
 });
+
 
 
 const signupBtn   = document.getElementById("signupBtn");
