@@ -27,6 +27,22 @@ async function uploadToCloudinary(file) {
 
 
 
+// ===== USER HEADER CACHE (instant profile header) =====
+const USER_HEADER_CACHE = new Map(); // uid -> {name, photo, cover, ts}
+
+function cacheUserHeader(uid, data){
+  if (!uid) return;
+  USER_HEADER_CACHE.set(uid, {
+    name: data.name || "",
+    photo: data.photo || "",
+    cover: data.cover || "",
+    ts: Date.now()
+  });
+}
+
+function getCachedUserHeader(uid){
+  return USER_HEADER_CACHE.get(uid) || null;
+}
 
 
 
@@ -159,6 +175,7 @@ homeIcon.onclick = () => {
   document.body.classList.remove("profile-mode"); // ✅ add
 };
 
+
 profileIcon.onclick = () => {
 
   // guest হলে শুধু message দেখাবে, modal খুলবে না
@@ -167,21 +184,29 @@ profileIcon.onclick = () => {
     return;
   }
 
+  const myUid = auth.currentUser.uid;
+
+  const prefill = {
+    name: (MEMORY_PROFILE_NAME || "").trim(),
+    photo:
+      document.getElementById("profilePicBig")?.src ||
+      document.getElementById("profilePic")?.src ||
+      ""
+  };
+
+  cacheUserHeader(myUid, prefill);
+  openUserProfile(myUid, prefill);
+
   homePage.style.display = "none";
   profilePage.style.display = "block";
   notificationPage.style.display = "none";
   messagePage.style.display = "none";
   setActive(profileIcon);
 
-
-
-  const profileFeed = document.getElementById("profileFeed");
-  
-  
   window.scrollTo(0, 0);
-
-  document.body.classList.add("profile-mode"); // ✅ add
+  document.body.classList.add("profile-mode");
 };
+
 
 notificationIcon.onclick = () => {
   homePage.style.display = "none";
@@ -204,6 +229,46 @@ messageIcon.onclick = () => {
 
 
 
+//oner profile//
+function setProfileOwnerUI(isOwner){
+  // camera buttons
+  const profileCam = document.getElementById("profileCam");
+  const coverCam   = document.getElementById("coverCam");
+
+  // bio edit
+  const editBioBtn = document.getElementById("editBioBtn");
+  const saveBioBtn = document.getElementById("saveBioBtn");
+  const bioInput   = document.getElementById("bioInput");
+  const bioText    = document.getElementById("bioText");
+
+  // optional: change name button (settings/dropdown এ থাকলে)
+  const changeNameBtn = document.getElementById("changeNameBtn");
+
+  const show = (el) => { if (el) el.style.display = ""; };
+  const hide = (el) => { if (el) el.style.display = "none"; };
+
+  if (isOwner){
+    show(profileCam);
+    show(coverCam);
+    show(editBioBtn);
+    // save button normally hidden থাকে edit click না করা পর্যন্ত
+    if (saveBioBtn) saveBioBtn.style.display = "none";
+    if (bioInput) bioInput.style.display = "none";
+    if (bioText) bioText.style.display = "block";
+    show(changeNameBtn);
+  } else {
+    hide(profileCam);
+    hide(coverCam);
+    hide(editBioBtn);
+    hide(saveBioBtn);
+
+    // অন্যের প্রোফাইলে bio input/show state clean রাখো
+    if (bioInput) bioInput.style.display = "none";
+    if (bioText) bioText.style.display = "block";
+
+    hide(changeNameBtn);
+  }
+}
 
 
 
@@ -663,22 +728,31 @@ function promptSignup(message = "Please signup to react") {
   }
 }
 
-/* ================= GUEST BLOCK: PROFILE CLICK ================= */
-/* ⚠️ এটা শুধু একবারই থাকবে */
 document.addEventListener("click", (e) => {
-  const clickedUser = e.target.closest(
-    ".post-user-pic[data-uid], .uname[data-uid]"
-  );
+  const clickedUser = e.target.closest(".post-user-pic[data-uid], .uname[data-uid]");
   if (!clickedUser) return;
 
-  // guest হলে signup দেখাবে
+  const uid = clickedUser.dataset.uid;
+
   if (!auth || !auth.currentUser) {
     promptSignup("Please signup to view profiles");
     return;
   }
 
-  // future: logged-in হলে profile open
-  // const uid = clickedUser.dataset.uid;
+  // ✅ instant prefill from DOM
+  const postEl = clickedUser.closest(".post");
+  const nameEl = postEl?.querySelector(`.uname[data-uid="${uid}"]`);
+  const imgEl  = postEl?.querySelector(`.post-user-pic[data-uid="${uid}"]`);
+
+  const prefill = {
+    name: (nameEl?.textContent || "").trim(),
+    photo: imgEl?.getAttribute("src") || imgEl?.src || ""
+  };
+
+  // cache it (next time even faster)
+  cacheUserHeader(uid, prefill);
+
+  openUserProfile(uid, prefill);
 });
 
 
@@ -1738,7 +1812,7 @@ auth.onAuthStateChanged((user) => {
       const profileFeed = document.getElementById("profileFeed");
 
       if (feed) feed.innerHTML = "";
-      if (profileFeed) profileFeed.innerHTML = "";
+      
 
       snapshot.forEach((doc) => {
         const p = doc.data();
@@ -1756,22 +1830,6 @@ auth.onAuthStateChanged((user) => {
           updateType: p.updateType,
           target: "home"
         });
-
-        // PROFILE: শুধু logged-in user তার নিজের পোস্ট দেখবে
-        if (user && p.userId === user.uid) {
-          createPost({
-            postId: doc.id,
-            userId: p.userId,
-            type: p.type,
-            media: p.media,
-            caption: p.caption,
-            userName: p.userName,
-            userPhoto: p.userPhoto,
-            isProfileUpdate: p.isProfileUpdate,
-            updateType: p.updateType,
-            target: "profile"
-          });
-        }
       });
 
       hydratePostUserPhoto();
@@ -1783,7 +1841,123 @@ auth.onAuthStateChanged((user) => {
     });
 });
 
+//vdo system
+// ================= HOME FEED: SINGLE VIDEO AUTOPLAY (NO AUTO MUTE) =================
 
+let FEED_VIDEO_OBSERVER = null;
+let FEED_ACTIVE_VIDEO = null;
+
+// pause all feed videos except one
+function pauseAllFeedVideos(exceptVideo = null){
+  document.querySelectorAll("#feed video").forEach(v => {
+    if (exceptVideo && v === exceptVideo) return;
+    try { v.pause(); } catch(e){}
+  });
+}
+
+// play one video, pause others
+function playOnlyThisFeedVideo(v){
+  if (!v) return;
+
+  // single-play rule
+  pauseAllFeedVideos(v);
+
+  FEED_ACTIVE_VIDEO = v;
+
+  // user manually paused => don't auto-play again
+  if (v.dataset.userPaused === "1") return;
+
+  // ✅ NO AUTO MUTE here
+  // keep current muted state as user set it (default false)
+  const p = v.play();
+  if (p && p.catch) p.catch(()=>{});
+}
+
+// init / re-init system after feed re-render
+function initFeedVideoSystem(){
+  // cleanup old observer
+  if (FEED_VIDEO_OBSERVER){
+    try { FEED_VIDEO_OBSERVER.disconnect(); } catch(e){}
+    FEED_VIDEO_OBSERVER = null;
+  }
+
+  FEED_ACTIVE_VIDEO = null;
+
+  const videos = Array.from(document.querySelectorAll("#feed video"));
+  if (!videos.length) return;
+
+  videos.forEach(v => {
+    // flags
+    if (!v.dataset.userPaused) v.dataset.userPaused = "0";
+    if (!v.dataset.feedBound) v.dataset.feedBound = "0";
+
+    // ✅ do not force mute
+    // do not touch v.muted at all
+
+    // bind once
+    if (v.dataset.feedBound !== "1"){
+      v.dataset.feedBound = "1";
+
+      // tap/click toggle play/pause
+      v.addEventListener("click", (e) => {
+        // if you have menu overlay etc, you can remove preventDefault
+        e.preventDefault();
+
+        if (v.paused){
+          v.dataset.userPaused = "0";
+          playOnlyThisFeedVideo(v);
+        } else {
+          v.dataset.userPaused = "1";
+          try { v.pause(); } catch(e){}
+        }
+      });
+
+      // if user plays via native controls, enforce single-play
+      v.addEventListener("play", () => {
+        v.dataset.userPaused = "0";
+        pauseAllFeedVideos(v);
+        FEED_ACTIVE_VIDEO = v;
+      });
+
+      // if ended, clear active
+      v.addEventListener("ended", () => {
+        if (FEED_ACTIVE_VIDEO === v) FEED_ACTIVE_VIDEO = null;
+      });
+    }
+  });
+
+  // viewport observer: in => play, out => pause
+  FEED_VIDEO_OBSERVER = new IntersectionObserver((entries) => {
+    // pick the most visible intersecting video
+    let best = null;
+
+    for (const entry of entries){
+      const v = entry.target;
+
+      if (!entry.isIntersecting || entry.intersectionRatio < 0.65){
+        // out of screen => pause
+        try { v.pause(); } catch(e){}
+        continue;
+      }
+
+      if (!best || entry.intersectionRatio > best.ratio){
+        best = { v, ratio: entry.intersectionRatio };
+      }
+    }
+
+    // if no candidate, nothing to autoplay
+    if (!best) return;
+
+    // if user manually paused this one, don't force play
+    if (best.v.dataset.userPaused === "1") return;
+
+    // autoplay the best visible one
+    playOnlyThisFeedVideo(best.v);
+
+  }, { threshold: [0.65, 0.75, 0.85, 0.95] });
+
+  videos.forEach(v => FEED_VIDEO_OBSERVER.observe(v));
+}
 
 
 
@@ -2190,6 +2364,141 @@ async function toggleReelLike(postId){
     createdAt: Date.now()
   });
 }
+
+
+
+
+
+// ===== PROFILE VIEW STATE =====
+let VIEW_PROFILE_UID = null;
+let PROFILE_POSTS_UNSUB = null;
+
+function stopProfilePostsListener(){
+  if (typeof PROFILE_POSTS_UNSUB === "function") PROFILE_POSTS_UNSUB();
+  PROFILE_POSTS_UNSUB = null;
+}
+
+function showOnlyProfilePage(){
+  homePage.style.display = "none";
+  profilePage.style.display = "block";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  setActive(profileIcon);
+  window.scrollTo(0,0);
+  document.body.classList.add("profile-mode");
+}
+
+let PROFILE_OPEN_TOKEN = 0;
+
+// ===== VIEW OTHER USER PROFILE (STATE) =====
+async function openUserProfile(uid, prefill = {}) {
+  if (!uid) return;
+
+  const token = ++PROFILE_OPEN_TOKEN;
+  VIEW_PROFILE_UID = uid;
+
+  const me = auth.currentUser?.uid || "";
+  const isOwner = (me && me === uid);
+
+  setProfileOwnerUI(isOwner);
+  showOnlyProfilePage();
+
+  const pn = document.getElementById("profileName");
+  const profileFeed = document.getElementById("profileFeed");
+
+  const fallbackAvatar = "https://i.imgur.com/6VBx3io.png";
+
+  // ✅ pick best instant header: prefill > cache > minimal
+  const cached = getCachedUserHeader(uid) || {};
+  const instantName  = (prefill.name  || cached.name  || " ");
+  const instantPhoto = (prefill.photo || cached.photo || fallbackAvatar);
+  const instantCover = (prefill.cover || cached.cover || "");
+
+  if (pn) pn.textContent = instantName;         // ✅ no "Loading..."
+  if (profilePic) profilePic.src = instantPhoto;
+  if (profilePicBig) profilePicBig.src = instantPhoto;
+  if (coverPic) coverPic.src = instantCover;
+
+  const pb = document.getElementById("profileVerifiedBadge");
+  if (pb) pb.dataset.verifiedUid = uid;
+
+  // ✅ show posts skeleton तुरंत
+  if (profileFeed) {
+    profileFeed.innerHTML = `
+      <div style="padding:12px;">
+        ${Array.from({length:4}).map(()=>`
+          <div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06);opacity:.7;">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width:38px;height:38px;border-radius:50%;background:#eee;"></div>
+              <div style="height:12px;width:140px;background:#eee;border-radius:6px;"></div>
+            </div>
+            <div style="height:12px;width:90%;background:#eee;border-radius:6px;margin-top:12px;"></div>
+            <div style="height:12px;width:70%;background:#eee;border-radius:6px;margin-top:8px;"></div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  stopProfilePostsListener();
+
+  // ---- fetch user header (real) ----
+  const uSnap = await db.collection("users").doc(uid).get();
+  if (token !== PROFILE_OPEN_TOKEN) return;
+
+  const u = uSnap.exists ? (uSnap.data() || {}) : {};
+  const fullName = [u.firstName, u.lastName].filter(Boolean).join(" ").trim() || "User";
+
+  const profilePicUrl = u.profilePic || instantPhoto || fallbackAvatar;
+  const coverPicUrl   = u.coverPic || instantCover || "";
+
+  if (pn) pn.textContent = fullName;
+  if (profilePic) profilePic.src = profilePicUrl;
+  if (profilePicBig) profilePicBig.src = profilePicUrl;
+  if (coverPic) coverPic.src = coverPicUrl;
+
+  // ✅ cache for next time
+  cacheUserHeader(uid, { name: fullName, photo: profilePicUrl, cover: coverPicUrl });
+
+  VERIFIED_CACHE.clear();
+  hydrateVerifiedBadges();
+
+  // ---- load posts realtime ----
+  PROFILE_POSTS_UNSUB = db.collection("posts")
+    .where("userId", "==", uid)
+    .orderBy("createdAt", "desc")
+    .limit(50)
+    .onSnapshot((snap) => {
+      if (token !== PROFILE_OPEN_TOKEN) return;
+
+      if (profileFeed) profileFeed.innerHTML = "";
+
+      snap.forEach((doc) => {
+        const p = doc.data() || {};
+        createPost({
+          postId: doc.id,
+          userId: p.userId,
+          type: p.type,
+          media: p.media,
+          caption: p.caption,
+          userName: p.userName,
+          userPhoto: p.userPhoto,
+          isProfileUpdate: p.isProfileUpdate,
+          updateType: p.updateType,
+          target: "profile"
+        });
+      });
+
+      hydratePostUserPhoto();
+      hydratePostUserNames();
+      VERIFIED_CACHE.clear();
+      hydrateVerifiedBadges();
+      initFeedVideoSystem();
+    }, (err) => console.error("profile posts error:", err));
+}
+
+
+
 
 // Listen like count for a reel (only once)
 function bindReelLikeCount(postId, reelEl){
@@ -3213,5 +3522,5 @@ cmodalInput.addEventListener("input", () => {
     const isDark = toggle.checked;
     document.body.classList.toggle("dark", isDark);
     localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
+  }); 
 })();
