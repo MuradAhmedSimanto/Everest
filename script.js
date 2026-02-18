@@ -177,7 +177,7 @@ homeIcon.onclick = () => {
 
 
 profileIcon.onclick = () => {
-
+  
   // guest হলে শুধু message দেখাবে, modal খুলবে না
   if (typeof auth === "undefined" || !auth.currentUser) {
     alert("Please signup to view profile");
@@ -209,6 +209,7 @@ profileIcon.onclick = () => {
 
 
 notificationIcon.onclick = () => {
+  
   homePage.style.display = "none";
   profilePage.style.display = "none";
   messagePage.style.display = "none";
@@ -218,6 +219,7 @@ notificationIcon.onclick = () => {
 };
 
 messageIcon.onclick = () => {
+  
   homePage.style.display = "none";
   profilePage.style.display = "none";
   notificationPage.style.display = "none";
@@ -1842,126 +1844,194 @@ auth.onAuthStateChanged((user) => {
 });
 
 //vdo system
-// ================= HOME FEED: SINGLE VIDEO AUTOPLAY (NO AUTO MUTE) =================
+// ================= HOME FEED: MANUAL PLAY ONLY + SINGLE VIDEO RULE + OUT-OF-VIEW AUTO PAUSE (CLEAN) =================
 
 let FEED_VIDEO_OBSERVER = null;
 let FEED_ACTIVE_VIDEO = null;
 
-// pause all feed videos except one
-function pauseAllFeedVideos(exceptVideo = null){
-  document.querySelectorAll("#feed video").forEach(v => {
+// ✅ cleanup hooks (prevents scroll listener leak)
+let FEED_SCROLL_TARGET = null;
+let FEED_SCROLL_HANDLER = null;
+let FEED_RESIZE_HANDLER = null;
+
+function getFeedVideos() {
+  return Array.from(document.querySelectorAll("#feed video"));
+}
+
+function safePause(v) {
+  if (!v) return;
+  try { v.pause(); } catch (e) {}
+}
+
+function safePlay(v) {
+  if (!v) return;
+  const p = v.play();
+  if (p && typeof p.catch === "function") p.catch(() => {});
+}
+
+function pauseAllExcept(exceptVideo = null) {
+  getFeedVideos().forEach(v => {
     if (exceptVideo && v === exceptVideo) return;
-    try { v.pause(); } catch(e){}
+    safePause(v);
   });
 }
 
-// play one video, pause others
-function playOnlyThisFeedVideo(v){
-  if (!v) return;
-
-  // single-play rule
-  pauseAllFeedVideos(v);
-
-  FEED_ACTIVE_VIDEO = v;
-
-  // user manually paused => don't auto-play again
-  if (v.dataset.userPaused === "1") return;
-
-  // ✅ NO AUTO MUTE here
-  // keep current muted state as user set it (default false)
-  const p = v.play();
-  if (p && p.catch) p.catch(()=>{});
+function setActiveVideo(v) {
+  FEED_ACTIVE_VIDEO = v || null;
 }
 
-// init / re-init system after feed re-render
-function initFeedVideoSystem(){
-  // cleanup old observer
-  if (FEED_VIDEO_OBSERVER){
-    try { FEED_VIDEO_OBSERVER.disconnect(); } catch(e){}
+// ✅ find real scroll root (feed container or viewport)
+function getScrollRoot() {
+  const feed = document.querySelector("#feed");
+  if (!feed) return null;
+
+  const style = getComputedStyle(feed);
+  const canScroll = /(auto|scroll)/.test(style.overflowY) && feed.scrollHeight > feed.clientHeight;
+  return canScroll ? feed : null; // null => viewport
+}
+
+// ✅ strict: fully out of view = pause (works for container or window)
+function isFullyOutOfView(v, rootEl) {
+  const r = v.getBoundingClientRect();
+
+  if (rootEl) {
+    const fr = rootEl.getBoundingClientRect();
+    return (
+      r.bottom <= fr.top ||
+      r.top >= fr.bottom ||
+      r.right <= fr.left ||
+      r.left >= fr.right
+    );
+  }
+
+  return (
+    r.bottom <= 0 ||
+    r.top >= window.innerHeight ||
+    r.right <= 0 ||
+    r.left >= window.innerWidth
+  );
+}
+
+function bindVideoOnce(v) {
+  if (!v || v.dataset.feedBound === "1") return;
+  v.dataset.feedBound = "1";
+
+  // Manual tap/click toggle only (when controls=false)
+  v.addEventListener("click", (e) => {
+    if (v.controls) return; // controls enabled হলে play listener handle করবে
+    e.preventDefault();
+
+    if (v.paused) {
+      pauseAllExcept(v);
+      setActiveVideo(v);
+      safePlay(v);
+    } else {
+      safePause(v);
+      if (FEED_ACTIVE_VIDEO === v) setActiveVideo(null);
+    }
+  });
+
+  // Any play (controls/programmatic) => single play enforce
+  v.addEventListener("play", () => {
+    pauseAllExcept(v);
+    setActiveVideo(v);
+  });
+
+  v.addEventListener("pause", () => {
+    if (FEED_ACTIVE_VIDEO === v) setActiveVideo(null);
+  });
+
+  v.addEventListener("ended", () => {
+    if (FEED_ACTIVE_VIDEO === v) setActiveVideo(null);
+  });
+}
+
+// ✅ external hard stop (page change etc.)
+function stopHomeFeedVideos() {
+  getFeedVideos().forEach(v => safePause(v));
+  setActiveVideo(null);
+}
+
+function initFeedVideoSystem() {
+  // ---------- cleanup previous ----------
+  if (FEED_VIDEO_OBSERVER) {
+    try { FEED_VIDEO_OBSERVER.disconnect(); } catch (e) {}
     FEED_VIDEO_OBSERVER = null;
   }
 
-  FEED_ACTIVE_VIDEO = null;
+  if (FEED_SCROLL_TARGET && FEED_SCROLL_HANDLER) {
+    try { FEED_SCROLL_TARGET.removeEventListener("scroll", FEED_SCROLL_HANDLER); } catch(e){}
+  }
+  if (FEED_RESIZE_HANDLER) {
+    try { window.removeEventListener("resize", FEED_RESIZE_HANDLER); } catch(e){}
+  }
 
-  const videos = Array.from(document.querySelectorAll("#feed video"));
+  FEED_SCROLL_TARGET = null;
+  FEED_SCROLL_HANDLER = null;
+  FEED_RESIZE_HANDLER = null;
+
+  setActiveVideo(null);
+
+  // ---------- bind current videos ----------
+  const videos = getFeedVideos();
   if (!videos.length) return;
 
-  videos.forEach(v => {
-    // flags
-    if (!v.dataset.userPaused) v.dataset.userPaused = "0";
-    if (!v.dataset.feedBound) v.dataset.feedBound = "0";
+  videos.forEach(bindVideoOnce);
 
-    // ✅ do not force mute
-    // do not touch v.muted at all
+  const rootEl = getScrollRoot();
 
-    // bind once
-    if (v.dataset.feedBound !== "1"){
-      v.dataset.feedBound = "1";
+  // ---------- single source of truth: pause if out of view ----------
+  const checkAll = () => {
+    const vids = getFeedVideos();
+    vids.forEach(v => {
+      // playing + fully out => pause
+      if (!v.paused && isFullyOutOfView(v, rootEl)) {
+        safePause(v);
+        if (FEED_ACTIVE_VIDEO === v) setActiveVideo(null);
+      }
+    });
+  };
 
-      // tap/click toggle play/pause
-      v.addEventListener("click", (e) => {
-        // if you have menu overlay etc, you can remove preventDefault
-        e.preventDefault();
-
-        if (v.paused){
-          v.dataset.userPaused = "0";
-          playOnlyThisFeedVideo(v);
-        } else {
-          v.dataset.userPaused = "1";
-          try { v.pause(); } catch(e){}
-        }
-      });
-
-      // if user plays via native controls, enforce single-play
-      v.addEventListener("play", () => {
-        v.dataset.userPaused = "0";
-        pauseAllFeedVideos(v);
-        FEED_ACTIVE_VIDEO = v;
-      });
-
-      // if ended, clear active
-      v.addEventListener("ended", () => {
-        if (FEED_ACTIVE_VIDEO === v) FEED_ACTIVE_VIDEO = null;
-      });
-    }
-  });
-
-  // viewport observer: in => play, out => pause
+  // IntersectionObserver (fast path)
   FEED_VIDEO_OBSERVER = new IntersectionObserver((entries) => {
-    // pick the most visible intersecting video
-    let best = null;
-
-    for (const entry of entries){
+    for (const entry of entries) {
       const v = entry.target;
 
-      if (!entry.isIntersecting || entry.intersectionRatio < 0.65){
-        // out of screen => pause
-        try { v.pause(); } catch(e){}
-        continue;
-      }
-
-      if (!best || entry.intersectionRatio > best.ratio){
-        best = { v, ratio: entry.intersectionRatio };
+      // If not intersecting => fully out => pause
+      if (!entry.isIntersecting) {
+        safePause(v);
+        if (FEED_ACTIVE_VIDEO === v) setActiveVideo(null);
       }
     }
-
-    // if no candidate, nothing to autoplay
-    if (!best) return;
-
-    // if user manually paused this one, don't force play
-    if (best.v.dataset.userPaused === "1") return;
-
-    // autoplay the best visible one
-    playOnlyThisFeedVideo(best.v);
-
-  }, { threshold: [0.65, 0.75, 0.85, 0.95] });
+  }, {
+    root: rootEl,
+    rootMargin: "0px",
+    threshold: [0, 0.01]
+  });
 
   videos.forEach(v => FEED_VIDEO_OBSERVER.observe(v));
+
+  // Scroll/resize fallback (fixes any IO edge case)
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      checkAll();
+    });
+  };
+
+  FEED_SCROLL_TARGET = rootEl || window;
+  FEED_SCROLL_HANDLER = onScroll;
+  FEED_RESIZE_HANDLER = onScroll;
+
+  FEED_SCROLL_TARGET.addEventListener("scroll", FEED_SCROLL_HANDLER, { passive: true });
+  window.addEventListener("resize", FEED_RESIZE_HANDLER, { passive: true });
+
+  // run once
+  checkAll();
 }
-
-
-
-
 
 
 
@@ -2031,6 +2101,7 @@ function goHomeFromReels(){
 
 /* ---- open reels ---- */
 function openReelsPage(){
+  stopHomeFeedVideos();
   if (!reelsPage || !reelsWrap) return;
 
   homePage.style.display = "none";
