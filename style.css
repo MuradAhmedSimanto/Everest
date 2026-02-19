@@ -3291,7 +3291,7 @@ body.reels-open{
   gap:10px;
   padding:10px 12px;
   background:#fff;
-  border-bottom:1px solid rgba(0,0,0,.06);
+  border-bottom: none;
 }
 
 .friends-title{
