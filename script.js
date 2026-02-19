@@ -209,7 +209,7 @@ profileIcon.onclick = () => {
 
 
 notificationIcon.onclick = () => {
-  
+  setNavbarVisible(false);
   homePage.style.display = "none";
   profilePage.style.display = "none";
   messagePage.style.display = "none";
@@ -219,7 +219,7 @@ notificationIcon.onclick = () => {
 };
 
 messageIcon.onclick = () => {
-  
+  setNavbarVisible(false);
   homePage.style.display = "none";
   profilePage.style.display = "none";
   notificationPage.style.display = "none";
@@ -3612,6 +3612,7 @@ function stopFriendsListener(){
 }
 
 function openFriendsPage(){
+  setNavbarVisible(false);
   if (!auth.currentUser){
     alert("Please signup/login to view friends");
     return;
@@ -3632,6 +3633,7 @@ function openFriendsPage(){
 }
 
 function closeFriendsPage(){
+  setNavbarVisible(true);
   stopFriendsListener();
   if (typeof showPrevPage === "function") {
     // settings logic এর মত previous page দেখাতে চাইলে এটা ইউজ করতে পারো
@@ -3904,3 +3906,17 @@ reelsIcon?.addEventListener("click", (e) => {
 settingsBtn?.addEventListener("click", (e)=>{
   hideFriendsPage();
 }, true);
+
+
+//page swise nav bar hide//
+function setNavbarVisible(yes){
+  document.body.classList.toggle("no-navbar", !yes);
+  // scroll hide/show class যাতে interfere না করে
+  if (!yes){
+    document.body.classList.add("nav-hidden");
+    document.querySelector(".navbar")?.classList.add("fb-hide");
+  } else {
+    document.body.classList.remove("nav-hidden");
+    document.querySelector(".navbar")?.classList.remove("fb-hide");
+  }
+}
