@@ -3594,3 +3594,313 @@ cmodalInput.addEventListener("input", () => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }); 
 })();
+
+//friend//
+/* ================= FRIENDS PAGE ================= */
+const friendIcon   = document.getElementById("friendIcon");
+const friendsPage  = document.getElementById("friendsPage");
+const friendsBackBtn = document.getElementById("friendsBackBtn");
+const friendsList  = document.getElementById("friendsList");
+const friendsTabs  = document.querySelectorAll(".ftab");
+
+let FRIENDS_UNSUB = null;
+let FRIENDS_ACTIVE_TAB = "followers";
+
+function stopFriendsListener(){
+  if (typeof FRIENDS_UNSUB === "function") FRIENDS_UNSUB();
+  FRIENDS_UNSUB = null;
+}
+
+function openFriendsPage(){
+  if (!auth.currentUser){
+    alert("Please signup/login to view friends");
+    return;
+  }
+
+  // hide all pages (use your helper if exists)
+  if (typeof hideAllPages === "function") hideAllPages();
+  friendsPage.style.display = "block";
+
+  // active icon
+  icons.forEach(i => i.classList.remove("active"));
+  friendIcon?.classList.add("active");
+
+  window.scrollTo(0,0);
+
+  // default tab
+  setFriendsTab(FRIENDS_ACTIVE_TAB || "followers");
+}
+
+function closeFriendsPage(){
+  stopFriendsListener();
+  if (typeof showPrevPage === "function") {
+    // settings logic এর মত previous page দেখাতে চাইলে এটা ইউজ করতে পারো
+    // কিন্তু এখানে we go home by default:
+  }
+  // default: go home
+  homePage.style.display = "block";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  friendsPage.style.display = "none";
+  setActive(homeIcon);
+  window.scrollTo(0,0);
+}
+
+friendIcon?.addEventListener("click", (e)=>{
+  e.preventDefault();
+  openFriendsPage();
+});
+
+friendsBackBtn?.addEventListener("click", (e)=>{
+  e.preventDefault();
+  closeFriendsPage();
+});
+
+friendsTabs.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const tab = btn.dataset.tab;
+    setFriendsTab(tab);
+  });
+});
+
+function setFriendsTab(tab){
+  FRIENDS_ACTIVE_TAB = tab;
+
+  friendsTabs.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+
+  // reset ui instantly
+  if (friendsList) friendsList.innerHTML = "";
+
+  stopFriendsListener();
+  listenFriendsList(tab);
+}
+
+function esc(s=""){ return String(s).replace(/[<>]/g,""); }
+
+function renderFriendsEmpty(tab){
+  const txt = tab === "followers" ? "No followers yet" : "Not following anyone yet";
+  friendsList.innerHTML = `<div class="friends-empty">${txt}</div>`;
+}
+
+function renderFriendRow(userDoc, tab){
+  const u = userDoc || {};
+  const uid = u.uid || u.userId || "";
+  const name = esc(u.fullName || u.name || "User");
+  const pic  = u.profilePic || u.photo || "https://i.imgur.com/6VBx3io.png";
+
+  // following tab এ "Unfollow" দেখাব
+  // followers tab এ optional: "Remove" (চাইলে করতে পারো)
+  const actionText = (tab === "following") ? "Unfollow" : "";
+  const actionBtn = actionText ? `<button class="friend-action danger" data-act="unfollow" data-uid="${uid}">${actionText}</button>` : "";
+
+  return `
+    <div class="friend-row" data-uid="${uid}">
+      <img class="friend-pic" src="${pic}" onerror="this.onerror=null;this.src='https://i.imgur.com/6VBx3io.png';">
+      <div class="friend-meta">
+        <div class="friend-name">${name}</div>
+        <div class="friend-sub">@${uid.slice(0,6)}</div>
+      </div>
+      ${actionBtn}
+    </div>
+  `;
+}
+
+async function fetchUsersMeta(uids){
+  // parallel fetch (fast)
+  const docs = await Promise.all(
+    uids.map(uid => db.collection("users").doc(uid).get().catch(()=>null))
+  );
+
+  const list = [];
+  docs.forEach((snap, i)=>{
+    const uid = uids[i];
+    if (!snap || !snap.exists) return;
+    const d = snap.data() || {};
+    list.push({
+      uid,
+      fullName: [d.firstName, d.lastName].filter(Boolean).join(" ").trim() || "User",
+      profilePic: d.profilePic || ""
+    });
+  });
+
+  return list;
+}
+
+function listenFriendsList(tab){
+  const me = auth.currentUser.uid;
+  const sub = (tab === "followers") ? "followers" : "following";
+
+  FRIENDS_UNSUB = db.collection("users").doc(me).collection(sub)
+    .orderBy("createdAt", "desc")
+    .limit(200)
+    .onSnapshot(async (snap)=>{
+      if (!friendsList) return;
+
+      if (snap.empty){
+        renderFriendsEmpty(tab);
+        return;
+      }
+
+      // collect uids
+      const uids = snap.docs.map(d => (d.data()?.userId || d.id)).filter(Boolean);
+
+      // show quick skeleton (instant)
+      friendsList.innerHTML = uids.slice(0,10).map(()=>`
+        <div class="friend-row" style="opacity:.7;">
+          <div class="friend-pic" style="width:44px;height:44px;border-radius:50%;background:#eee;"></div>
+          <div class="friend-meta">
+            <div style="height:12px;width:160px;background:#eee;border-radius:6px;"></div>
+            <div style="height:10px;width:90px;background:#eee;border-radius:6px;margin-top:8px;"></div>
+          </div>
+        </div>
+      `).join("");
+
+      // fetch real meta
+      const meta = await fetchUsersMeta(uids);
+
+      // render
+      friendsList.innerHTML = meta.map(u => renderFriendRow(u, tab)).join("");
+    });
+}
+
+/* click row => open profile */
+document.addEventListener("click", (e)=>{
+  if (!friendsPage || friendsPage.style.display !== "block") return;
+
+  const row = e.target.closest(".friend-row[data-uid]");
+  if (!row) return;
+
+  // unfollow button
+  const unf = e.target.closest('[data-act="unfollow"]');
+  if (unf){
+    e.preventDefault();
+    e.stopPropagation();
+    const targetUid = unf.dataset.uid;
+    unfollowUser(targetUid);
+    return;
+  }
+
+  // open profile
+  const uid = row.dataset.uid;
+  if (uid) openUserProfile(uid, { name: row.querySelector(".friend-name")?.textContent || "", photo: row.querySelector("img")?.src || "" });
+});
+
+/* ===== FOLLOW / UNFOLLOW (core) ===== */
+async function followUser(targetUid){
+  if (!auth.currentUser) return;
+  const me = auth.currentUser.uid;
+  if (!targetUid || targetUid === me) return;
+
+  const now = Date.now();
+
+  // me -> following
+  await db.collection("users").doc(me)
+    .collection("following").doc(targetUid)
+    .set({ userId: targetUid, createdAt: now });
+
+  // target -> followers
+  await db.collection("users").doc(targetUid)
+    .collection("followers").doc(me)
+    .set({ userId: me, createdAt: now });
+}
+
+async function unfollowUser(targetUid){
+  if (!auth.currentUser) return;
+  const me = auth.currentUser.uid;
+  if (!targetUid || targetUid === me) return;
+
+  // me -> following remove
+  await db.collection("users").doc(me)
+    .collection("following").doc(targetUid)
+    .delete();
+
+  // target -> followers remove
+  await db.collection("users").doc(targetUid)
+    .collection("followers").doc(me)
+    .delete();
+}
+
+
+
+function hideAllPages(){
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  if (settingsPage) settingsPage.style.display = "none";
+  if (friendsPage) friendsPage.style.display = "none"; // ✅ add
+}
+
+
+function detectCurrentPage(){
+  if (friendsPage?.style.display === "block") return "friends";
+  if (profilePage.style.display === "block") return "profile";
+  if (notificationPage.style.display === "block") return "notification";
+  if (messagePage.style.display === "block") return "message";
+  return "home";
+}
+
+
+function hideFriendsPage() {
+  // realtime listener বন্ধ
+  if (typeof stopFriendsListener === "function") {
+    stopFriendsListener();
+  }
+  // UI hide
+  if (friendsPage) {
+    friendsPage.style.display = "none";
+  }
+}
+
+function wrapHideFriends(originalFn){
+  return function(){
+    hideFriendsPage();
+    return (typeof originalFn === "function")
+      ? originalFn.apply(this, arguments)
+      : undefined;
+  };
+}
+
+
+function hideFriendsPage() {
+  // realtime listener বন্ধ
+  if (typeof stopFriendsListener === "function") stopFriendsListener();
+
+  // UI hide
+  if (friendsPage) friendsPage.style.display = "none";
+}
+
+function hideAllPages(){
+  // ✅ ALWAYS close friends first
+  hideFriendsPage();
+
+  homePage.style.display = "none";
+  profilePage.style.display = "none";
+  notificationPage.style.display = "none";
+  messagePage.style.display = "none";
+  if (settingsPage) settingsPage.style.display = "none";
+}
+
+function withFriendsClosed(fn){
+  return function(){
+    hideFriendsPage();
+    return (typeof fn === "function") ? fn.apply(this, arguments) : undefined;
+  };
+}
+
+homeIcon.onclick         = withFriendsClosed(homeIcon.onclick);
+profileIcon.onclick      = withFriendsClosed(profileIcon.onclick);
+notificationIcon.onclick = withFriendsClosed(notificationIcon.onclick);
+messageIcon.onclick      = withFriendsClosed(messageIcon.onclick);
+
+// যদি reelsIcon আলাদা handler থাকে
+reelsIcon?.addEventListener("click", (e) => {
+  hideFriendsPage();
+  // তোমার existing reels open logic
+}, true);
+
+// settings open
+settingsBtn?.addEventListener("click", (e)=>{
+  hideFriendsPage();
+}, true);
