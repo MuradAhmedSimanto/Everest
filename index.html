@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Everest</title>
-
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -14,12 +13,10 @@
 <!-- NAVBAR -->
 <div class="navbar">
   <h2 class="logo">Everest</h2>
-
   <div class="top-icons">
     <a href="https://tinyurl.com/Murad-Ai" target="_blank">
       <i class="fa-solid fa-bolt"></i>
     </a>
-
     <i class="fa-solid fa-magnifying-glass"></i>
     <i class="fa-solid fa-bell" id="notificationIcon"></i>
     <i class="fa-solid fa-message" id="messageIcon"></i>
@@ -30,11 +27,8 @@
 <div class="menu-bar">
   <i class="fa-solid fa-house menu-icon active" id="homeIcon"></i>
   <i class="fa-solid fa-user menu-icon" id="profileIcon"></i>
-
-  <!-- ✅ play btn -->
   <i class="fa-solid fa-circle-play menu-icon" id="reelsIcon"></i>
-
-  <i class="fa-solid fa-user-group" id="friendIcon"></i>
+  <i class="fa-solid fa-user-group menu-icon" id="friendIcon"></i>
   <i class="fa-solid fa-bars menu-icon" id="menuBtn"></i>
 </div>
 
@@ -52,9 +46,25 @@
 </div>
 
 
+<!-- ===== FRIENDS PAGE ===== -->
+<div id="friendsPage" class="page" style="display:none;">
+  <div class="friends-topbar">
+    <button id="friendsBackBtn" class="fbtn" aria-label="Back">←</button>
+    <div class="friends-title">Friends</div>
+    <button id="friendsSearchBtn" class="fbtn" aria-label="Search">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+  </div>
+  <div class="friends-tabs">
+    <button class="ftab active" data-tab="followers">followers</button>
+    <button class="ftab" data-tab="following">following</button>
+  </div>
+  <div id="friendsList" class="friends-list"></div>
+</div>
+
+
   <!-- Drawer Overlay -->
 <div id="drawerOverlay" class="drawer-overlay"></div>
-
 <!-- Left Drawer -->
 <aside id="leftDrawer" class="left-drawer" aria-hidden="true">
   <div class="drawer-head">
@@ -63,7 +73,6 @@
       <div class="drawer-user-meta">
         <div class="drawer-name-row">
           <div class="drawer-name" id="drawerName">Your Name</div>
-
           <span id="drawerVerifiedBadge"
                 class="verified-badge"
                 data-verified-uid=""
@@ -83,7 +92,6 @@
             </svg>
           </span>
         </div>
-
         <div class="drawer-meta">
           <span><strong id="drawerFollowing">0</strong> Following</span>
           <span> • </span>
@@ -91,17 +99,14 @@
         </div>
       </div>
     </div>
-
     <button id="drawerCloseBtn" class="drawer-close" aria-label="Close">✕</button>
   </div>
-
   <nav class="drawer-links">
     <a href="#" id="menuProfile"><i class="fa-solid fa-user"></i> Profile</a>
     <a href="#" id="changeNameBtn"><i class="fa-solid fa-pen"></i> Change name</a>
     <a href="#" id="signupBtn"><i class="fa-solid fa-user-plus"></i> Signup</a>
     <a href="#" id="settingsBtn"><i class="fa-solid fa-gear"></i> Settings</a>
     <a href="#" id="loginMenuBtn"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-
     <a class="logo-item">
       <img src="ChatGPT Image Jan 19, 2026, 07_18_08 PM.png" alt="MAS">
     </a>
@@ -116,9 +121,6 @@
     <h2>Notifications</h2>
     <i class="fa-solid fa-magnifying-glass" id="notifSearch"></i>
   </div>
-
-  
-
     <div class="notification-item">
       <strong>Everest</strong> started following you
     </div>
@@ -126,20 +128,19 @@
 </div>
 
 
+
 <!-- MESSAGE PAGE -->
 <div id="messagePage" style="display:none;">
   <div class="message-header">
-    <h2>E-text</h2>
-   <input
-      class="message-search"
-      placeholder="Search messages..."
-    />
+    <div class="message-top">
+      <h2>E-text</h2>
+      <button class="menu-btn" type="button" aria-label="Menu">
+        ☰
+      </button>
+    </div>
+    <input class="message-search" placeholder="Search messages..." />
   </div>
   <div class="message-list">
-    <div class="message-item">
-    </div>
-    <div class="message-item">
-    </div>
   </div>
 </div>
 
@@ -151,7 +152,6 @@
     <i class="fa-solid fa-arrow-left settings-back" id="settingsBackBtn"></i>
     <h2>Settings</h2>
   </div>
-
   <div class="settings-list">
     <div class="settings-item" id="languageItem">
       <div class="si-left">
@@ -160,13 +160,11 @@
       </div>
       <span class="si-right" id="currentLanguage">English</span>
     </div>
-
     <div class="settings-item">
       <div class="si-left">
         <i class="fa-solid fa-moon"></i>
         <span>Dark mode</span>
       </div>
-
       <label class="switch">
         <input type="checkbox" id="darkModeToggle">
         <span class="slider"></span>
@@ -190,45 +188,31 @@
     <textarea
       id="textPostInput"
       placeholder="What's on your mind?"
-     
     ></textarea>
-
   <button id="textPostBtn">Post</button>
   </div>
 </div>
-
     <div class="post-input">
       <img id="profilePic" src="https://i.imgur.com/6VBx3io.png">
       <div class="mind">What are you thingking?</div>
-
    <button id="postBtn" type="button" class="post-logo-btn" aria-label="Create post">
   <img src="new post btn logo 2.png" alt="Post">
 </button>
-
-
-
-
-
-
     </div>
   </div>
-
   <input type="file" id="imageInput" accept="image/*,video/*" hidden>
   <div id="feed"></div>
 </div>
 
 <!-- PROFILE PAGE -->
 <div id="profilePage">
-  
 <input type="file" id="profileInput" accept="image/*" hidden>
 <input type="file" id="coverInput" accept="image/*" hidden>
-
   <!-- COVER -->
   <div class="cover-wrapper">
     <img id="coverPic" src="https://i.imgur.com/9QZ7R0B.jpg">
     <i class="fa-solid fa-camera" id="coverCam"></i>
   </div>
-
   <!-- PROFILE PIC -->
   <div class="profile-pic-wrapper">
     <img id="profilePicBig" src="https://i.imgur.com/6VBx3io.png">
@@ -239,7 +223,6 @@
   <!-- NAME + VERIFIED -->
 <div class="profile-name-row">
   <h3 id="profileName">Your Name</h3>
-
   <span id="profileVerifiedBadge"
         class="verified-badge"
         data-verified-uid=""
@@ -283,7 +266,6 @@
     <button class="message-btn">Message</button>
     <i class="fa-solid fa-ellipsis more-btn"></i>
   </div>
-  
 <div id="profileFeed"></div>
 </div>
 </div>
@@ -305,23 +287,17 @@
         <option value="Other">Other</option>
       </select>
       <input type="date" id="dob">
-
       <button id="continueBtn" type="button">Continue</button>
     </div>
     <!-- STEP 2 -->
-
     <div id="stepTwo" style="display:none;">
-      
       <input type="password" id="password" placeholder="Enter password">
       <input type="password" id="confirmPassword" placeholder="Confirm password">
-
       <button id="authSubmit" type="button">Signup</button>
     </div>
-
     <p id="signupSuccess" class="signup-success">
       Your signup successful
     </p>
-
     <p id="authMsg"></p>
   </div>
 </div>
@@ -394,9 +370,7 @@
       <div class="cmodal-title">Comments</div>
       <button id="cmodalClose" class="cmodal-close">✕</button>
     </div>
-
     <div id="cmodalList" class="cmodal-list"></div>
-
     <div class="cmodal-inputbar">
       <input id="cmodalInput" type="text" placeholder="Write a comment..." />
       <button id="cmodalSend">➤</button>
@@ -424,10 +398,8 @@
   <div class="auth-box">
     <i id="changeNameBackBtn" class="login-back fa-solid fa-arrow-left"></i>
     <h3>Change name</h3>
-
     <input type="text" id="newFirstName" placeholder="First name">
     <input type="text" id="newLastName" placeholder="Last name">
-
     <button id="saveNameBtn" class="btn-danger" type="button">
   <span class="btn-text">Save</span>
   <span class="btn-spinner" aria-hidden="true"></span>
