@@ -3920,3 +3920,86 @@ function setNavbarVisible(yes){
     document.querySelector(".navbar")?.classList.remove("fb-hide");
   }
 }
+
+//message//
+// ===== REAL USERS IN MESSAGE PAGE (WITH VERIFIED BADGE) =====
+(function realMessageUsers(){
+
+  const list = document.querySelector(".message-list");
+  if (!list) return;
+
+  const PRIVACY =
+    "This conversation is fully private and secure. Only the participants in this chat have access to the messages and calls.";
+
+  const FALLBACK_AVATAR = "https://i.imgur.com/6VBx3io.png";
+
+  // small escape to avoid HTML break
+  function esc(s=""){ return String(s).replace(/[<>]/g, ""); }
+
+  function badgeHTML(uid){
+    return `
+      <span class="verified-badge"
+            data-verified-uid="${esc(uid)}"
+            title="Verified"
+            style="display:none;">
+        <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z"
+            fill="#ff1f1f"
+          />
+          <path
+            d="M9.3 12.6l1.9 1.9 4.2-4.3"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="2.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+    `;
+  }
+
+  db.collection("users")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(async (snapshot)=>{
+
+      list.innerHTML = "";
+
+      snapshot.forEach(doc=>{
+        const u = doc.data() || {};
+
+        const fullName = [u.firstName, u.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .trim() || "User";
+
+        const photo = u.profilePic || FALLBACK_AVATAR;
+
+        list.insertAdjacentHTML("beforeend", `
+          <div class="chat-item" data-uid="${esc(doc.id)}">
+            <div class="chat-avatar-wrap">
+              <img class="chat-avatar"
+                   src="${photo}"
+                   onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}';" />
+              <div class="chat-online"></div>
+            </div>
+
+            <div class="chat-content">
+              <div class="chat-name">
+                <span class="chat-name-text">${esc(fullName)}</span>
+                ${badgeHTML(doc.id)}
+              </div>
+              <div class="chat-text">${PRIVACY}</div>
+            </div>
+          </div>
+        `);
+      });
+
+      // ✅ badge hydrate (তোমার existing function)
+      if (typeof VERIFIED_CACHE !== "undefined" && VERIFIED_CACHE?.clear) VERIFIED_CACHE.clear();
+      if (typeof hydrateVerifiedBadges === "function") hydrateVerifiedBadges();
+
+    });
+
+})();
