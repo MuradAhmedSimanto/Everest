@@ -3388,3 +3388,124 @@ body.reels-open{
   padding:20px 6px;
   color:#65676b;
 }
+
+/*message*/
+/* ===== MESSAGE PAGE BRIGHT WHITE (FULL REPLACE) ===== */
+
+#messagePage{
+  background:#ffffff;         /* ✅ pure white */
+  min-height:100vh;
+}
+
+/* header area যদি grey হয়, এটাও white করে দিলাম */
+.message-header{
+  background:#ffffff;
+}
+
+.message-list{
+  padding:6px 0;
+  background:#ffffff;         /* ✅ ensure list area white */
+}
+
+/* Each row: flat + clean (no box, no border) */
+.chat-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  background:transparent;
+  padding:10px 14px;
+
+  margin:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+
+  cursor:pointer;
+}
+
+/* hover highlight */
+.chat-item:hover{
+  background:rgba(0,0,0,.03);
+}
+
+/* avatar wrapper */
+.chat-avatar-wrap{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  position:relative;
+}
+
+/* avatar */
+.chat-avatar{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  display:block;
+}
+
+/* online dot (optional) */
+.chat-online{
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:11px;
+  height:11px;
+  background:#22c55e;
+  border-radius:50%;
+  border:2px solid #ffffff;  /* ✅ white background blend */
+  display:none;              /* চাইলে block করে দাও */
+}
+
+/* right content */
+.chat-content{
+  flex:1;
+  min-width:0;
+}
+
+/* name + badge */
+.chat-name{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:15px;
+  font-weight:700;
+  color:#111;
+  margin:0;
+  line-height:1.2;
+}
+
+.chat-name-text{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+
+/* privacy text */
+.chat-text{
+  font-size:13px;
+  color:#7b7f87;              /* ✅ lighter grey */
+  line-height:1.25;
+  margin-top:4px;
+
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* verified badge */
+.verified-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.verified-icon{
+  width:15px;
+  height:15px;
+  display:block;
+}
