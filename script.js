@@ -3044,17 +3044,48 @@ setTimeout(() => {
   const body = document.body;
   if (!navbar) return;
 
+  // ✅ যেসব page এ navbar একদমই দেখাবে না
+  const NO_NAV_PAGES = new Set(["message", "notification"]);
+
+  // ✅ current page detect করার function
+  function getCurrentPage() {
+    // Option A (recommended): window.currentPage global রাখলে
+    if (window.currentPage) return window.currentPage;
+
+    // Option B: display দিয়ে detect (fallback)
+    const messagePage = document.getElementById("messagePage");
+    const notificationPage = document.getElementById("notificationPage");
+
+    if (messagePage && getComputedStyle(messagePage).display !== "none") return "message";
+    if (notificationPage && getComputedStyle(notificationPage).display !== "none") return "notification";
+
+    return "home"; // default
+  }
+
   let lastY = window.scrollY;
   let ticking = false;
 
-  const THRESHOLD = 8;   // small movement ignore
-  const MIN_Y = 20;      // top এ থাকলে hide না
+  const THRESHOLD = 8;
+  const MIN_Y = 20;
+
+  function forceHideNavbar() {
+    navbar.classList.add("fb-hide");
+    body.classList.add("nav-hidden");
+  }
 
   function update() {
+    // ✅ message/notification এ scroll করলে কখনোই show হবে না
+    const page = getCurrentPage();
+    if (NO_NAV_PAGES.has(page)) {
+      forceHideNavbar();
+      lastY = window.scrollY; // baseline update
+      ticking = false;
+      return;
+    }
+
     const y = window.scrollY;
     const delta = y - lastY;
 
-    // top area: keep normal
     if (y <= MIN_Y) {
       navbar.classList.remove("fb-hide");
       body.classList.remove("nav-hidden");
@@ -3069,11 +3100,9 @@ setTimeout(() => {
     }
 
     if (delta > 0) {
-      // ✅ scroll DOWN -> hide navbar, menu-bar goes top
       navbar.classList.add("fb-hide");
       body.classList.add("nav-hidden");
     } else {
-      // ✅ scroll UP -> show navbar, menu-bar goes back down
       navbar.classList.remove("fb-hide");
       body.classList.remove("nav-hidden");
     }
@@ -3082,13 +3111,16 @@ setTimeout(() => {
     ticking = false;
   }
 
-  window.addEventListener("scroll", () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(update);
-  }, { passive: true });
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    },
+    { passive: true }
+  );
 })();
-
 
 
 
