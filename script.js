@@ -4035,3 +4035,462 @@ function setNavbarVisible(yes){
     });
 
 })();
+
+//chat box//
+// ================= CHAT MODULE (CLEAN + INTRO ALWAYS + VERIFIED BADGE) =================
+(() => {
+  const chatThreadPage   = document.getElementById("chatThreadPage");
+  const chatBackBtn      = document.getElementById("chatBackBtn");
+  const chatHeadName     = document.getElementById("chatHeadName");
+  const chatHeadAvatar   = document.getElementById("chatHeadAvatar");
+  const chatHeadVerified = document.getElementById("chatHeadVerified");
+
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput    = document.getElementById("chatInput");
+  const chatSendBtn  = document.getElementById("chatSendBtn");
+
+  const FALLBACK_AVATAR = "https://i.imgur.com/6VBx3io.png";
+
+  if (!chatThreadPage || !chatBackBtn || !chatHeadName || !chatHeadAvatar || !chatMessages || !chatInput || !chatSendBtn) {
+    console.warn("CHAT UI elements missing. Check IDs in HTML.");
+    return;
+  }
+
+  // ---------- state ----------
+  let OPEN_UID = null;
+  let CONV_ID  = null;
+  let UNSUB    = null;
+  let TOKEN    = 0;
+  let SENDING  = false;
+
+  // Cached verified state for the currently opened user
+  let OPEN_VERIFIED = false;
+
+  // ---------- helpers ----------
+  const esc = (s = "") => String(s).replace(/[<>]/g, "");
+  const convIdFor = (a, b) => [a, b].sort().join("_");
+  const SVT = () => firebase.firestore.FieldValue.serverTimestamp();
+  const INC = (n) => firebase.firestore.FieldValue.increment(n);
+
+  function showChat() {
+    chatThreadPage.style.display = "flex";
+    chatThreadPage.style.flexDirection = "column";
+  }
+
+  function hideChat() {
+    chatThreadPage.style.display = "none";
+  }
+
+  function stop() {
+    if (typeof UNSUB === "function") UNSUB();
+    UNSUB = null;
+  }
+
+  function setHeaderVerified(isVerified) {
+    OPEN_VERIFIED = !!isVerified;
+    if (!chatHeadVerified) return;
+    chatHeadVerified.style.display = isVerified ? "inline-flex" : "none";
+  }
+
+  function getVerifiedSVG() {
+    return `
+      <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+        <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+  }
+
+  function ensureIntroNode() {
+    let intro = document.getElementById("chatIntro");
+    if (intro) return intro;
+
+    intro = document.createElement("div");
+    intro.id = "chatIntro";
+    intro.className = "mchat-intro";
+    intro.innerHTML = `
+      <img id="chatIntroAvatar" class="mchat-intro-avatar" src="${FALLBACK_AVATAR}">
+      <div class="mchat-intro-name-line">
+        <div id="chatIntroName" class="mchat-intro-name">User</div>
+
+        <span id="chatIntroVerified"
+              class="verified-badge"
+              style="display:none;"
+              title="Verified">
+          ${getVerifiedSVG()}
+        </span>
+      </div>
+
+      <button class="mchat-view-profile" type="button">View profile</button>
+
+      <div class="mchat-privacy">
+        This conversation is fully private and secure.
+        Only the participants in this chat have access to the messages and calls.
+      </div>
+    `;
+    return intro;
+  }
+
+  // Always paint the center intro (profile + secure + view profile + verified)
+  function paintIntro(name, photo, isVerified = false) {
+    const node = ensureIntroNode();
+
+    const nmEl = node.querySelector("#chatIntroName");
+    const avEl = node.querySelector("#chatIntroAvatar");
+    const vbEl = node.querySelector("#chatIntroVerified");
+
+    if (nmEl) nmEl.textContent = (name || "User").trim() || "User";
+    if (avEl) avEl.src = photo || FALLBACK_AVATAR;
+    if (vbEl) vbEl.style.display = isVerified ? "inline-flex" : "none";
+
+    if (chatMessages.firstChild !== node) {
+      chatMessages.insertBefore(node, chatMessages.firstChild);
+    }
+  }
+
+  function paintLoadingRows() {
+    const wrap = document.createElement("div");
+    wrap.id = "chatLoadingRows";
+    wrap.style.padding = "12px";
+    wrap.style.opacity = ".7";
+    wrap.innerHTML = `
+      <div style="height:12px;width:60%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
+      <div style="height:12px;width:40%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
+      <div style="height:12px;width:70%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
+    `;
+    chatMessages.appendChild(wrap);
+  }
+
+  function clearLoadingRows() {
+    const el = document.getElementById("chatLoadingRows");
+    if (el) el.remove();
+  }
+
+  function renderBubble(isMe, text) {
+    return `
+      <div class="msg-row ${isMe ? "me" : ""}">
+        <div class="msg-bubble">${esc(text || "")}</div>
+      </div>
+    `;
+  }
+
+  function scrollBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function paintHeader(otherUid, prefill, token) {
+    const nm = (prefill?.name || "User").trim() || "User";
+    const ph = prefill?.photo || FALLBACK_AVATAR;
+
+    // Instant header
+    chatHeadName.textContent = nm;
+    chatHeadAvatar.src = ph;
+
+    // Default hide badge until fetched
+    setHeaderVerified(false);
+
+    // Keep intro in sync immediately
+    paintIntro(nm, ph, false);
+
+    try {
+      const snap = await db.collection("users").doc(otherUid).get();
+      if (!snap.exists) return;
+      if (TOKEN !== token) return;
+      if (OPEN_UID !== otherUid) return;
+
+      const u = snap.data() || {};
+      const full =
+        [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
+        u.name ||
+        "User";
+
+      const photo = u.profilePic || u.photoURL || FALLBACK_AVATAR;
+      const isV = (u.verified === true);
+
+      chatHeadName.textContent = full;
+      chatHeadAvatar.src = photo;
+
+      // ✅ VERIFIED BADGE (HEADER + INTRO)
+      setHeaderVerified(isV);
+      paintIntro(full, photo, isV);
+    } catch (e) {
+      console.error("header fetch error:", e);
+    }
+  }
+
+  async function ensureConversation(convId, meUid, otherUid) {
+    const ref = db.collection("conversations").doc(convId);
+    const snap = await ref.get();
+    if (snap.exists) return;
+
+    await ref.set({
+      participants: [meUid, otherUid],
+      updatedAt: SVT(),
+      lastMessage: { text: "", senderId: "", createdAt: 0 },
+      unreadCountMap: { [meUid]: 0, [otherUid]: 0 }
+    });
+  }
+
+  async function resetMyUnread(meUid) {
+    if (!CONV_ID) return;
+    try {
+      await db.collection("conversations").doc(CONV_ID).set({
+        [`unreadCountMap.${meUid}`]: 0
+      }, { merge: true });
+    } catch (e) {
+      console.warn("unread reset failed:", e?.code || e);
+    }
+  }
+
+  function listenMessages(meUid, otherUid, token) {
+    const convRef = db.collection("conversations").doc(CONV_ID);
+
+    UNSUB = convRef.collection("messages")
+      .orderBy("createdAt", "asc")
+      .limit(300)
+      .onSnapshot((snap) => {
+        if (TOKEN !== token) return;
+        if (OPEN_UID !== otherUid) return;
+
+        const nm = chatHeadName.textContent || "User";
+        const ph = chatHeadAvatar.src || FALLBACK_AVATAR;
+        const isV = OPEN_VERIFIED;
+
+        chatMessages.innerHTML = "";
+        paintIntro(nm, ph, isV);
+
+        if (snap.empty) return;
+
+        snap.forEach(d => {
+          const m = d.data() || {};
+          chatMessages.insertAdjacentHTML(
+            "beforeend",
+            renderBubble(m.senderId === meUid, m.text || "")
+          );
+        });
+
+        scrollBottom();
+      }, (err) => {
+        console.error("messages listener error:", err);
+
+        const nm = chatHeadName.textContent || "User";
+        const ph = chatHeadAvatar.src || FALLBACK_AVATAR;
+        const isV = OPEN_VERIFIED;
+
+        chatMessages.innerHTML = "";
+        paintIntro(nm, ph, isV);
+        chatMessages.insertAdjacentHTML(
+          "beforeend",
+          `<div style="padding:14px;color:#c00;">Failed to load messages</div>`
+        );
+      });
+  }
+
+  async function openChat(otherUid, prefill = {}) {
+    if (!auth.currentUser) {
+      if (typeof promptSignup === "function") promptSignup("Please signup to message");
+      return;
+    }
+
+    const meUid = auth.currentUser.uid;
+    if (!otherUid || otherUid === meUid) return;
+
+    const token = ++TOKEN;
+
+    stop();
+    OPEN_UID = otherUid;
+    CONV_ID  = convIdFor(meUid, otherUid);
+
+    showChat();
+    chatInput.value = "";
+
+    const nm0 = (prefill?.name || "User").trim() || "User";
+    const ph0 = prefill?.photo || FALLBACK_AVATAR;
+
+    // Reset state per open
+    OPEN_VERIFIED = false;
+
+    chatMessages.innerHTML = "";
+    paintIntro(nm0, ph0, false);
+    paintLoadingRows();
+
+    // default hide badge until fetched
+    setHeaderVerified(false);
+
+    paintHeader(otherUid, prefill, token);
+
+    try {
+      await ensureConversation(CONV_ID, meUid, otherUid);
+      if (TOKEN !== token) return;
+
+      await resetMyUnread(meUid);
+
+      clearLoadingRows();
+      listenMessages(meUid, otherUid, token);
+    } catch (e) {
+      console.error("open chat error:", e);
+      clearLoadingRows();
+
+      const nm = chatHeadName.textContent || nm0;
+      const ph = chatHeadAvatar.src || ph0;
+
+      chatMessages.innerHTML = "";
+      paintIntro(nm, ph, OPEN_VERIFIED);
+      chatMessages.insertAdjacentHTML(
+        "beforeend",
+        `<div style="padding:14px;color:#c00;"></div>`
+      );
+    }
+  }
+
+  async function send() {
+    if (!auth.currentUser) return;
+    if (!CONV_ID || !OPEN_UID) return;
+
+    const text = (chatInput.value || "").trim();
+    if (!text) return;
+
+    if (SENDING) return;
+    SENDING = true;
+
+    const meUid = auth.currentUser.uid;
+    chatInput.value = "";
+
+    const convRef = db.collection("conversations").doc(CONV_ID);
+    const msgRef  = convRef.collection("messages").doc();
+    const batch   = db.batch();
+
+    const ts = SVT();
+
+    batch.set(msgRef, {
+      senderId: meUid,
+      receiverId: OPEN_UID,
+      text,
+      createdAt: ts,
+      type: "text"
+    });
+
+    batch.set(convRef, {
+      participants: [meUid, OPEN_UID],
+      updatedAt: ts,
+      lastMessage: { text, senderId: meUid, createdAt: ts },
+      [`unreadCountMap.${OPEN_UID}`]: INC(1),
+      [`unreadCountMap.${meUid}`]: 0
+    }, { merge: true });
+
+    try {
+      await batch.commit();
+    } catch (e) {
+      console.error("SEND ERROR:", e);
+      alert(e?.code ? `${e.code}: ${e.message}` : "Failed to send");
+    } finally {
+      SENDING = false;
+    }
+  }
+
+  // ---------- events ----------
+  chatSendBtn.addEventListener("click", send);
+
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  chatBackBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    stop();
+
+    OPEN_UID = null;
+    CONV_ID = null;
+    OPEN_VERIFIED = false;
+
+    chatHeadName.textContent = "User";
+    chatHeadAvatar.src = FALLBACK_AVATAR;
+    setHeaderVerified(false);
+
+    chatMessages.innerHTML = "";
+    chatInput.value = "";
+    hideChat();
+  });
+
+  document.addEventListener("click", (e) => {
+    const item = e.target.closest(".chat-item[data-uid]");
+    if (!item) return;
+
+    const uid = item.dataset.uid;
+    if (!uid) return;
+
+    const name  = (item.querySelector(".chat-name-text")?.textContent || "").trim() || "User";
+    const photo = item.querySelector("img.chat-avatar")?.getAttribute("src") || FALLBACK_AVATAR;
+
+    openChat(uid, { name, photo });
+  });
+
+  window.__openChat = openChat;
+
+  hideChat();
+})();
+
+
+//shere section//
+// ===== SHARE (Native Share Sheet) =====
+async function sharePost({ postId, text = "", url = "", files = null }) {
+  const shareData = {
+    title: "Everest",
+    text: text || "Check this post",
+    url: url || (location.origin + location.pathname + "#post=" + postId)
+  };
+
+  try {
+    if (navigator.share) {
+      // files share (optional) - only if supported
+      if (files && navigator.canShare && navigator.canShare({ files })) {
+        shareData.files = files;
+      }
+      await navigator.share(shareData);
+      return true;
+    }
+  } catch (err) {
+    // user cancelled => ignore
+    if (err?.name !== "AbortError") console.error("share error:", err);
+    return false;
+  }
+
+  // Fallback: copy link
+  const fallbackLink = shareData.url;
+  try {
+    await navigator.clipboard.writeText(fallbackLink);
+    alert("Link copied");
+  } catch (e) {
+    prompt("Copy this link:", fallbackLink);
+  }
+  return false;
+}
+
+// ✅ SHARE BUTTON
+document.addEventListener("click", async (e) => {
+  const sb = e.target.closest(".share-btn");
+  if (!sb) return;
+
+  const postId = sb.dataset.post;
+  if (!postId) return;
+
+  // Optional: post caption/name fetch করে share text সুন্দর করা
+  let text = "Check this post on Everest";
+  try {
+    const snap = await db.collection("posts").doc(postId).get();
+    if (snap.exists) {
+      const p = snap.data() || {};
+      const cap = (p.caption || "").trim();
+      text = cap ? cap : text;
+    }
+  } catch (err) {}
+
+  sharePost({
+    postId,
+    text,
+    url: location.origin + location.pathname + "#post=" + postId
+  });
+});
