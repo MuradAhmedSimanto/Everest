@@ -4295,12 +4295,7 @@ function setNavbarVisible(yes){
       });
   }
 
-  async function openChat(otherUid, prefill = {}) {
-    if (!auth.currentUser) {
-      if (typeof promptSignup === "function") promptSignup("Please signup to message");
-      return;
-    }
-
+  
     const meUid = auth.currentUser.uid;
     if (!otherUid || otherUid === meUid) return;
 
