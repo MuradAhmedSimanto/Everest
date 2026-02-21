@@ -3650,7 +3650,9 @@ function stopFriendsListener(){
 }
 
 function openFriendsPage(){
+gotoPage("friends");
   setNavbarVisible(false);
+ 
   if (!auth.currentUser){
     alert("Please signup/login to view friends");
     return;
@@ -4678,5 +4680,4 @@ function closeModalHistory(modalId){
     renderPageSPA(page);
   });
 })();
-
 
