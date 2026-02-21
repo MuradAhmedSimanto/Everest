@@ -149,6 +149,109 @@
 </div>
 
 
+<!-- chat box -->
+<!-- chat box -->
+<div id="chatThreadPage" class="mchat" style="display:none;">
+  <!-- TOP BAR -->
+  <div class="mchat-top">
+    <button id="chatBackBtn" class="mchat-back" type="button">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <div class="mchat-user">
+      <img id="chatHeadAvatar" class="mchat-avatar" src="https://i.imgur.com/6VBx3io.png" />
+
+      <div class="mchat-user-meta">
+        <div class="mchat-name-line">
+          <span id="chatHeadName" class="mchat-name"></span>
+
+          <!-- TOP VERIFIED BADGE -->
+          <span id="chatHeadVerified"
+                class="verified-badge"
+                style="display:none;"
+                title="Verified">
+            <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+              <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+
+        <div class="mchat-sub">Active now</div>
+      </div>
+    </div>
+
+    <div class="mchat-actions">
+      <button class="mchat-ico" type="button">📞</button>
+
+     <button class="mchat-ico video-btn" type="button" title="Video call">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="#ff1f1f">
+    <path d="M17 10.5V6c0-1.1-.9-2-2-2H5C3.9 4 3 4.9 3 6v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-4.5l4 4V6.5l-4 4z"/>
+  </svg>
+</button>
+
+      <button class="mchat-ico" type="button">⋮</button>
+    </div>
+  </div>
+
+  <!-- MESSAGES AREA -->
+  <div id="chatMessages" class="mchat-body">
+    <!-- First open profile intro -->
+    <div id="chatIntro" class="mchat-intro">
+      <img id="chatIntroAvatar" class="mchat-intro-avatar" src="https://i.imgur.com/6VBx3io.png">
+
+      <div class="mchat-intro-name-line">
+        <div id="chatIntroName" class="mchat-intro-name">User</div>
+
+        <!-- INTRO VERIFIED BADGE -->
+        <span id="chatIntroVerified"
+              class="verified-badge"
+              style="display:none;"
+              title="Verified">
+          <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+            <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+
+      <button class="mchat-view-profile" type="button">View profile</button>
+
+      <div class="mchat-privacy">
+        This conversation is fully private and secure.
+        Only the participants in this chat have access to the messages and calls.
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT BAR -->
+  <div class="mchat-inputbar">
+   
+   <button class="mchat-ico camera-btn" type="button" title="Camera">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
+    <path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4c-1.1 0-2 .9-2 2v11c0 
+    1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 
+    13a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+   </svg>
+</button>
+    
+<button class="mchat-ico gallery-btn" type="button" title="Gallery">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
+    <path d="M21 19V5c0-1.1-.9-2-2-2H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 11.5l2.5 3.01L14.5 10l4.5 6H5l3.5-4.5zM8 8a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+  </svg>
+</button>
+
+    <button class="mchat-ico voice-btn" type="button" title="Voice">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
+    <path d="M12 14c1.66 0 3-1.34 3-3V6a3 3 0 10-6 0v5c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+  </svg>
+</button>
+
+    <input id="chatInput" class="mchat-input" placeholder="write text...">
+    <button id="chatSendBtn" class="mchat-send">➤</button>
+  </div>
+</div>
+
 <!-- language/dark mode -->
 <!-- SETTINGS PAGE -->
 <div id="settingsPage" class="settings-page" style="display:none;">
