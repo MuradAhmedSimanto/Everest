@@ -4343,96 +4343,130 @@ function setNavbarVisible(yes){
     }
   }
 
-  async function send() {
-    if (!auth.currentUser) return;
-    if (!CONV_ID || !OPEN_UID) return;
 
-    const text = (chatInput.value || "").trim();
-    if (!text) return;
 
-    if (SENDING) return;
-    SENDING = true;
+// ================= SEND + EVENTS (REPLACE THIS WHOLE BLOCK) =================
 
-    const meUid = auth.currentUser.uid;
-    chatInput.value = "";
+function updateSendButton() {
+  const hasText = (chatInput.value || "").trim().length > 0;
 
-    const convRef = db.collection("conversations").doc(CONV_ID);
-    const msgRef  = convRef.collection("messages").doc();
-    const batch   = db.batch();
-
-    const ts = SVT();
-
-    batch.set(msgRef, {
-      senderId: meUid,
-      receiverId: OPEN_UID,
-      text,
-      createdAt: ts,
-      type: "text"
-    });
-
-    batch.set(convRef, {
-      participants: [meUid, OPEN_UID],
-      updatedAt: ts,
-      lastMessage: { text, senderId: meUid, createdAt: ts },
-      [`unreadCountMap.${OPEN_UID}`]: INC(1),
-      [`unreadCountMap.${meUid}`]: 0
-    }, { merge: true });
-
-    try {
-      await batch.commit();
-    } catch (e) {
-      console.error("SEND ERROR:", e);
-      alert(e?.code ? `${e.code}: ${e.message}` : "Failed to send");
-    } finally {
-      SENDING = false;
-    }
+  if (hasText) {
+    chatSendBtn.classList.add("enabled");
+    chatSendBtn.disabled = false;
+  } else {
+    chatSendBtn.classList.remove("enabled");
+    chatSendBtn.disabled = true;
   }
+}
 
-  // ---------- events ----------
-  chatSendBtn.addEventListener("click", send);
+async function send() {
+  if (!auth.currentUser) return;
+  if (!CONV_ID || !OPEN_UID) return;
 
-  chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      send();
-    }
+  const text = (chatInput.value || "").trim();
+  if (!text) return;
+
+  if (SENDING) return;
+  SENDING = true;
+
+  const meUid = auth.currentUser.uid;
+
+  // clear input + update UI instantly
+  chatInput.value = "";
+  updateSendButton();
+
+  const convRef = db.collection("conversations").doc(CONV_ID);
+  const msgRef  = convRef.collection("messages").doc();
+  const batch   = db.batch();
+
+  const ts = SVT();
+
+  batch.set(msgRef, {
+    senderId: meUid,
+    receiverId: OPEN_UID,
+    text,
+    createdAt: ts,
+    type: "text"
   });
 
-  chatBackBtn.addEventListener("click", (e) => {
+  batch.set(convRef, {
+    participants: [meUid, OPEN_UID],
+    updatedAt: ts,
+    lastMessage: { text, senderId: meUid, createdAt: ts },
+    [`unreadCountMap.${OPEN_UID}`]: INC(1),
+    [`unreadCountMap.${meUid}`]: 0
+  }, { merge: true });
+
+  try {
+    await batch.commit();
+  } catch (e) {
+    console.error("SEND ERROR:", e);
+    alert(e?.code ? `${e.code}: ${e.message}` : "Failed to send");
+
+    // if send failed, restore text back (optional but nicer)
+    chatInput.value = text;
+    updateSendButton();
+  } finally {
+    SENDING = false;
+  }
+}
+
+// ---------- events ----------
+chatSendBtn.addEventListener("click", send);
+
+// ✅ this is what makes the button turn red while typing
+chatInput.addEventListener("input", updateSendButton);
+
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
     e.preventDefault();
-    stop();
+    send();
+  }
+});
 
-    OPEN_UID = null;
-    CONV_ID = null;
-    OPEN_VERIFIED = false;
+chatBackBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  stop();
 
-    chatHeadName.textContent = "User";
-    chatHeadAvatar.src = FALLBACK_AVATAR;
-    setHeaderVerified(false);
+  OPEN_UID = null;
+  CONV_ID = null;
+  OPEN_VERIFIED = false;
 
-    chatMessages.innerHTML = "";
-    chatInput.value = "";
-    hideChat();
-  });
+  chatHeadName.textContent = "User";
+  chatHeadAvatar.src = FALLBACK_AVATAR;
+  setHeaderVerified(false);
 
-  document.addEventListener("click", (e) => {
-    const item = e.target.closest(".chat-item[data-uid]");
-    if (!item) return;
-
-    const uid = item.dataset.uid;
-    if (!uid) return;
-
-    const name  = (item.querySelector(".chat-name-text")?.textContent || "").trim() || "User";
-    const photo = item.querySelector("img.chat-avatar")?.getAttribute("src") || FALLBACK_AVATAR;
-
-    openChat(uid, { name, photo });
-  });
-
-  window.__openChat = openChat;
+  chatMessages.innerHTML = "";
+  chatInput.value = "";
+  updateSendButton();
 
   hideChat();
-})();
+});
 
+document.addEventListener("click", (e) => {
+  const item = e.target.closest(".chat-item[data-uid]");
+  if (!item) return;
+
+  const uid = item.dataset.uid;
+  if (!uid) return;
+
+  const name  = (item.querySelector(".chat-name-text")?.textContent || "").trim() || "User";
+  const photo = item.querySelector("img.chat-avatar")?.getAttribute("src") || FALLBACK_AVATAR;
+
+  openChat(uid, { name, photo });
+
+  // reset button state when opening chat
+  chatInput.value = "";
+  updateSendButton();
+});
+
+window.__openChat = openChat;
+
+// initial state on load
+updateSendButton();
+
+hideChat();
+})();
 
 //shere section//
 // ===== SHARE (Native Share Sheet) =====
