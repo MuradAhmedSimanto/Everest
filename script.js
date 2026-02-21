@@ -4681,3 +4681,74 @@ function closeModalHistory(modalId){
   });
 })();
 
+//mobile back btn//
+/* ================= BOOT + HOME SCROLL BACK (REPLACE FULL) ================= */
+(() => {
+  // ---------- 1) BOOT DEFAULT PAGE (NO AUTO PROFILE) ----------
+  function bootDefaultPage() {
+    // normalize hash
+    const raw = (location.hash || "").replace("#", "");
+
+    // modal hash হলে home এ নাও (modal auto-open করবো না)
+    if (raw.startsWith("m-")) {
+      gotoPage("home", { push: false });
+      return;
+    }
+
+    // allow only known pages
+    const allowed = new Set(["home", "profile", "notification", "message", "reels", "friends", "settings"]);
+
+    if (allowed.has(raw)) {
+      // open that page without pushing new history entry
+      gotoPage(raw, { push: false });
+    } else {
+      // default: home
+      gotoPage("home", { push: false });
+    }
+  }
+
+  // run after your initSpaHistory has set replaceState({page:"home"})
+  // but safe to run anyway
+  try { bootDefaultPage(); } catch (e) { try { gotoPage("home", { push: false }); } catch(_){} }
+
+  // ---------- 2) HOME scroll -> push a scroll state so back goes to top ----------
+  let homeScrollStatePushed = false;
+
+  function isHomeVisible() {
+    const st = history.state || {};
+    const homeEl = document.getElementById("homePage");
+    const homeVisible = homeEl && getComputedStyle(homeEl).display !== "none";
+    return st.page === "home" || homeVisible;
+  }
+
+  function onHomeScroll() {
+    if (!isHomeVisible()) return;
+
+    const y = window.scrollY || 0;
+
+    // push only once when user scrolls down a bit
+    if (y > 180 && !homeScrollStatePushed) {
+      const st = history.state || {};
+      if (!st.homeScroll) {
+        history.pushState({ page: "home", homeScroll: true }, "", "#home");
+      }
+      homeScrollStatePushed = true;
+    }
+
+    // reset flag when user returns to top
+    if (y <= 30) homeScrollStatePushed = false;
+  }
+
+  window.addEventListener("scroll", onHomeScroll, { passive: true });
+
+  // ---------- 3) popstate helper: back to home base => force top ----------
+  window.addEventListener("popstate", () => {
+    const st = history.state || {};
+
+    if (st.page === "home" && !st.homeScroll) {
+      if (typeof closeTopOpenModal === "function") closeTopOpenModal();
+      if (typeof renderPageSPA === "function") renderPageSPA("home");
+      window.scrollTo(0, 0);
+    }
+  });
+})();
