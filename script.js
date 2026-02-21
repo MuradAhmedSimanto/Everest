@@ -4681,6 +4681,40 @@ function closeModalHistory(modalId){
   });
 })();
 
+//mobile back btn menu active//
+function syncActiveIcon(page){
+  // সব active remove
+  icons.forEach(i => i.classList.remove("active"));
+
+  if (page === "profile") profileIcon?.classList.add("active");
+  else if (page === "notification") notificationIcon?.classList.add("active");
+  else if (page === "message") messageIcon?.classList.add("active");
+  else if (page === "reels") reelsIcon?.classList.add("active");
+  else if (page === "friends") friendIcon?.classList.add("active");
+  else homeIcon?.classList.add("active"); // default home
+}
+
+
+function renderPageSPA(page){
+  if (!PAGE_IDS[page]) page = "home";
+
+  hideAllPagesSPA();
+  const el = document.getElementById(PAGE_IDS[page]);
+  if (el) el.style.display = "block";
+  // ✅ profile-mode class
+  if (page === "profile") document.body.classList.add("profile-mode");
+  else document.body.classList.remove("profile-mode");
+  // ✅ navbar visibility
+  if (typeof setNavbarVisible === "function") {
+    if (page === "message" || page === "notification") setNavbarVisible(false);
+    else setNavbarVisible(true);
+  }
+// ✅ ACTIVE ICON SYNC (THIS FIXES MOBILE BACK)
+  syncActiveIcon(page);
+  window.scrollTo(0, 0);
+}
+
+
 //mobile back btn//
 /* ================= BOOT + HOME SCROLL BACK (REPLACE FULL) ================= */
 (() => {
