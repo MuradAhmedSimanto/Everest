@@ -170,6 +170,7 @@ homeIcon.onclick = () => {
   notificationPage.style.display = "none";
   messagePage.style.display = "none";
   setActive(homeIcon);
+  gotoPage("home");
   window.scrollTo(0, 0);
 
   document.body.classList.remove("profile-mode"); // ✅ add
@@ -202,7 +203,7 @@ profileIcon.onclick = () => {
   notificationPage.style.display = "none";
   messagePage.style.display = "none";
   setActive(profileIcon);
-
+  gotoPage("profile");
   window.scrollTo(0, 0);
   document.body.classList.add("profile-mode");
 };
@@ -215,6 +216,7 @@ notificationIcon.onclick = () => {
   messagePage.style.display = "none";
   notificationPage.style.display = "block";
   icons.forEach(i => i.classList.remove("active"));
+  gotoPage("notification");
   window.scrollTo(0, 0);
 };
 
@@ -225,6 +227,7 @@ messageIcon.onclick = () => {
   notificationPage.style.display = "none";
   messagePage.style.display = "block";
   icons.forEach(i => i.classList.remove("active"));
+  gotoPage("message");
   window.scrollTo(0, 0);
 };
 
@@ -311,6 +314,7 @@ function showPrevPage(){
 
 function openSettings(){
   PREV_PAGE = detectCurrentPage();
+  gotoPage("settings");
 
   hideAllPages();
   document.body.classList.add("settings-open");
@@ -326,6 +330,7 @@ settingsBtn?.addEventListener("click", (e)=>{
 
 settingsBackBtn?.addEventListener("click", (e)=>{
   e.preventDefault();
+  gotoPage("home");
   showPrevPage();
 });
 
@@ -579,7 +584,7 @@ document.getElementById("postBtn").onclick = () => {
 
 mindBox.onclick = () => {
   textPostInput.value = "";
-  textPostModal.style.display = "flex";
+  openModalHistory("textPostModal");
 };
 
 textPostModal.onclick = e => {
@@ -897,7 +902,7 @@ function openChangeNameModal() {
   document.getElementById("newLastName").value  = last || "";
 
   if (changeNameMsg) changeNameMsg.textContent = "";
-  changeNameModal.style.display = "flex";
+   openModalHistory("changeNameModal");
 }
 
 function closeChangeNameModal() {
@@ -1145,7 +1150,7 @@ if (e.target.classList.contains("edit")) {
       editPostImage.style.display = "none";
     }
 
-    editPostModal.style.display = "flex";
+    openModalHistory("editPostModal");
   });
 }
 //edit post save cancle
@@ -1210,7 +1215,7 @@ imageInput.onchange = () => {
   // ✅ fast preview (no base64)
   const previewURL = URL.createObjectURL(file);
 
-  document.getElementById("mediaCaptionModal").style.display = "flex";
+ openModalHistory("mediaCaptionModal");
 
   const img = document.getElementById("mediaPreview");
   const video = document.getElementById("videoPreview");
@@ -1612,7 +1617,7 @@ const reactorsList  = document.getElementById("reactorsList");
 const reactTabsEl   = document.getElementById("reactTabs");
 const reactorsClose = document.getElementById("reactorsClose");
 
-function openReactorsModal(){ reactorsModal?.classList.add("open"); }
+function openReactorsModal(){ openModalHistory("reactorsModal"); }
 function closeReactorsModal(){ reactorsModal?.classList.remove("open"); }
 
 reactorsClose?.addEventListener("click", closeReactorsModal);
@@ -2086,6 +2091,7 @@ function forceShowNav(){
 /* ---- go home safely ---- */
 function goHomeFromReels(){
   hideReelsPage();
+  gotoPage("home");
 
   homePage.style.display = "block";
   profilePage.style.display = "none";
@@ -2101,6 +2107,7 @@ function goHomeFromReels(){
 /* ---- open reels ---- */
 function openReelsPage(){
   stopHomeFeedVideos();
+  gotoPage("reels");
   if (!reelsPage || !reelsWrap) return;
 
   homePage.style.display = "none";
@@ -2956,7 +2963,7 @@ if (loginMenuBtn) {
     e.preventDefault();
     if (!loginModal) return;
 
-    loginModal.style.display = "flex";
+    openModalHistory("loginModal");
     if (loginMsg) loginMsg.textContent = "";
     if (loginSuccess) loginSuccess.style.display = "none";
 
@@ -3183,8 +3190,7 @@ function confirmBox(message){
     if (!confirmModal) return resolve(false);
 
     confirmTextEl.textContent = message;
-    confirmModal.classList.add("open");
-
+    openModalHistory("confirmModal");
     const cleanup = () => {
       confirmModal.classList.remove("open");
       confirmOkBtn.onclick = null;
@@ -3211,7 +3217,7 @@ const REPLY_UNSUBS = new Map(); // commentId -> unsub
 
 function openCommentsModal(postId){
   ACTIVE_POST_ID = postId;
-  commentsModal.classList.add("open");
+ openModalHistory("commentsModal");
   cmodalList.innerHTML = "";
   cmodalInput.value = "";
 
@@ -3678,6 +3684,7 @@ function closeFriendsPage(){
   messagePage.style.display = "none";
   friendsPage.style.display = "none";
   setActive(homeIcon);
+  gotoPage("home");
   window.scrollTo(0,0);
 }
 
@@ -4528,3 +4535,148 @@ document.addEventListener("click", async (e) => {
     url: location.origin + location.pathname + "#post=" + postId
   });
 });
+
+//back to home//
+// ===== SPA HISTORY: pages + modals (Back: modal close -> home -> exit) =====
+const PAGE_IDS = {
+  home: "homePage",
+  profile: "profilePage",
+  notification: "notificationPage",
+  message: "messagePage",
+  reels: "reelsPage",
+  friends: "friendsPage",
+  settings: "settingsPage",
+};
+
+const MODAL_IDS = [
+  "textPostModal",
+  "mediaCaptionModal",
+  "editPostModal",
+  "authModal",
+  "loginModal",
+  "changeNameModal",
+  "commentsModal",
+  "reactorsModal",
+  "confirmModal"
+];
+
+function isModalOpen(modalId){
+  const el = document.getElementById(modalId);
+  if (!el) return false;
+
+  // your project uses both display:flex and classList "open"
+  const disp = getComputedStyle(el).display;
+  const byDisplay = disp !== "none";
+  const byClass = el.classList.contains("open");
+  return byDisplay || byClass;
+}
+
+function closeModalById(modalId){
+  const el = document.getElementById(modalId);
+  if (!el) return;
+
+  // support both systems
+  el.classList.remove("open");
+  el.style.display = "none";
+}
+
+// closes the top-most currently open modal (if any)
+function closeTopOpenModal(){
+  for (let i = MODAL_IDS.length - 1; i >= 0; i--){
+    const id = MODAL_IDS[i];
+    if (isModalOpen(id)){
+      closeModalById(id);
+      return true;
+    }
+  }
+  return false;
+}
+
+function hideAllPagesSPA(){
+  Object.values(PAGE_IDS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+}
+
+function renderPageSPA(page){
+  if (!PAGE_IDS[page]) page = "home";
+
+  hideAllPagesSPA();
+
+  const el = document.getElementById(PAGE_IDS[page]);
+  if (el) el.style.display = "block";
+
+  if (page === "profile") document.body.classList.add("profile-mode");
+  else document.body.classList.remove("profile-mode");
+
+  if (typeof setNavbarVisible === "function") {
+    if (page === "message" || page === "notification") setNavbarVisible(false);
+    else setNavbarVisible(true);
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function gotoPage(page, { push = true } = {}){
+  renderPageSPA(page);
+
+  if (page === "home") {
+    history.replaceState({ page: "home" }, "", location.pathname + location.search);
+    return;
+  }
+
+  if (push) history.pushState({ page }, "", "#" + page);
+  else history.replaceState({ page }, "", "#" + page);
+}
+
+// modal open => pushState so back closes modal first
+function openModalHistory(modalId){
+  const el = document.getElementById(modalId);
+  if (!el) return;
+
+  // open (support both)
+  if (modalId === "commentsModal" || modalId === "reactorsModal" || modalId === "confirmModal"){
+    el.classList.add("open");
+  } else {
+    el.style.display = "flex";
+  }
+
+  // add history state for modal
+  history.pushState({ modal: modalId }, "", "#m-" + modalId);
+}
+
+// modal close (UI only). Back handler will manage history.
+function closeModalHistory(modalId){
+  closeModalById(modalId);
+}
+
+// init base state
+(function initSpaHistory(){
+  history.replaceState({ page: "home" }, "", location.pathname + location.search);
+
+  window.addEventListener("popstate", (e) => {
+    const st = e.state || {};
+
+    // 1) if we were on a modal state -> back should close any open modal
+    if (st.modal){
+      closeModalById(st.modal);
+      return;
+    }
+
+    // 2) if ANY modal is open (safety) close it and stay on current page
+    if (closeTopOpenModal()) return;
+
+    // 3) page navigation
+    const page = st.page;
+    if (!page) {
+      // no state => first back goes home
+      gotoPage("home", { push: false });
+      return;
+    }
+
+    renderPageSPA(page);
+  });
+})();
+
+
