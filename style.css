@@ -3512,8 +3512,18 @@ body.reels-open{
 
 
 /*chat box*/
+/* ===== FULL CSS REPLACE (Mobile fixed input + send state) ===== */
+
+:root{
+  --border: rgba(0,0,0,.08);
+  --muted: rgba(0,0,0,.55);
+  --chip: rgba(0,0,0,.06);
+  --chip2: rgba(0,0,0,.10);
+  --red: #e11d48;
+}
+
 /* Chat thread layout */
-.mchat {
+.mchat{
   position: fixed;
   inset: 0;
   background: #fff;
@@ -3521,20 +3531,24 @@ body.reels-open{
   display: flex;
   flex-direction: column;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* mobile height fix */
+  height: 100dvh;
 }
 
 /* Top bar */
-.mchat-top {
+.mchat-top{
+  flex: 0 0 auto;
   height: 56px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 12px;
-  border-bottom: 1px solid rgba(0,0,0,.08);
+  border-bottom: 1px solid var(--border);
   background: #fff;
 }
 
-.mchat-back {
+.mchat-back{
   border: 0;
   background: transparent;
   font-size: 22px;
@@ -3542,36 +3556,37 @@ body.reels-open{
   padding: 6px 8px;
   border-radius: 10px;
 }
-.mchat-back:active { background: rgba(0,0,0,.06); }
+.mchat-back:active{ background: rgba(0,0,0,.06); }
 
-.mchat-user {
+.mchat-user{
   display: flex;
   align-items: center;
   gap: 10px;
   flex: 1;
   min-width: 0;
 }
-.mchat-avatar {
+.mchat-avatar{
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
 }
-.mchat-user-meta { min-width: 0; }
-.mchat-name {
+.mchat-user-meta{ min-width: 0; }
+.mchat-name{
   font-weight: 650;
   font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.mchat-sub { font-size: 12px; color: rgba(0,0,0,.55); }
+.mchat-sub{ font-size: 12px; color: var(--muted); }
 
-.mchat-actions {
+.mchat-actions{
   display: flex;
   gap: 6px;
+  flex: 0 0 auto;
 }
-.mchat-ico {
+.mchat-ico{
   border: 0;
   background: transparent;
   font-size: 18px;
@@ -3579,35 +3594,35 @@ body.reels-open{
   padding: 6px 8px;
   border-radius: 10px;
 }
-.mchat-ico:active { background: rgba(0,0,0,.06); }
+.mchat-ico:active{ background: rgba(0,0,0,.06); }
 
 /* Body */
-.mchat-body {
-  flex: 1;
+.mchat-body{
+  flex: 1 1 auto;
   overflow: auto;
-  padding: 18px 14px 12px;
+  padding: 18px 14px calc(12px + var(--composer-h, 64px));
   background: #fff;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Intro block */
-.mchat-intro {
+.mchat-intro{
   display: grid;
   place-items: center;
   gap: 10px;
   padding: 34px 12px 18px;
 }
-
-.mchat-intro-avatar {
+.mchat-intro-avatar{
   width: 84px;
   height: 84px;
   border-radius: 50%;
   object-fit: cover;
 }
-.mchat-intro-name {
+.mchat-intro-name{
   font-weight: 750;
   font-size: 20px;
 }
-.mchat-view-profile {
+.mchat-view-profile{
   border: 0;
   background: rgba(0,0,0,.08);
   padding: 8px 14px;
@@ -3615,66 +3630,96 @@ body.reels-open{
   cursor: pointer;
   font-weight: 600;
 }
-.mchat-view-profile:active { background: rgba(0,0,0,.12); }
+.mchat-view-profile:active{ background: rgba(0,0,0,.12); }
 
-.mchat-privacy {
+.mchat-privacy{
   text-align: center;
   font-size: 13px;
-  color: rgba(0,0,0,.55);
+  color: var(--muted);
   max-width: 320px;
   line-height: 1.3;
 }
 
-/* Input bar */
-.mchat-inputbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 10px;
-  border-top: 1px solid rgba(0,0,0,.08);
-  background: #fff;
-}
-
-.mchat-input {
-  flex: 1;
-  border: 0;
-  outline: none;
-  background: rgba(0,0,0,.06);
-  padding: 10px 12px;
-  border-radius: 999px;
-  font-size: 14px;
-}
-
-.mchat-send {
-  border: 0;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 10px;
-}
-.mchat-send:active { background: rgba(0,0,0,.06); }
-
-
-
+/* Messages */
 .msg-row{
-  display:flex;
-  margin:8px 0;
+  display: flex;
+  margin: 8px 0;
 }
-.msg-row.me{ justify-content:flex-end; }
+.msg-row.me{ justify-content: flex-end; }
 .msg-bubble{
-  max-width:75%;
-  padding:10px 12px;
-  border-radius:16px;
+  max-width: 75%;
+  padding: 10px 12px;
+  border-radius: 16px;
   background: rgba(0,0,0,.05);
-  font-size:14px;
-  line-height:1.25;
-  white-space:pre-wrap;
+  font-size: 14px;
+  line-height: 1.25;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .msg-row.me .msg-bubble{
   background: rgba(0,0,0,.08);
 }
 
+/* ===== Input bar (mobile fixed + safe area) ===== */
+.mchat-inputbar{
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: #fff;
+}
+
+/* input */
+.mchat-input{
+  flex: 1 1 auto;
+  min-width: 0;          /* IMPORTANT: prevents pushing send out */
+  border: 0;
+  outline: none;
+  background: var(--chip);
+
+  padding: 10px 12px;
+  border-radius: 999px;
+
+  font-size: 14px;
+  line-height: 1.25;
+
+  resize: none;          /* in case textarea is used */
+  max-height: 120px;     /* keeps bar from becoming too tall */
+  overflow: auto;
+}
+
+/* Send button: always visible */
+.mchat-send {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;   /* ❌ no box */
+  padding: 8px;
+  font-size: 20px;
+  cursor: pointer;
+
+  color: rgba(0,0,0,.35);     /* default grey */
+}
+
+.mchat-send:disabled {
+  color: rgba(0,0,0,.35);
+  cursor: not-allowed;
+}
+
+/* when typing */
+.mchat-send.enabled {
+  background: transparent;   /* ❌ still no box */
+  color: #e11d48;            /* ✅ bright red icon only */
+}
+/* iOS: prevent zoom on focus */
+@supports (-webkit-touch-callout: none){
+  .mchat-input{ font-size: 16px; }
+}
 
 
 .mchat-name-line{display:flex;align-items:center;gap:6px;min-width:0;}
@@ -3708,3 +3753,8 @@ body.reels-open{
   align-items:center;
   justify-content:center;
 }
+
+.mchat-ico--red { color: #ff1f1f; }   /* bright red */
+.mchat-svg { width: 20px; height: 20px; display: block; }
+
+.mchat-ico--red:active { color: #d91515; } /* pressed */
