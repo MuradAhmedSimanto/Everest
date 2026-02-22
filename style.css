@@ -3766,3 +3766,35 @@ body.reels-open{
 #reelsIcon svg {
   transform: translateY(3px);
 }
+
+/*upload post*/
+.upload-indicator{
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 99999;
+  background: #111;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  font-size: 14px;
+}
+
+.upload-indicator .spinner{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff2d2d;   /* red dot */
+  box-shadow: 0 0 0 6px rgba(255,45,45,.15);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse{
+  0%{ transform: scale(1); opacity: 1; }
+  50%{ transform: scale(1.25); opacity: .7; }
+  100%{ transform: scale(1); opacity: 1; }
+}
