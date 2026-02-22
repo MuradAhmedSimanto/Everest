@@ -76,15 +76,33 @@ function formatCaption(text) {
     showReadMore: true
   };
 }
-
-
-
-
 let posts = [];
 
 
 
 
+
+
+// ===== FAST FEED CACHE =====
+let FEED_CACHE = [];
+let FEED_CACHE_MAP = new Map();
+let postsUnsub = null;
+
+function normalizePost(doc){
+  const p = doc.data() || {};
+  return {
+    postId: doc.id,
+    userId: p.userId,
+    type: p.type,
+    media: p.media,
+    caption: p.caption || "",
+    userName: p.userName || "User",
+    userPhoto: p.userPhoto || "",
+    isProfileUpdate: !!p.isProfileUpdate,
+    updateType: p.updateType || "",
+    createdAt: p.createdAt || 0
+  };
+}
 /* ================= LEFT DRAWER MENU ================= */
 const menuBtn = document.getElementById("menuBtn");
 const leftDrawer = document.getElementById("leftDrawer");
@@ -433,7 +451,7 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
     ` : `
       <div class="post-media">
         ${type === "image"
-          ? `<img src="${media}">`
+          ? `<img src="${media}" loading="lazy" decoding="async">`
           : `<video controls playsinline preload="metadata">
                <source src="${media}" type="video/mp4">
              </video>`
@@ -511,7 +529,7 @@ profileInput.onchange = () => {
   r.onload = () => {
     profilePic.src = r.result;
     profilePicBig.src = r.result;
-
+    MEMORY_PROFILE_PHOTO = r.result;
     // ✅ save to firestore
     db.collection("users")
       .doc(auth.currentUser.uid)
@@ -624,6 +642,12 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// 🔥 Enable offline cache (instant load)
+firebase.firestore().enablePersistence({ synchronizeTabs: true })
+  .catch((err) => {
+    console.warn("Persistence error:", err.code);
+  });
 
 /* ===== GUEST POST BLOCK ===== */
 auth.onAuthStateChanged(user => {
@@ -1262,6 +1286,8 @@ document.getElementById("mediaPostBtn").onclick = async () => {
 
 
   //firebase
+let MEMORY_PROFILE_PHOTO = "";
+
 async function savePostToFirebase({
   type,
   media,
@@ -1276,22 +1302,31 @@ async function savePostToFirebase({
 
   const uid = auth.currentUser.uid;
 
-  // ✅ ensure username always available
-  let userName = (MEMORY_PROFILE_NAME || "").trim();
-  let userPhoto = "";
+  // ✅ always try from memory first
+  let userName  = (MEMORY_PROFILE_NAME || "").trim();
+  let userPhoto = (MEMORY_PROFILE_PHOTO || "").trim();
 
-  if (!userName) {
+  // ✅ if name OR photo missing -> fetch once from users collection
+  if (!userName || !userPhoto) {
     const snap = await db.collection("users").doc(uid).get();
     if (snap.exists) {
-      const d = snap.data();
-      userName = [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
-      MEMORY_PROFILE_NAME = userName; // cache
-    userPhoto = d.profilePic || "";
+      const d = snap.data() || {};
+
+      userName =
+        userName || [d.firstName, d.lastName].filter(Boolean).join(" ").trim();
+
+      userPhoto =
+        userPhoto || d.profilePic || "";
+
+      // ✅ cache for next posts
+      MEMORY_PROFILE_NAME  = userName || MEMORY_PROFILE_NAME;
+      MEMORY_PROFILE_PHOTO = userPhoto || MEMORY_PROFILE_PHOTO;
+    }
   }
-}
+
   await db.collection("posts").add({
     userId: uid,
-    userName: userName || "User",   // fallback
+    userName: userName || "User",
     userPhoto: userPhoto || "",
     type,
     media,
@@ -1302,7 +1337,6 @@ async function savePostToFirebase({
     createdAt: Date.now()
   });
 }
-
 
 
 
@@ -1805,50 +1839,76 @@ document.addEventListener("click", (e) => {
 
 
 
-// ================= POSTS FEED LISTENER (guest can see) =================
-let postsUnsub = null;
 
-auth.onAuthStateChanged((user) => {
-  // stop previous listener (prevents duplicates)
+// ===== FAST HOME FEED SYSTEM =====
+
+function renderFeedFromCache(){
+  const feed = document.getElementById("feed");
+  if (!feed) return;
+
+  if (!FEED_CACHE.length) return;
+
+  feed.innerHTML = "";
+
+  FEED_CACHE.forEach(p => {
+    createPost({ ...p, target: "home" });
+  });
+
+  hydratePostUserPhoto?.();
+  hydratePostUserNames?.();
+  VERIFIED_CACHE?.clear?.();
+  hydrateVerifiedBadges?.();
+  initFeedVideoSystem?.();
+}
+
+function persistFeedCache(){
+  try {
+    localStorage.setItem("everest_feed_cache_v1", JSON.stringify(FEED_CACHE.slice(0,40)));
+  } catch(e){}
+}
+
+function loadFeedCache(){
+  try {
+    const raw = localStorage.getItem("everest_feed_cache_v1");
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)){
+      FEED_CACHE = arr;
+      FEED_CACHE_MAP = new Map(arr.map(x => [x.postId, x]));
+    }
+  } catch(e){}
+}
+
+function startPostsListener(){
   if (typeof postsUnsub === "function") postsUnsub();
 
   postsUnsub = db.collection("posts")
     .orderBy("createdAt", "desc")
+    .limit(60)
     .onSnapshot((snapshot) => {
-      REELS_SNAPSHOT = snapshot; 
-      const feed = document.getElementById("feed");
-      const profileFeed = document.getElementById("profileFeed");
 
-      if (feed) feed.innerHTML = "";
-      
+      REELS_SNAPSHOT = snapshot;
 
-      snapshot.forEach((doc) => {
-        const p = doc.data();
-
-        // HOME: সবাই দেখবে
-        createPost({
-          postId: doc.id,
-          userId: p.userId,
-          type: p.type,
-          media: p.media,
-          caption: p.caption,
-          userName: p.userName,
-          userPhoto: p.userPhoto,
-          isProfileUpdate: p.isProfileUpdate,
-          updateType: p.updateType,
-          target: "home"
-        });
+      snapshot.forEach(doc => {
+        const p = normalizePost(doc);
+        FEED_CACHE_MAP.set(p.postId, p);
       });
 
-      hydratePostUserPhoto();
-      hydratePostUserNames();
-      VERIFIED_CACHE.clear();
-      hydrateVerifiedBadges();
-    }, (err) => {
-      console.error("posts listener error:", err);
-    });
-});
+      FEED_CACHE = Array.from(FEED_CACHE_MAP.values())
+        .sort((a,b)=> b.createdAt - a.createdAt)
+        .slice(0,60);
 
+      renderFeedFromCache();
+      persistFeedCache();
+    });
+}
+
+// 🔥 Boot instantly
+document.addEventListener("DOMContentLoaded", () => {
+  loadFeedCache();        // local cache
+  renderFeedFromCache();  // instant paint (if #feed exists)
+  startPostsListener();   // realtime update
+});
 //vdo system
 // ================= HOME FEED: MANUAL PLAY ONLY + SINGLE VIDEO RULE + OUT-OF-VIEW AUTO PAUSE (CLEAN) =================
 
@@ -2123,7 +2183,7 @@ function openReelsPage(){
   reelsIcon?.classList.add("active");
 
   window.scrollTo(0,0);
-  renderReels();
+ renderReelsFast();
 }
 
 /* ---- sound: only current can be unmuted ---- */
@@ -2390,7 +2450,27 @@ function setupReelsIntersectionObserver(){
 }
 
 
+function renderReelsFast(){
+  if (!reelsWrap) return;
 
+  stopAllReels();
+  reelsWrap.innerHTML = "";
+
+  const cachedVideos = FEED_CACHE.filter(p => p.type === "video");
+
+  if (cachedVideos.length){
+    reelsWrap.innerHTML = cachedVideos.map(p => buildReelCard(p)).join("");
+    hydrateReelsAvatars?.();
+    VERIFIED_CACHE?.clear?.();
+    hydrateVerifiedBadges?.();
+    setupReelsIntersectionObserver?.();
+    return;
+  }
+
+  if (REELS_SNAPSHOT){
+    renderReels();
+  }
+}
 
 
 // ===== REELS LIKE/SAVE (MODULAR) =====
@@ -2787,6 +2867,7 @@ reelsIcon?.addEventListener("click", (e) => {
   // ✅ user gesture = sound unlock ready
   REELS_SOUND_UNLOCKED = true;
   REELS_USER_MUTED = false;
+
 
   openReelsPage();
 });
@@ -4786,3 +4867,41 @@ function renderPageSPA(page){
     }
   });
 })();
+
+
+
+function bindNav(id, fn){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    fn();
+  }, true); // capture=true so overwritten onclick doesn't matter
+}
+
+// ✅ bind
+bindNav("homeIcon", () => {
+  hideReelsPage?.();
+  hideFriendsPage?.();
+  gotoPage("home");
+});
+
+bindNav("profileIcon", () => {
+  hideReelsPage?.();
+  hideFriendsPage?.();
+  // তোমার existing profileIcon.onclick logic থাকলে সেটা এখানে call করো:
+  if (typeof window.__openMyProfile === "function") window.__openMyProfile();
+  else gotoPage("profile");
+});
+
+bindNav("notificationIcon", () => {
+  hideReelsPage?.();
+  hideFriendsPage?.();
+  gotoPage("notification");
+});
+
+bindNav("messageIcon", () => {
+  hideReelsPage?.();
+  hideFriendsPage?.();
+  gotoPage("message");
+});
