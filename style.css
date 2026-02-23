@@ -1959,7 +1959,7 @@ body.profile-mode #bioText{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:99999;
+  z-index:10000001;
 }
 .confirm-modal.open{
   display:flex;
@@ -2767,7 +2767,7 @@ body.dark #profileFeed{ background: transparent !important; }
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.45) !important;
-  z-index: 9999;
+  z-index: 10000000;
 }
 
 #commentsModal .cmodal-sheet,
@@ -3798,16 +3798,4 @@ body.reels-open{
   50%{ transform: scale(1.25); opacity: .7; }
   100%{ transform: scale(1); opacity: 1; }
 }
-/*coment model up to rells page*/
-#commentsModal.open{
-  position: fixed;
-  inset: 0;
-  display: flex;
-  z-index: 999999;
-}
 
-/* reels এর z-index কম রাখো */
-#reelsPage{
-  position: relative;
-  z-index: 1000;
-}
