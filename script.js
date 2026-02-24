@@ -602,23 +602,15 @@ savePostToFirebase({
 
 
 /* ================= TEXT POST ================= */
-const mindBox = document.querySelector(".mind");
 const textPostModal = document.getElementById("textPostModal");
 const textPostInput = document.getElementById("textPostInput");
 const textPostBtn = document.getElementById("textPostBtn");
 
 const imageInput = document.getElementById("imageInput");
 
-document.getElementById("postBtn").onclick = () => {
-  imageInput.click();
-};
 
 
 
-mindBox.onclick = () => {
-  textPostInput.value = "";
-  openModalHistory("textPostModal");
-};
 
 textPostModal.onclick = e => {
   if (e.target === textPostModal) textPostModal.style.display = "none";
@@ -5000,4 +4992,106 @@ bindNav("messageIcon", () => {
   hideReelsPage?.();
   hideFriendsPage?.();
   gotoPage("message");
+});
+
+//plus icon//
+
+const plusWrap = document.getElementById("plusWrap");
+const plusMenu = document.getElementById("plusMenu");
+
+let plusMenuOpen = false;
+
+function closePlusMenu({ popHistory = false } = {}){
+  if (!plusMenuOpen) return;
+
+  plusMenu.classList.remove("open");
+  plusMenuOpen = false;
+
+  // only when user pressed back / outside click if you want
+  if (popHistory && history.state?.plusMenuOpen){
+    history.back();
+  }
+}
+
+function openPlusMenu(){
+  if (!auth.currentUser){
+    promptSignup("Please signup to create post");
+    return;
+  }
+
+  plusMenu.classList.add("open");
+  plusMenuOpen = true;
+
+  // push state so BACK closes it
+  history.pushState({ plusMenuOpen: true }, "");
+}
+
+function togglePlusMenu(){
+  plusMenuOpen ? closePlusMenu({ popHistory: true }) : openPlusMenu();
+}
+
+// icon click only
+plusWrap.addEventListener("click", (e)=>{
+  if (!e.target.closest("#plusIcon")) return;
+  e.stopPropagation();
+  togglePlusMenu();
+});
+
+// menu item click
+plusMenu.addEventListener("click", (e)=>{
+  const item = e.target.closest(".pmx-item");
+  if (!item) return;
+
+  const act = item.dataset.act;
+
+  // ✅ close menu but DON'T touch history here
+  closePlusMenu({ popHistory: false });
+
+  if (act === "text"){
+    openModalHistory("textPostModal");
+    return;
+  }
+
+  if (act === "media"){
+    imageInput?.click();
+    return;
+  }
+
+  if (act === "reels"){
+    REELS_SOUND_UNLOCKED = true;
+    REELS_USER_MUTED = false;
+    openReelsPage?.();
+    return;
+  }
+
+  if (act === "story"){
+    alert("Story feature coming soon");
+    return;
+  }
+
+  if (act === "ai"){
+    window.open("https://tinyurl.com/Murad-Ai", "_blank");
+    return;
+  }
+});
+
+// outside click (close + pop history)
+document.addEventListener("click", (e)=>{
+  if (!e.target.closest("#plusWrap")){
+    closePlusMenu({ popHistory: true });
+  }
+});
+
+// ESC (close + pop history)
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape"){
+    closePlusMenu({ popHistory: true });
+  }
+});
+
+// ✅ back button closes menu (without looping)
+window.addEventListener("popstate", ()=>{
+  if (plusMenuOpen){
+    closePlusMenu({ popHistory: false });
+  }
 });
