@@ -2648,7 +2648,10 @@ async function openUserProfile(uid, prefill = {}) {
   const isOwner = (me && me === uid);
 
   setProfileOwnerUI(isOwner);
+  setProfileActionsForUid(uid);
   showOnlyProfilePage();
+
+
 
   const pn = document.getElementById("profileName");
   const profileFeed = document.getElementById("profileFeed");
@@ -4995,7 +4998,6 @@ bindNav("messageIcon", () => {
 });
 
 //plus icon//
-
 const plusWrap = document.getElementById("plusWrap");
 const plusMenu = document.getElementById("plusMenu");
 
@@ -5099,4 +5101,174 @@ window.addEventListener("popstate", () => {
     closePlusMenu({ popHistory: false });
   }
 });
+
+//follow/message//
+async function setProfileActionsForUid(profileUid) {
+  const followBtn = document.querySelector(".profile-actions .follow-btn");
+  const msgBtn    = document.querySelector(".profile-actions .message-btn");
+  if (!followBtn || !msgBtn) return;
+
+  const me = auth.currentUser?.uid || "";
+  const isOwner = (me && me === profileUid);
+
+  // reset (avoid old onclick leak)
+  followBtn.onclick = null;
+  msgBtn.onclick = null;
+
+  // ---------- helpers ----------
+  const ensureMediaPicker = () => {
+    let picker = document.getElementById("mediaPicker");
+    if (!picker) {
+      picker = document.createElement("input");
+      picker.id = "mediaPicker";
+      picker.type = "file";
+      picker.accept = "image/*,video/*";
+      picker.hidden = true;
+      document.body.appendChild(picker);
+    }
+    return picker;
+  };
+
+  const openModalSafe = (modalId) => {
+    if (typeof openModalHistory === "function") {
+      openModalHistory(modalId);
+      return;
+    }
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = "flex";
+      document.body.classList.add("modal-open");
+    }
+  };
+
+  const openMediaModalWithFile = (file) => {
+    if (!file) return;
+
+    const isVideo = file.type?.startsWith("video/");
+    const isImage = file.type?.startsWith("image/");
+    if (!isVideo && !isImage) {
+      alert("Only image/video supported");
+      return;
+    }
+
+    const imgEl = document.getElementById("mediaPreview");
+    const vidEl = document.getElementById("videoPreview");
+    const captionEl = document.getElementById("mediaCaptionInput");
+
+    const url = URL.createObjectURL(file);
+
+    if (imgEl) {
+      imgEl.style.display = isImage ? "block" : "none";
+      if (isImage) imgEl.src = url;
+    }
+    if (vidEl) {
+      vidEl.style.display = isVideo ? "block" : "none";
+      if (isVideo) {
+        vidEl.src = url;
+        if (typeof vidEl.load === "function") vidEl.load();
+      }
+    }
+
+    if (captionEl) captionEl.value = "";
+
+    // store for upload button handler (your existing post upload code uses these)
+    window.__selectedMediaFile = file;
+    window.__selectedMediaType = isVideo ? "video" : "image";
+
+    openModalSafe("mediaCaptionModal");
+  };
+
+  const openMediaPostFlow = () => {
+    const picker = ensureMediaPicker();
+
+    // bind once only
+    if (!picker.__bound) {
+      picker.addEventListener("change", () => {
+        const file = picker.files?.[0];
+        if (!file) return;
+        openMediaModalWithFile(file);
+      });
+      picker.__bound = true;
+    }
+
+    // reset so same file reselect works
+    picker.value = "";
+    picker.click();
+  };
+
+  const bumpCountsUI = ({ following }) => {
+    const delta = following ? 1 : -1;
+
+    // ✅ target profile followers
+    const followersEl = document.getElementById("followersCount");
+    if (followersEl) followersEl.textContent = String((+followersEl.textContent || 0) + delta);
+
+    // ✅ my following (optional: only if you show it on profile page)
+    const followingEl = document.getElementById("followingCount");
+    if (followingEl) followingEl.textContent = String((+followingEl.textContent || 0) + delta);
+  };
+
+  // ---------- OWNER ----------
+  if (isOwner) {
+    followBtn.textContent = "Create Post";
+    msgBtn.textContent = "Add Story";
+
+    followBtn.onclick = () => openMediaPostFlow();
+    msgBtn.onclick = () => alert("Story feature coming soon");
+
+    return;
+  }
+
+  // ---------- OTHER USER ----------
+  followBtn.textContent = "Follow";
+  msgBtn.textContent = "Message";
+  followBtn.classList.remove("is-following");
+
+  // ✅ Sync follow state on open
+  await syncFollowButtonState(profileUid, followBtn);
+
+  followBtn.onclick = async () => {
+    if (!auth.currentUser) {
+      promptSignup("Please signup to follow");
+      return;
+    }
+
+    followBtn.disabled = true;
+    try {
+      const { following } = await toggleFollow(profileUid);
+
+      followBtn.textContent = following ? "Following" : "Follow";
+      followBtn.classList.toggle("is-following", following);
+
+      bumpCountsUI({ following });
+    } catch (e) {
+      console.error(e);
+      alert("Follow failed");
+    } finally {
+      followBtn.disabled = false;
+    }
+  };
+
+  msgBtn.onclick = () => {
+    if (!auth.currentUser) {
+      promptSignup("Please signup to message");
+      return;
+    }
+
+    const name =
+      (document.getElementById("profileName")?.textContent || "User").trim();
+
+    const photo =
+      document.getElementById("profilePicBig")?.src ||
+      document.getElementById("profilePic")?.src ||
+      "https://i.imgur.com/6VBx3io.png";
+
+    gotoPage("message");
+    if (typeof window.__openChat === "function") {
+      window.__openChat(profileUid, { name, photo });
+    } else {
+      alert("Chat system not ready");
+    }
+  };
+}
 
