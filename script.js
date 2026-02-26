@@ -1,3 +1,8 @@
+function setSrcSafe(id, src){
+  const el = document.getElementById(id);
+  if (el) el.src = src;
+}
+
 
 async function uploadToCloudinary(file) {
   const cloudName = "ddn8et0q4";
@@ -535,34 +540,48 @@ profileCam.onclick = () => profileInput.click();
 coverCam.onclick = () => coverInput.click();
 
 //sub profile
-profileInput.onchange = () => {
-  const file = profileInput.files[0];
+profileInput.onchange = async () => {
+  const file = profileInput.files?.[0];
+  profileInput.value = ""; // same file reselect fix
   if (!file || !auth.currentUser) return;
 
- 
-  const r = new FileReader();
-  r.onload = () => {
-    profilePic.src = r.result;
-    profilePicBig.src = r.result;
-    MEMORY_PROFILE_PHOTO = r.result;
-    // ✅ save to firestore
-    db.collection("users")
-      .doc(auth.currentUser.uid)
-      .update({
-        profilePic: r.result
-      });
+  showUploadBusy("Uploading profile photo...");
 
-  savePostToFirebase({
-  type: "image",
-  media: r.result,
-  isProfileUpdate: true,
-  updateType: "profile"
-});
+  try {
+    // instant preview
+    const localUrl = URL.createObjectURL(file);
+    setSrcSafe("profilePic", localUrl);
+    setSrcSafe("profilePicBig", localUrl);
 
+    // upload cloudinary
+    const url = await uploadToCloudinary(file);
 
-  };
+    // final paint
+    setSrcSafe("profilePic", url);
+    setSrcSafe("profilePicBig", url);
 
-  r.readAsDataURL(file);
+    // cache
+    MEMORY_PROFILE_PHOTO = url;
+
+    // firestore save
+    await db.collection("users").doc(auth.currentUser.uid).update({
+      profilePic: url
+    });
+
+    // optional: create post
+    await savePostToFirebase({
+      type: "image",
+      media: url,
+      isProfileUpdate: true,
+      updateType: "profile"
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert(err?.message || "Profile upload failed");
+  } finally {
+    hideUploadBusy();
+  }
 };
 
 
@@ -5272,4 +5291,3 @@ if (isOwner) {
     }
   };
 }
-
