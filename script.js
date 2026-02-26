@@ -117,7 +117,7 @@ function normalizePost(doc){
     media: p.media,
     caption: p.caption || "",
     userName: p.userName || "User",
-    userPhoto: p.userPhoto || "",
+    userPhoto: p.userPhoto || MEMORY_PROFILE_PHOTO || "",
     isProfileUpdate: !!p.isProfileUpdate,
     updateType: p.updateType || "",
     createdAt: p.createdAt || 0
@@ -1430,10 +1430,10 @@ async function savePostToFirebase({
     }
   }
 
-  await db.collection("posts").add({
-    userId: uid,
-    userName: userName || "User",
-    userPhoto: userPhoto || "",
+await db.collection("posts").add({
+  userId: uid,
+  userName: userName || "User",
+  userPhoto: userPhoto || MEMORY_PROFILE_PHOTO || "",
     type,
     media,
     caption,
