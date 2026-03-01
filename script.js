@@ -5293,75 +5293,15 @@ if (isOwner) {
 }
 
 //search section//
-document.addEventListener("DOMContentLoaded", () => {
-  // 1) Algolia keys
+// ================= SEARCH MODULE (FAST + FIRESTORE HYDRATE: PIC + VERIFIED + TITLE + INSTANT PROFILE) =================
+(() => {
   const ALGOLIA_APP_ID = "ISIAJ0VOPF";
   const ALGOLIA_SEARCH_KEY = "2b2d1959f16482266e968fee717ee2bb";
   const ALGOLIA_INDEX = "users";
 
-  // 2) DOM
-  const searchIcon = document.getElementById("searchIcon");
-  const searchOverlay = document.getElementById("searchOverlay");
-  const searchInput = document.getElementById("searchInput");
-  const searchClearBtn = document.getElementById("searchClearBtn");
-  const resultsList = document.getElementById("searchResultsList");
-  const searchBackBtn = document.getElementById("searchBackBtn");
-
-  if (!searchIcon || !searchOverlay || !searchInput || !searchClearBtn || !resultsList || !searchBackBtn) {
-    console.warn("Search UI elements missing. Check IDs.");
-    return;
-  }
-
-  // 3) Algolia init
-  if (typeof algoliasearch !== "function") {
-    console.error("Algolia CDN not loaded. Add algoliasearch script tag before this JS.");
-    return;
-  }
-
-  const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
-  const index = client.initIndex(ALGOLIA_INDEX);
-
-  // 4) Helpers
   const FALLBACK_AVATAR = "https://i.imgur.com/6VBx3io.png";
+
   const esc = (s = "") => String(s).replace(/[<>]/g, "");
-
-  const setEmpty = (text) => {
-    resultsList.innerHTML = `<div class="empty-state">${esc(text)}</div>`;
-  };
-
-  const renderLoading = () => {
-    resultsList.innerHTML = Array.from({ length: 7 }).map(() => `
-      <div class="srow" style="cursor:default;">
-        <div style="width:44px;height:44px;border-radius:50%;background:#eee;"></div>
-        <div class="meta" style="flex:1;">
-          <div style="height:12px;width:170px;background:#eee;border-radius:6px;"></div>
-          <div style="height:10px;width:100px;background:#eee;border-radius:6px;margin-top:8px;"></div>
-        </div>
-      </div>
-    `).join("");
-  };
-
-  const renderResults = (hits) => {
-    if (!hits || !hits.length) return setEmpty("No users found");
-
-    resultsList.innerHTML = hits.map(h => {
-      const uid = h.objectID || h.uid || h.userId || "";
-      const fullName =
-        (h.fullName || h.name || [h.firstName, h.lastName].filter(Boolean).join(" ")).trim() || "User";
-      const photo = h.profilePic || h.photo || h.userPhoto || FALLBACK_AVATAR;
-
-      return `
-        <div class="srow" data-uid="${esc(uid)}" data-name="${esc(fullName)}" data-photo="${esc(photo)}">
-          <img src="${esc(photo)}" onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}';" />
-          <div class="meta">
-            <div class="name">${esc(fullName)}</div>
-            <div class="uid">@${esc(uid).slice(0, 24)}</div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  };
-
   const debounce = (fn, wait = 180) => {
     let t = null;
     return (...args) => {
@@ -5370,90 +5310,254 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  // ✅ single source of truth for open/close
-  const openSearch = () => {
-    searchOverlay.style.display = "flex";
-    searchOverlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("search-open");
+  // uid -> { verified, profilePic, title, fullName }
+  const USER_META_CACHE = new Map();
 
-    searchInput.value = "";
-    setEmpty("Type to search users");
-    setTimeout(() => searchInput.focus(), 10);
-  };
+  function badgeHTML(uid) {
+    return `
+      <span class="verified-badge" data-uid="${esc(uid)}" title="Verified" style="display:none;">
+        <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+          <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    `;
+  }
 
-  const closeSearch = () => {
-    searchOverlay.style.display = "none";
-    searchOverlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("search-open");
+  function setEmpty(resultsList, text) {
+    resultsList.innerHTML = `<div class="empty-state">${esc(text)}</div>`;
+  }
 
-    searchInput.value = "";
-    resultsList.innerHTML = "";
-  };
+  function renderLoading(resultsList) {
+    resultsList.innerHTML = Array.from({ length: 7 }).map(() => `
+      <div class="srow" style="cursor:default; opacity:.7;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#eee;"></div>
+        <div class="meta" style="flex:1;">
+          <div style="height:12px;width:170px;background:#eee;border-radius:6px;"></div>
+          <div style="height:10px;width:130px;background:#eee;border-radius:6px;margin-top:8px;"></div>
+        </div>
+      </div>
+    `).join("");
+  }
 
-  // 6) Search
-  const doSearch = debounce(async () => {
-    const q = (searchInput.value || "").trim();
+  function normalizeHit(h) {
+    const uid = (h.objectID || h.uid || h.userUid || h.userId || "").toString().trim();
+    const fullName = (
+      (h.fullName || h.name || [h.firstName, h.lastName].filter(Boolean).join(" "))
+    ).toString().trim() || "User";
 
-    if (!q) {
-      setEmpty("Type to search users");
+    const photo = (h.profilePic || h.photo || h.userPhoto || "").toString().trim();
+    // optional, final title will come from Firestore anyway
+    const title = (h.title || h.bioTitle || h.tagline || h.role || h.userId || "").toString().trim();
+
+    return { uid, fullName, photo, title };
+  }
+
+  async function warmUserMeta(uids) {
+    const need = Array.from(new Set((uids || []).filter(Boolean)))
+      .filter(uid => !USER_META_CACHE.has(uid));
+
+    if (!need.length) return;
+
+    const snaps = await Promise.all(
+      need.map(uid => db.collection("users").doc(uid).get().catch(() => null))
+    );
+
+    snaps.forEach((snap, i) => {
+      const uid = need[i];
+      const d = (snap && snap.exists) ? (snap.data() || {}) : {};
+
+      const fullName =
+        [d.firstName, d.lastName].filter(Boolean).join(" ").trim() ||
+        d.fullName ||
+        d.name ||
+        "User";
+
+      const meta = {
+        verified: d.verified === true,
+        profilePic: (d.profilePic || d.photoURL || d.photo || "").toString().trim(),
+        // ✅ title priority: title / bioTitle / tagline / role / userId
+        title: (d.title || d.bioTitle || d.tagline || d.role || d.userId || "").toString().trim(),
+        fullName
+      };
+
+      USER_META_CACHE.set(uid, meta);
+    });
+  }
+
+  function applyMetaToRow(rowEl, uid) {
+    const meta = USER_META_CACHE.get(uid);
+    if (!meta) return;
+
+    // name
+    const nameEl = rowEl.querySelector(".ntext");
+    if (nameEl && meta.fullName) nameEl.textContent = meta.fullName;
+
+    // photo
+    const img = rowEl.querySelector("img");
+    if (img) img.src = (meta.profilePic || rowEl.dataset.photo || FALLBACK_AVATAR);
+
+    // ✅ title line uses existing .uid class (so your CSS shows it)
+    const titleEl = rowEl.querySelector(".uid");
+    if (titleEl) {
+      const t = meta.title || "";
+      titleEl.textContent = t;
+      titleEl.style.display = t ? "block" : "none";
+    }
+
+    // badge
+    const badge = rowEl.querySelector(".verified-badge");
+    if (badge) badge.style.display = meta.verified ? "inline-flex" : "none";
+
+    // dataset for instant open
+    rowEl.dataset.name = meta.fullName || rowEl.dataset.name || "User";
+    rowEl.dataset.photo = meta.profilePic || rowEl.dataset.photo || FALLBACK_AVATAR;
+  }
+
+  async function hydrateRenderedRows(resultsList) {
+    const rows = Array.from(resultsList.querySelectorAll(".srow[data-uid]"));
+    const uids = rows.map(r => (r.dataset.uid || "").trim()).filter(Boolean);
+
+    await warmUserMeta(uids);
+    rows.forEach(r => applyMetaToRow(r, (r.dataset.uid || "").trim()));
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const searchIcon = document.getElementById("searchIcon");
+    const searchOverlay = document.getElementById("searchOverlay");
+    const searchInput = document.getElementById("searchInput");
+    const searchClearBtn = document.getElementById("searchClearBtn");
+    const resultsList = document.getElementById("searchResultsList");
+    const searchBackBtn = document.getElementById("searchBackBtn");
+
+    if (!searchIcon || !searchOverlay || !searchInput || !searchClearBtn || !resultsList || !searchBackBtn) {
+      console.warn("Search UI elements missing. Check IDs.");
       return;
     }
 
-    renderLoading();
-
-    try {
-      const res = await index.search(q, { hitsPerPage: 20 });
-      renderResults(res.hits || []);
-    } catch (e) {
-      console.error("Algolia search error:", e);
-      setEmpty("Search failed");
+    if (typeof algoliasearch !== "function") {
+      console.error("Algolia CDN not loaded. Add algoliasearch script tag before this JS.");
+      return;
     }
-  }, 180);
 
-  // 7) Events
-  searchIcon.addEventListener("click", (e) => {
-    e.preventDefault();
-    openSearch();
-  });
+    const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
+    const index = client.initIndex(ALGOLIA_INDEX);
 
-  searchBackBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    closeSearch();
-  });
+    const openSearch = () => {
+      searchOverlay.style.display = "flex";
+      searchOverlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("search-open");
 
-  searchClearBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    searchInput.value = "";
-    searchInput.focus();
-    setEmpty("Type to search users");
-  });
+      searchInput.value = "";
+      setEmpty(resultsList, "Type to search users");
+      setTimeout(() => searchInput.focus(), 10);
+    };
 
-  searchInput.addEventListener("input", doSearch);
+    const closeSearch = () => {
+      searchOverlay.style.display = "none";
+      searchOverlay.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("search-open");
 
-  // click result -> open profile
-  resultsList.addEventListener("click", (e) => {
-    const row = e.target.closest(".srow[data-uid]");
-    if (!row) return;
+      searchInput.value = "";
+      resultsList.innerHTML = "";
+    };
 
-    const uid = row.dataset.uid;
-    if (!uid) return;
+    const renderResults = async (hits) => {
+      if (!hits || !hits.length) {
+        setEmpty(resultsList, "users not found");
+        return;
+      }
 
-    const name = row.dataset.name || "User";
-    const photo = row.dataset.photo || FALLBACK_AVATAR;
+      const rows = hits.map(normalizeHit).filter(x => x.uid);
 
-    closeSearch();
+      // instant paint (title uses .uid class)
+      resultsList.innerHTML = rows.map(r => `
+        <div class="srow"
+             data-uid="${esc(r.uid)}"
+             data-name="${esc(r.fullName)}"
+             data-photo="${esc(r.photo || FALLBACK_AVATAR)}">
+          <img src="${esc(r.photo || FALLBACK_AVATAR)}"
+               loading="lazy"
+               decoding="async"
+               onerror="this.onerror=null;this.src='${FALLBACK_AVATAR}';" />
 
-    if (typeof openUserProfile === "function") {
-      openUserProfile(uid, { name, photo });
-    } else {
-      console.warn("openUserProfile() not found");
-    }
-  });
+          <div class="meta">
+            <div class="name" style="display:flex;align-items:center;gap:6px;">
+              <span class="ntext">${esc(r.fullName)}</span>
+              ${badgeHTML(r.uid)}
+            </div>
 
-  // ESC closes
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && searchOverlay.style.display === "flex") {
+            <!-- ✅ title line (same class .uid that your UI already supports) -->
+            <div class="uid" style="${r.title ? "display:block" : "display:none"}">
+              ${esc(r.title || "")}
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      // hydrate from Firestore (guarantee title/verified/pic)
+      await hydrateRenderedRows(resultsList);
+    };
+
+    const doSearch = debounce(async () => {
+      const q = (searchInput.value || "").trim();
+      if (!q) {
+        setEmpty(resultsList, "Type to search users");
+        return;
+      }
+
+      renderLoading(resultsList);
+
+      try {
+        const res = await index.search(q, { hitsPerPage: 20 });
+        await renderResults(res.hits || []);
+      } catch (e) {
+        console.error("Algolia search error:", e);
+        setEmpty(resultsList, "Search failed");
+      }
+    }, 180);
+
+    // events
+    searchIcon.addEventListener("click", (e) => {
+      e.preventDefault();
+      openSearch();
+    });
+
+    searchBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       closeSearch();
-    }
+    });
+
+    searchClearBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      searchInput.value = "";
+      searchInput.focus();
+      setEmpty(resultsList, "Type to search users");
+    });
+
+    searchInput.addEventListener("input", doSearch);
+
+    // click -> open profile
+    resultsList.addEventListener("click", (e) => {
+      const row = e.target.closest(".srow[data-uid]");
+      if (!row) return;
+
+      const uid = (row.dataset.uid || "").trim();
+      if (!uid) return;
+
+      const name = (row.dataset.name || "User").trim() || "User";
+      const photo = (row.dataset.photo || "").trim() || FALLBACK_AVATAR;
+
+      closeSearch();
+
+      if (typeof cacheUserHeader === "function") cacheUserHeader(uid, { name, photo });
+      if (typeof openUserProfile === "function") openUserProfile(uid, { name, photo });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && searchOverlay.style.display === "flex") closeSearch();
+    });
+
+    setEmpty(resultsList, "Type to search users");
   });
-});
+})();
