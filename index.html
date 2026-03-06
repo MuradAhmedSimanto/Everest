@@ -9,12 +9,9 @@
 </head>
 <body>
 
-
 <!-- NAVBAR --> 
-<!-- ✅ NAVBAR -->
 <div class="navbar" id="navbar">
   <h2 class="logo" id="navLogo">Everest</h2>
-
   <div class="top-icons" id="navIcons">
     <i class="fa-solid fa-magnifying-glass" id="searchIcon"></i>
     <i class="fa-solid fa-bell" id="notificationIcon"></i>
@@ -24,7 +21,6 @@
 </div>
 
 <!-- ✅ BOTTOM NAV (example id) -->
-<!-- তোমার bottom nav যদি অন্য id হয়, এটা বদলে দাও -->
 <div id="bottomNav"></div>
 
 <!-- ✅ FULL SCREEN SEARCH OVERLAY -->
@@ -33,7 +29,6 @@
     <button class="app-back-btn" id="searchBackBtn" aria-label="Back">
       <i class="fa-solid fa-chevron-left"></i>
     </button>
-
     <div class="search-input-wrap">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input id="searchInput" type="text" placeholder="Search Everest" autocomplete="off" />
@@ -42,16 +37,12 @@
       </button>
     </div>
   </div>
-
   <div class="search-results" id="searchResultsList"></div>
 </div>
-
-
 
 <!-- MENU BAR -->
 <div class="menu-bar" id="bottomNav">
   <i class="fa-solid fa-house menu-icon active" id="homeIcon"></i>
- 
 <div class="menu-icon" id="reelsIcon">
   <svg viewBox="0 0 24 24" width="26" height="26"
        fill="none"
@@ -74,29 +65,24 @@
 <!-- PLUS ICON (after reels) -->
 <div class="menu-icon plus-wrap" id="plusWrap">
   <i class="fa-solid fa-plus" id="plusIcon"></i>
-
   <!-- dropdown -->
   <div class="plus-menu" id="plusMenu">
     <div class="pmx-item" data-act="text">
       <i class="fa-solid fa-pen-to-square"></i>
       <span>Text post</span>
     </div>
-
     <div class="pmx-item" data-act="media">
       <i class="fa-regular fa-image"></i>
       <span>Media post</span>
     </div>
-
     <div class="pmx-item" data-act="reels">
       <i class="fa-solid fa-clapperboard"></i>
       <span>Reels</span>
     </div>
-
     <div class="pmx-item" data-act="story">
       <i class="fa-solid fa-circle-plus"></i>
       <span>Story</span>
     </div>
-
     <div class="pmx-item" data-act="ai">
   <i class="fa-solid fa-bolt"></i>
   <span>AI</span>
@@ -131,11 +117,9 @@
 <!-- ===== FRIENDS PAGE ===== -->
 <div id="friendsPage" class="page" style="display:none;">
   <div class="friends-topbar">
-    
    <button id="friendsBackBtn" class="fbtn" aria-label="Back">
   <i class="fa-solid fa-chevron-left"></i>
 </button>
-
     <div class="friends-title">Friends</div>
     <button id="friendsSearchBtn" class="fbtn" aria-label="Search">
   <i class="fa-solid fa-magnifying-glass"></i>
@@ -199,8 +183,6 @@
   </nav>
 </aside>
 
-
-
 <!-- NOTIFICATION PAGE -->
 <div id="notificationPage" style="display:none;">
   <div class="notification-header">
@@ -211,9 +193,6 @@
       <strong>Everest</strong> started following you
     </div>
   </div>
-
-
-
 
 <!-- MESSAGE PAGE -->
 <div id="messagePage" style="display:none;">
@@ -230,8 +209,6 @@
   </div>
 </div>
 
-
-<!-- chat box -->
 <!-- chat box -->
 <div id="chatThreadPage" class="mchat" style="display:none;">
   <!-- TOP BAR -->
@@ -239,14 +216,11 @@
     <button id="chatBackBtn" class="mchat-back" type="button">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
-
     <div class="mchat-user">
       <img id="chatHeadAvatar" class="mchat-avatar" src="https://i.imgur.com/6VBx3io.png" />
-
       <div class="mchat-user-meta">
         <div class="mchat-name-line">
           <span id="chatHeadName" class="mchat-name"></span>
-
           <!-- TOP VERIFIED BADGE -->
           <span id="chatHeadVerified"
                 class="verified-badge"
@@ -258,25 +232,20 @@
             </svg>
           </span>
         </div>
-
         <div class="mchat-sub">Active now</div>
       </div>
     </div>
-
     <div class="mchat-actions">
-      
       <button class="mchat-ico mchat-ico--red" type="button" aria-label="Call">
   <svg class="mchat-svg" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
   </svg>
 </button>
-
      <button class="mchat-ico video-btn" type="button" title="Video call">
   <svg viewBox="0 0 24 24" width="20" height="20" fill="#ff1f1f">
     <path d="M17 10.5V6c0-1.1-.9-2-2-2H5C3.9 4 3 4.9 3 6v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-4.5l4 4V6.5l-4 4z"/>
   </svg>
 </button>
-
       <button class="mchat-ico" type="button">⋮</button>
     </div>
   </div>
@@ -286,7 +255,6 @@
     <!-- First open profile intro -->
     <div id="chatIntro" class="mchat-intro">
       <img id="chatIntroAvatar" class="mchat-intro-avatar" src="https://i.imgur.com/6VBx3io.png">
-
       <div class="mchat-intro-name-line">
         <div id="chatIntroName" class="mchat-intro-name">User</div>
 
@@ -301,9 +269,7 @@
           </svg>
         </span>
       </div>
-
       <button class="mchat-view-profile" type="button">View profile</button>
-
       <div class="mchat-privacy">
         This conversation is fully private and secure.
         Only the participants in this chat have access to the messages and calls.
@@ -313,27 +279,23 @@
 
   <!-- INPUT BAR -->
   <div class="mchat-inputbar">
-   
    <button class="mchat-ico camera-btn" type="button" title="Camera">
   <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
     <path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4c-1.1 0-2 .9-2 2v11c0 
     1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 
     13a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
    </svg>
-</button>
-    
+</button>  
 <button class="mchat-ico gallery-btn" type="button" title="Gallery">
   <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
     <path d="M21 19V5c0-1.1-.9-2-2-2H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 11.5l2.5 3.01L14.5 10l4.5 6H5l3.5-4.5zM8 8a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
   </svg>
 </button>
-
     <button class="mchat-ico voice-btn" type="button" title="Voice">
   <svg viewBox="0 0 24 24" width="26" height="26" fill="#ff1f1f">
     <path d="M12 14c1.66 0 3-1.34 3-3V6a3 3 0 10-6 0v5c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
   </svg>
 </button>
-
     <input id="chatInput" class="mchat-input" placeholder="write text...">
     <button id="chatSendBtn" class="mchat-send">➤</button>
   </div>
@@ -342,11 +304,15 @@
 <!-- language/dark mode -->
 <!-- SETTINGS PAGE -->
 <div id="settingsPage" class="settings-page" style="display:none;">
+
   <div class="settings-header">
     <i class="fa-solid fa-arrow-left settings-back" id="settingsBackBtn"></i>
     <h2>Settings</h2>
   </div>
+
   <div class="settings-list">
+
+    <!-- Language -->
     <div class="settings-item" id="languageItem">
       <div class="si-left">
         <i class="fa-solid fa-language"></i>
@@ -354,23 +320,120 @@
       </div>
       <span class="si-right" id="currentLanguage">English</span>
     </div>
+
+    <!-- Dark Mode -->
     <div class="settings-item">
       <div class="si-left">
         <i class="fa-solid fa-moon"></i>
-        <span>Dark mode</span>
+        <span>Dark Mode</span>
       </div>
       <label class="switch">
         <input type="checkbox" id="darkModeToggle">
         <span class="slider"></span>
       </label>
     </div>
+
+    <!-- Personal Details -->
+    <div class="settings-item">
+      <div class="si-left">
+        <i class="fa-solid fa-user"></i>
+        <span>Personal Details</span>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="settings-item">
+      <div class="si-left">
+        <i class="fa-solid fa-key"></i>
+        <span>Change Password</span>
+      </div>
+    </div>
+
+    <!-- Get Verified -->
+    <div class="settings-item">
+      <div class="si-left">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Get Verified</span>
+      </div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="settings-item" id="privacyBtn">
+      <div class="si-left">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Privacy Policy</span>
+      </div>
+    </div>
+
+    <!-- Help -->
+    <div class="settings-item">
+      <div class="si-left">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Help and support</span>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-item">
+      <div class="si-left">
+        <span class="custom-icon">E</span>
+        <span>About</span>
+      </div>
+    </div>
+
   </div>
 </div>
 
 
+<!-- PRIVACY PAGE -->
+<div id="privacyPage" class="privacy-page" style="display:none;">
 
+  <div class="privacy-header">
+    <i class="fa-solid fa-arrow-left" id="privacyBack"></i>
+    <h2>Privacy Policy</h2>
+  </div>
+  <div class="privacy-content">
+    <p>
+    Welcome to Everest. Your privacy is important to us. This Privacy Policy explains how Everest collects, uses, and protects your information when you use our platform.
+    </p>
+    <h3>1. Information We Collect</h3>
+    <p>When you use Everest, we may collect the following information:</p>
+    <ul>
+      <li>Personal information such as your name, email address, and profile details.</li>
+      <li>Content you create such as posts, comments, photos, and messages.</li>
+      <li>Device and usage information including browser type, IP address, and activity on the platform.</li>
+    </ul>
+    <h3>2. How We Use Your Information</h3>
+    <ul>
+      <li>Provide and improve Everest services.</li>
+      <li>Allow you to create posts and interact with users.</li>
+      <li>Keep the platform safe and prevent spam.</li>
+      <li>Improve user experience.</li>
+    </ul>
+    <h3>3. Data Protection</h3>
+    <p>
+    Everest takes appropriate security measures to protect your personal information from unauthorized access, misuse, or loss. We use modern security practices and restricted access systems to safeguard user data. However, because the internet is not completely secure, we cannot guarantee absolute protection of all information.
+    </p>
+    <h3>4. Sharing Information</h3>
+    <p>Everest does not sell or trade your personal data to third parties. Information may only be shared when necessary to operate the platform, comply with legal obligations, or protect the safety and rights of our users and services.</p>
+    <h3>5. User Control</h3>
+    <ul>
+      <li>Edit your personal information.</li>
+      <li>Delete posts or content.</li>
+      <li>Request account deletion.</li>
+    </ul>
 
+    <h3>6. Cookies</h3>
+    <p>Everest may use cookies to enhance site performance, remember user preferences, and improve the overall browsing experience. Disabling cookies may limit certain features of the platform.</p>
 
+    <h3>7. Changes to Privacy Policy</h3>
+    <p>We may update this Privacy Policy occasionally to reflect improvements or legal requirements. The updated version will always be published on this page with the latest revision date.</p>
+
+    <h3>8. Contact Us</h3>
+    <p>If you have any questions or concerns about this Privacy Policy, you can contact us through the Everest support system within the platform.</p>
+
+  </div>
+</div>
 
 <!-- HOME PAGE -->
 <div id="homePage">
