@@ -4106,12 +4106,13 @@ overflow-y:auto;
 .privacy-header{
 display:flex;
 align-items:center;
-gap:15px;
-padding:15px;
+gap:8px;
+padding:5px 12px 3px 12px;
 font-size:18px;
 font-weight:bold;
 border-bottom:1px solid #eee;
 }
+
 
 .privacy-content{
 padding:20px;
@@ -4140,4 +4141,36 @@ font-size:15px;
   line-height: 20px;
   border-radius: 50%; /* Circle shape */
   margin-right: 8px;
+} 
+
+/*about*/
+.about-page{
+background:#fff;
+height:100vh;
+overflow-y:auto;
 }
+
+.about-header{
+display:flex;
+align-items:center;
+gap:8px;
+padding:5px 12px 3px 12px;
+font-size:18px;
+font-weight:bold;
+border-bottom:1px solid #eee;
+}
+
+.about-content{
+padding:20px;
+line-height:1.6;
+font-size:15px;
+}
+
+.about-page{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#fff;
+} 
