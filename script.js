@@ -5927,3 +5927,94 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 2000);
   });
 });
+
+//help and suport section//
+document.addEventListener("DOMContentLoaded", function () {
+  const helpSupportBtn = document.getElementById("helpSupportBtn");
+  const helpSupportPage = document.getElementById("helpSupportPage");
+  const helpSupportBackBtn = document.getElementById("helpSupportBackBtn");
+  const settingsPage = document.getElementById("settingsPage");
+
+  if (!helpSupportBtn || !helpSupportPage || !helpSupportBackBtn || !settingsPage) {
+    return;
+  }
+
+  helpSupportBtn.addEventListener("click", function () {
+    settingsPage.style.display = "none";
+    helpSupportPage.style.display = "block";
+  });
+
+  helpSupportBackBtn.addEventListener("click", function () {
+    helpSupportPage.style.display = "none";
+    settingsPage.style.display = "block";
+  });
+});
+
+
+//community gidlines cection//
+document.addEventListener("DOMContentLoaded", function () {
+  const communityGuidelinesBtn = document.getElementById("communityGuidelinesBtn");
+  const communityGuidelinesPage = document.getElementById("communityGuidelinesPage");
+  const communityGuidelinesBackBtn = document.getElementById("communityGuidelinesBackBtn");
+  const leftDrawer = document.getElementById("leftDrawer");
+  const drawerOverlay = document.getElementById("drawerOverlay");
+
+  if (
+    !communityGuidelinesBtn ||
+    !communityGuidelinesPage ||
+    !communityGuidelinesBackBtn
+  ) {
+    return;
+  }
+
+  communityGuidelinesBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (leftDrawer) {
+      leftDrawer.classList.remove("open");
+      leftDrawer.setAttribute("aria-hidden", "true");
+    }
+
+    if (drawerOverlay) {
+      drawerOverlay.classList.remove("show");
+    }
+
+    communityGuidelinesPage.style.display = "block";
+  });
+
+  communityGuidelinesBackBtn.addEventListener("click", function () {
+    communityGuidelinesPage.style.display = "none";
+  });
+});
+
+//mobile app section//
+document.addEventListener("DOMContentLoaded", function () {
+  const mobileAppBtn = document.getElementById("mobileAppBtn");
+  const mobileAppPage = document.getElementById("mobileAppPage");
+  const mobileAppBackBtn = document.getElementById("mobileAppBackBtn");
+  const leftDrawer = document.getElementById("leftDrawer");
+  const drawerOverlay = document.getElementById("drawerOverlay");
+
+  if (!mobileAppBtn || !mobileAppPage || !mobileAppBackBtn) {
+    return;
+  }
+
+  mobileAppBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (leftDrawer) {
+      leftDrawer.classList.remove("open");
+      leftDrawer.setAttribute("aria-hidden", "true");
+    }
+
+    if (drawerOverlay) {
+      drawerOverlay.classList.remove("show");
+    }
+
+    mobileAppPage.style.display = "block";
+  });
+
+  mobileAppBackBtn.addEventListener("click", function () {
+    mobileAppPage.style.display = "none";
+  });
+});
