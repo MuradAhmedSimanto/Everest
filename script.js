@@ -5989,16 +5989,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //mobile app section//
 document.addEventListener("DOMContentLoaded", function () {
+
   const mobileAppBtn = document.getElementById("mobileAppBtn");
   const mobileAppPage = document.getElementById("mobileAppPage");
   const mobileAppBackBtn = document.getElementById("mobileAppBackBtn");
   const leftDrawer = document.getElementById("leftDrawer");
   const drawerOverlay = document.getElementById("drawerOverlay");
 
-  if (!mobileAppBtn || !mobileAppPage || !mobileAppBackBtn) {
-    return;
-  }
+  if (!mobileAppBtn || !mobileAppPage || !mobileAppBackBtn) return;
 
+  // Open Mobile App page
   mobileAppBtn.addEventListener("click", function (e) {
     e.preventDefault();
 
@@ -6012,9 +6012,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     mobileAppPage.style.display = "block";
+
+    // Add history state
+    history.pushState({ page: "mobileApp" }, "", "#mobile-app");
   });
 
+  // Back arrow button
   mobileAppBackBtn.addEventListener("click", function () {
+    history.back();
+  });
+
+  // Mobile browser back button
+  window.addEventListener("popstate", function () {
     mobileAppPage.style.display = "none";
   });
+
 });
