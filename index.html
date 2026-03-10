@@ -342,12 +342,12 @@
     </div>
 
     <!-- Change Password -->
-    <div class="settings-item">
-      <div class="si-left">
-        <i class="fa-solid fa-key"></i>
-        <span id="settingsChangePasswordText">Change Password</span>
-      </div>
-    </div>
+<div class="settings-item" id="changePasswordBtn">
+  <div class="si-left">
+    <i class="fa-solid fa-key"></i>
+    <span id="settingsChangePasswordText">Change Password</span>
+  </div>
+</div>
 
     <!-- Get Verified -->
     <div class="settings-item">
@@ -764,6 +764,42 @@
   </div>
 </div>
 
+
+<!-- CHANGE PASSWORD PAGE -->
+<div id="changePasswordPage" class="change-password-page" style="display:none;">
+  <div class="cp-header">
+    <i class="fa-solid fa-arrow-left" id="changePasswordBackBtn"></i>
+    <h2>Change Password</h2>
+  </div>
+
+  <p class="cp-text">
+    Create a password with at least 6 characters, including letters, numbers,
+    and at least one special symbol to keep your account secure
+  </p>
+
+  <div class="cp-input">
+    <label for="cpCurrentPassword">Current Password</label>
+    <input type="password" id="cpCurrentPassword" placeholder="Enter current password">
+  </div>
+
+  <div class="cp-input">
+    <label for="cpNewPassword">New Password</label>
+    <input type="password" id="cpNewPassword" placeholder="Enter new password">
+  </div>
+
+  <div class="cp-input">
+    <label for="cpConfirmNewPassword">Confirm New Password</label>
+    <input type="password" id="cpConfirmNewPassword" placeholder="Confirm new password">
+  </div>
+
+  <button id="cpSubmitBtn" class="cp-btn">
+    <span class="cp-btn-text">Change Password</span>
+    <span class="cp-btn-spinner" style="display:none;"></span>
+  </button>
+</div>
+
+
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -773,7 +809,6 @@
 <script src="script.js"></script>
 </body>
 </html>
-
 
 
 
