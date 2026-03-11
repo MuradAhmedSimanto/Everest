@@ -406,7 +406,7 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
   if (isProfileUpdate && updateType === "cover") updateText = "updated cover photo";
 
  const postHTML = `
-  <div class="post" data-id="${postId}">
+  <div class="post" data-id="${postId}" data-owner-id="${userId}">
 
     <div class="post-header">
       <div class="post-user-left">
@@ -447,11 +447,42 @@ const isOwner = !!(auth.currentUser && auth.currentUser.uid === userId);
 
         <div class="post-menu-dropdown">
           ${isOwner ? `
-            <div class="pm-item delete">Delete post</div>
-            <div class="pm-item edit">Edit post</div>
-            <div class="pm-item pin">Pin post</div>
+            
+            <div class="pm-item delete">
+        <i class="fa-solid fa-trash"></i> Delete post
+      </div>
+
+            <div class="pm-item edit">
+        <i class="fa-solid fa-pen"></i> Edit post
+      </div>
+
+            <div class="pm-item pin">
+        <i class="fa-solid fa-thumbtack"></i> Pin post
+      </div>
+
           ` : ``}
-          <div class="pm-item download">Download post</div>
+
+          <div class="pm-item save">
+      <i class="fa-regular fa-bookmark"></i> Save post
+    </div>
+
+          <div class="pm-item copy">
+      <i class="fa-solid fa-link"></i> Copy link
+    </div>
+
+          
+        <div class="pm-item download">
+      <i class="fa-solid fa-download"></i> Download post
+    </div>
+
+          <div class="pm-item hide">
+      <i class="fa-solid fa-eye-slash"></i> Hide post
+    </div>
+
+           <div class="pm-item report">
+      <i class="fa-solid fa-flag"></i> Report
+    </div>
+
         </div>
       </div>
     </div>
@@ -1172,6 +1203,8 @@ saveBioBtn.onclick = () => {
 };
 
 
+//post dropdown//
+
 //post delet section
 document.addEventListener("click", e => {
 
@@ -1214,6 +1247,71 @@ if (e.target.classList.contains("delete")) {
 
   return;
 }
+
+
+
+
+//copy link
+if (e.target.closest(".copy")) {
+  e.stopPropagation();
+
+  const postEl = e.target.closest(".post");
+  if (!postEl) return;
+
+  const postId = postEl.dataset.id;
+  if (!postId) return;
+
+  // always create shareable hash link
+  const baseUrl = window.location.href.split("#")[0].split("?")[0];
+  const postUrl = `${baseUrl}#post=${encodeURIComponent(postId)}`;
+
+  const copyFallback = () => {
+    const temp = document.createElement("input");
+    temp.value = postUrl;
+    document.body.appendChild(temp);
+    temp.select();
+    temp.setSelectionRange(0, 99999);
+
+    try {
+      document.execCommand("copy");
+      alert("Post link copied");
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+      prompt("Copy this link:", postUrl);
+    }
+
+    document.body.removeChild(temp);
+  };
+
+  try {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(postUrl)
+        .then(() => {
+          alert("Post link copied");
+        })
+        .catch((err) => {
+          console.error("Clipboard copy failed:", err);
+          copyFallback();
+        });
+    } else {
+      copyFallback();
+    }
+  } catch (err) {
+    console.error("Copy failed:", err);
+    copyFallback();
+  }
+
+  const menu = postEl.querySelector(".post-menu-dropdown");
+  if (menu) menu.classList.remove("show");
+
+  return;
+}
+
+
+
+ 
+
+
   // DOWNLOAD
   if (e.target.classList.contains("download")) {
     const media = e.target.closest(".post")?.querySelector("img,video");
@@ -1294,20 +1392,100 @@ document.getElementById("cancelEditPostBtn").onclick = () => {
   editingPostId = null;
 };
 
+// REPORT
+if (e.target.classList.contains("report")) {
+  e.stopPropagation();
 
+  const postEl = e.target.closest(".post");
+  if (!postEl) return;
+
+  if (!auth.currentUser) {
+    promptSignup("Please signup to report");
+    return;
+  }
+
+  const postId = postEl.dataset.id;
+  const ownerId = postEl.dataset.ownerId || "";
+
+  openReportModal(postId, ownerId);
+
+  const menu = postEl.querySelector(".post-menu-dropdown");
+  if (menu) menu.classList.remove("show");
+
+  return;
+}
 
   // PIN
   if (e.target.classList.contains("pin")) {
-    alert("developer is working");
+    alert("This feature is still under development");
   }
   });
 
 
+/* ================= REPORT POST ================= */
+const reportModal = document.getElementById("reportModal");
+const cancelReportBtn = document.getElementById("cancelReportBtn");
+const confirmReportBtn = document.getElementById("confirmReportBtn");
 
+let REPORTING_POST_ID = null;
+let REPORTING_OWNER_ID = null;
 
+function openReportModal(postId, ownerId) {
+  REPORTING_POST_ID = postId;
+  REPORTING_OWNER_ID = ownerId;
+  if (reportModal) reportModal.style.display = "flex";
+}
 
+function closeReportModal() {
+  REPORTING_POST_ID = null;
+  REPORTING_OWNER_ID = null;
+  if (reportModal) reportModal.style.display = "none";
+}
 
+cancelReportBtn?.addEventListener("click", () => {
+  closeReportModal();
+});
 
+reportModal?.addEventListener("click", (e) => {
+  if (e.target === reportModal) closeReportModal();
+});
+
+confirmReportBtn?.addEventListener("click", async () => {
+  if (!auth.currentUser) {
+    closeReportModal();
+    promptSignup("Please signup to report");
+    return;
+  }
+
+  if (!REPORTING_POST_ID || !REPORTING_OWNER_ID) {
+    alert("Invalid report data");
+    return;
+  }
+
+  confirmReportBtn.disabled = true;
+  confirmReportBtn.textContent = "Reporting...";
+
+  try {
+    await db.collection("reports").add({
+      postId: REPORTING_POST_ID,
+      ownerId: REPORTING_OWNER_ID,
+      reportedBy: auth.currentUser.uid,
+      reason: "post_report",
+      message: "User reported this post for review",
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    closeReportModal();
+    alert("Your report submitted");
+  } catch (err) {
+    console.error("Report failed:", err);
+    alert(err?.message || "Report failed");
+  } finally {
+    confirmReportBtn.disabled = false;
+    confirmReportBtn.textContent = "Report";
+  }
+});
 
 // ✅ Cloudinary upload এর জন্য file রাখবো
 let selectedFile = null;
