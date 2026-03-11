@@ -1227,21 +1227,21 @@ if (item) {
   });
 
   // TOGGLE MENU
-  if (e.target.classList.contains("post-menu")) {
-  const menu = e.target.nextElementSibling;
+  if (e.target.closest(".post-menu")) {
+  const btn = e.target.closest(".post-menu");
+  const menu = btn.nextElementSibling;
+  if (!menu) return;
 
   const willOpen = !menu.classList.contains("show");
 
-  closeAllPostMenus();
-
   if (willOpen) {
-    menu.classList.add("show");
-
-    // mobile back button handle
-    history.pushState({ menuOpen: true }, "");
+    openPostMenu(menu);
+  } else {
+    closePostMenusFromUI();
   }
-}
 
+  return;
+}
   // DELETE POST
 if (e.target.classList.contains("delete")) {
   e.stopPropagation();
@@ -1511,21 +1511,36 @@ confirmReportBtn?.addEventListener("click", async () => {
 
 
 //post dropdown mobile back btn
+let POST_MENU_HISTORY_OPEN = false;
+
 function closeAllPostMenus() {
   document.querySelectorAll(".post-menu-dropdown").forEach(menu => {
     menu.classList.remove("show");
   });
 }
 
-function isAnyPostMenuOpen() {
-  return !!document.querySelector(".post-menu-dropdown.show");
+function openPostMenu(menu) {
+  closeAllPostMenus();
+  menu.classList.add("show");
+
+  if (!POST_MENU_HISTORY_OPEN) {
+    POST_MENU_HISTORY_OPEN = true;
+    history.pushState({ postMenuOpen: true }, "");
+  }
+}
+
+function closePostMenusFromUI() {
+  closeAllPostMenus();
+  POST_MENU_HISTORY_OPEN = false;
 }
 
 window.addEventListener("popstate", () => {
-  if (isAnyPostMenuOpen()) {
+  if (POST_MENU_HISTORY_OPEN) {
     closeAllPostMenus();
+    POST_MENU_HISTORY_OPEN = false;
   }
 });
+
 // ✅ Cloudinary upload এর জন্য file রাখবো
 let selectedFile = null;
 let selectedMediaType = null;
