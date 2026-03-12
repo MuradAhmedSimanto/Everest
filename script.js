@@ -6369,3 +6369,157 @@ document.addEventListener("DOMContentLoaded", function () {
     alert("This feature is still under development");
   });
 });
+
+
+//single post model//
+(() => {
+  if (window.__IMAGE_ONLY_VIEWER_MODULE__) return;
+  window.__IMAGE_ONLY_VIEWER_MODULE__ = true;
+
+  const modal = document.getElementById("imageViewerModal");
+  const overlay = modal?.querySelector(".image-viewer-overlay");
+  const closeBtn = document.getElementById("imageViewerCloseBtn");
+  const imgEl = document.getElementById("imageViewerImg");
+
+  if (!modal || !overlay || !closeBtn || !imgEl) {
+    console.warn("Image viewer modal HTML not found");
+    return;
+  }
+
+  let IMAGE_VIEWER_OPEN = false;
+  let IMAGE_VIEWER_HISTORY_OPEN = false;
+
+  function lockScroll(lock) {
+    document.body.style.overflow = lock ? "hidden" : "";
+  }
+
+  function openImageViewer(src, postId = "", pushHash = true) {
+    if (!src) return;
+
+    imgEl.src = src;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    lockScroll(true);
+
+    IMAGE_VIEWER_OPEN = true;
+
+    if (pushHash && postId) {
+      if (!IMAGE_VIEWER_HISTORY_OPEN) {
+        IMAGE_VIEWER_HISTORY_OPEN = true;
+        history.pushState({ imageViewerOpen: true, postId }, "", `#post=${encodeURIComponent(postId)}`);
+      } else {
+        const base = window.location.href.split("#")[0];
+        history.replaceState({ imageViewerOpen: true, postId }, "", `${base}#post=${encodeURIComponent(postId)}`);
+      }
+    }
+  }
+
+  function closeImageViewer(fromPopState = false) {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    imgEl.src = "";
+    lockScroll(false);
+
+    IMAGE_VIEWER_OPEN = false;
+
+    if (!fromPopState && IMAGE_VIEWER_HISTORY_OPEN) {
+      IMAGE_VIEWER_HISTORY_OPEN = false;
+      history.back();
+      return;
+    }
+
+    if (fromPopState) {
+      IMAGE_VIEWER_HISTORY_OPEN = false;
+    }
+  }
+
+  async function openImageViewerByPostId(postId, pushHash = false) {
+    if (!postId || typeof db === "undefined") return;
+
+    const domPost = document.querySelector(`.post[data-id="${postId}"]`);
+    const domImg = domPost?.querySelector(".post-media img");
+
+    if (domImg) {
+      const src = domImg.getAttribute("src") || domImg.src || "";
+      if (src) {
+        openImageViewer(src, postId, pushHash);
+      }
+    }
+
+    try {
+      const snap = await db.collection("posts").doc(postId).get();
+      if (!snap.exists) return;
+
+      const p = snap.data() || {};
+      if (p.type !== "image" || !p.media) return;
+
+      if (!IMAGE_VIEWER_OPEN) {
+        openImageViewer(p.media, postId, pushHash);
+      } else {
+        imgEl.src = p.media;
+      }
+    } catch (err) {
+      console.error("Failed to open image viewer by post id:", err);
+    }
+  }
+
+  // image click -> open full image
+  document.addEventListener("click", (e) => {
+    const imageNode = e.target.closest(".post .post-media img");
+    if (!imageNode) return;
+
+    const postEl = imageNode.closest(".post");
+    const postId = postEl?.dataset?.id || "";
+    const src = imageNode.getAttribute("src") || imageNode.src || "";
+
+    if (!src) return;
+
+    openImageViewer(src, postId, true);
+  });
+
+  // close button
+  closeBtn.addEventListener("click", () => {
+    closeImageViewer(false);
+  });
+
+  // overlay click
+  overlay.addEventListener("click", () => {
+    closeImageViewer(false);
+  });
+
+  // esc key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && IMAGE_VIEWER_OPEN) {
+      closeImageViewer(false);
+    }
+  });
+
+  // browser/mobile back button support
+  window.addEventListener("popstate", () => {
+    const hash = window.location.hash || "";
+
+    if (IMAGE_VIEWER_OPEN && !hash.startsWith("#post=")) {
+      closeImageViewer(true);
+      return;
+    }
+
+    if (!IMAGE_VIEWER_OPEN && hash.startsWith("#post=")) {
+      const postId = decodeURIComponent(hash.replace(/^#post=/, "").trim());
+      if (postId) {
+        openImageViewerByPostId(postId, false);
+      }
+    }
+  });
+
+  // direct open from link
+  window.addEventListener("load", () => {
+    const hash = window.location.hash || "";
+    if (!hash.startsWith("#post=")) return;
+
+    const postId = decodeURIComponent(hash.replace(/^#post=/, "").trim());
+    if (!postId) return;
+
+    openImageViewerByPostId(postId, false);
+  });
+})();
+
