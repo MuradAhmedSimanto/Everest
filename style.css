@@ -1152,136 +1152,158 @@ body.modal-open{
 
 
 /* ================= LOGIN MODAL (REPLACE FULL) ================= */
+/* ===== LOGIN MODAL ===== */
 
-/* overlay */
-#loginModal{
+.auth-modal{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.45);
-  display: none;              /* JS দিয়ে flex হবে */
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: 999999;
+
+  display: none; /* important */
   align-items: center;
   justify-content: center;
-  z-index: 99999;
 }
 
-/* the white box */
-#loginModal .auth-box{
-  width: min(520px, 92vw);
-  background: #fff;
-  border-radius: 18px;
-  padding: 18px 16px;
-  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+.auth-modal.show{
+  display: flex;
 }
 
-/* optional: title spacing (যদি title থাকে) */
-#loginModal .auth-title{
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 12px;
-}
 
-/* inputs */
-#loginModal input{
-  width: 100%;
-  padding: 12px 12px;
-  border: 1px solid #e6e6e6;
+.modern-login{
+  width: 360px;
+  padding: 32px 26px;
   border-radius: 14px;
-  outline: none;
-  background: #fafafa;
-  margin-top: 10px;
-}
-
-#loginModal input:focus{
-  border-color: #ff1f1f;
+  text-align: center;
   background: #fff;
 }
 
-/* login button */
-#loginModal #loginBtn{
+.login-brand h2{
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #111;
+}
+
+.modern-login h3{
+  font-size: 16px;
+  margin-bottom: 22px;
+  color: #555;
+}
+
+.google-login{
   width: 100%;
-  margin-top: 14px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.google-login img{
+  width: 18px;
+}
+
+.login-divider{
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.login-divider::before,
+.login-divider::after{
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.login-divider span{
+  padding: 0 10px;
+}
+
+.modern-login input{
+  width: 100%;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 0 14px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.login-options{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.remember{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remember input{
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+.login-options a{
+  color: #1877f2;
+  text-decoration: none;
+}
+
+.login-red-btn{
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
   border: none;
-  padding: 12px 14px;
-  border-radius: 14px;
   background: #ff1f1f;
   color: #fff;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-#loginModal #loginBtn.loading{
-  opacity: .8;
-  cursor: not-allowed;
+.login-red-btn:hover{
+  background: #e01818;
 }
 
-/* msg */
-#loginModal #loginMsg{
-  margin-top: 10px;
-  color: #cc0000;
-  font-size: 14px;
+.signup-link{
+  font-size: 13px;
+  margin-top: 18px;
 }
 
-/* ✅ MOBILE FULL SCREEN */
-@media (max-width: 560px){
-  #loginModal{
-    background: #fff;                 /* full screen হলে overlay দরকার নেই */
-    align-items: stretch;
-    justify-content: stretch;
+.signup-link a{
+  color: #1877f2;
+  text-decoration: none;
+}
+
+@media (max-width: 768px){
+  .auth-modal.show{
+    align-items: flex-start;
   }
 
-  #loginModal .auth-box{
-    width: 100vw;
-    height: 100vh;
+  .modern-login{
+    width: 100%;
+    height: 100%;
     border-radius: 0;
-    box-shadow: none;
-    padding-top: calc(18px + env(safe-area-inset-top));
-    padding-bottom: calc(18px + env(safe-area-inset-bottom));
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* content scroll যদি বেশি হয় */
-  #loginModal .auth-box{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 40px 22px;
   }
 }
-
-/* 🔙 Premium Minimal Back Arrow */
-#loginModal .auth-box{
-  position: relative;
-}
-
-#loginModal .login-back{
-  position: absolute;
-  top: 18px;
-  left: 18px;
-
-  border: none;
-  background: transparent;
-
-  font-size: 22px;
-  color: #111;
-  cursor: pointer;
-
-  padding: 0;
-  line-height: 1;
-
-  transition: 0.2s ease;
-}
-
-#loginModal .login-back:hover{
-  transform: translateX(-3px);
-  color: #ff1f1f;
-}
-
-#loginModal .login-back:active{
-  transform: scale(0.9);
-}
-
-
-/*profile tab menu hide*/
 
 /* ===== Default (Home etc.) ===== */
 body{
@@ -4868,6 +4890,7 @@ to{transform:rotate(360deg)}
     font-size: 28px;
   }
 }
+
 /*single post model*/
 .image-viewer-modal{
   position: fixed;
