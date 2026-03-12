@@ -4868,3 +4868,80 @@ to{transform:rotate(360deg)}
     font-size: 28px;
   }
 }
+/*single post model*/
+.image-viewer-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: none;
+  background: #000;
+}
+
+.image-viewer-modal.open{
+  display: block;
+}
+
+.image-viewer-overlay{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.96);
+}
+
+.image-viewer-content{
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-viewer-content img{
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.image-viewer-close{
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(40,40,40,.75);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-viewer-close:active{
+  transform: scale(.96);
+}
+
+.post .post-media img{
+  cursor: pointer;
+}
+
+@media (max-width: 768px){
+  .image-viewer-close{
+    top: 12px;
+    left: 12px;
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+  }
+}
