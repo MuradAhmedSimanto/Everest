@@ -1115,7 +1115,7 @@ body.modal-open{
 /* Save button */
 .edit-save-btn {
   border: none;
-  background: #1677ff;
+  background: #ff0000;
   color: #fff;
   padding: 10px 14px;
   border-radius: 10px;
