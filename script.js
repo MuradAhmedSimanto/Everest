@@ -6523,3 +6523,28 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 })();
 
+//signup model to login model//
+document.addEventListener("DOMContentLoaded", function () {
+  const authModal = document.getElementById("authModal");
+  const loginModal = document.getElementById("loginModal");
+
+  const openLoginFromSignup = document.getElementById("openLoginFromSignup");
+  const openSignupFromLogin = document.getElementById("openSignupFromLogin");
+
+  if (openLoginFromSignup) {
+    openLoginFromSignup.addEventListener("click", function (e) {
+      e.preventDefault();
+      authModal.style.display = "none";
+      loginModal.style.display = "flex";
+    });
+  }
+
+  if (openSignupFromLogin) {
+    openSignupFromLogin.addEventListener("click", function (e) {
+      e.preventDefault();
+      loginModal.style.display = "none";
+      authModal.style.display = "flex";
+    });
+  }
+});
+
