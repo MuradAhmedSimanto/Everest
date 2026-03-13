@@ -915,28 +915,20 @@
   </div>
 </div>
   <!-- EDIT POST MODAL -->
-<!-- EDIT POST FULLSCREEN PAGE -->
-<div id="editPostModal" class="edit-post-page" style="display:none;">
+<div id="editPostModal">
   <div class="edit-post-page-inner">
+
     <div class="edit-post-header">
-      <button id="cancelEditPostBtn" class="edit-back-btn">←</button>
-      <h3>Edit post</h3>
+      <button id="cancelEditPostBtn" class="edit-back-btn">‹</button>
+      <h3>Edit Post</h3>
       <button id="saveEditPostBtn" class="edit-save-btn">Save</button>
     </div>
-    <div class="edit-post-body">
-      <textarea
-        id="editPostCaption"
-        placeholder="Edit caption..."
-      ></textarea>
 
-      <img
-        id="editPostImage"
-        style="display:none;">
-      <video
-        id="editPostVideo"
-        controls
-        style="display:none;"
-      ></video>
+    <div class="edit-post-body">
+      <textarea id="editPostCaption" placeholder="Edit caption..."></textarea>
+
+      <img id="editPostImage" style="display:none;" alt="Post image">
+      <video id="editPostVideo" controls style="display:none;"></video>
     </div>
 
   </div>
