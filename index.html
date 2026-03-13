@@ -992,21 +992,37 @@
   </div>
 </div>
 
-<!-- change name model model -->
+<!-- CHANGE NAME MODAL -->
 <div class="auth-modal" id="changeNameModal" style="display:none;">
   <div class="auth-box">
-    <i id="changeNameBackBtn" class="login-back fa-solid fa-arrow-left"></i>
-    <h3>Change name</h3>
-    <input type="text" id="newFirstName" placeholder="First name">
-    <input type="text" id="newLastName" placeholder="Last name">
+
+    <h2 class="brand-title">Everest</h2>
+
+    <h3 class="change-title">change your name</h3>
+
+    <p class="change-desc">
+      You can change your profile name a limited number of times.
+      After changing your name once, you must wait 30 days before
+      you can change it again.
+    </p>
+
+    <div class="input-group">
+      <input type="text" id="newFirstName" placeholder="First name">
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="newLastName" placeholder="Last name">
+    </div>
+
     <button id="saveNameBtn" class="btn-danger" type="button">
-  <span class="btn-text">Save</span>
-  <span class="btn-spinner" aria-hidden="true"></span>
-</button>
-<p id="changeNameMsg"></p>
+      <span class="btn-text">Save</span>
+      <span class="btn-spinner" aria-hidden="true"></span>
+    </button>
+
+    <p id="changeNameMsg"></p>
+
   </div>
 </div>
-
 
 <!-- CHANGE PASSWORD PAGE -->
 <div id="changePasswordPage" class="change-password-page" style="display:none;">
