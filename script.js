@@ -6933,6 +6933,7 @@ const EditPostModule = (() => {
 
   let currentProfileUid = "";
   let unsubFollowList = null;
+  let followPageHistoryOpen = false;
 
   function userRef(uid) {
     return db.collection("users").doc(uid);
@@ -7092,18 +7093,56 @@ const EditPostModule = (() => {
   }
 
   function openFollowPageUI() {
-    document.getElementById("followPage")?.classList.remove("hidden");
+    const page = document.getElementById("followPage");
+    if (!page) return;
+
+    const alreadyOpen = !page.classList.contains("hidden");
+    page.classList.remove("hidden");
+
+    if (!alreadyOpen) {
+      followPageHistoryOpen = true;
+      history.pushState({ followPage: true }, "", "#follow");
+    }
   }
 
-  function closeFollowPageUI() {
-    document.getElementById("followPage")?.classList.add("hidden");
+  function closeFollowPageUI(fromPopState = false) {
+    const page = document.getElementById("followPage");
+    if (!page) return;
+
+    const wasOpen = !page.classList.contains("hidden");
+    page.classList.add("hidden");
     cleanupFollowListListener();
+
+    if (!fromPopState && wasOpen && followPageHistoryOpen) {
+      followPageHistoryOpen = false;
+      history.back();
+      return;
+    }
+
+    if (fromPopState) {
+      followPageHistoryOpen = false;
+    }
   }
 
   function openUserProfile(uid) {
     if (!uid) return;
 
-    closeFollowPageUI();
+    const row = document.querySelector(`.follow-user-row[data-uid="${uid}"]`);
+    const name =
+      row?.querySelector(".follow-user-name")?.textContent?.trim() || "User";
+    const photo =
+      row?.querySelector(".follow-user-avatar")?.getAttribute("src") || DEFAULT_AVATAR;
+
+    closeFollowPageUI(true);
+
+    if (typeof window.cacheUserHeader === "function") {
+      window.cacheUserHeader(uid, { name, photo });
+    }
+
+    if (typeof window.openUserProfile === "function") {
+      window.openUserProfile(uid, { name, photo });
+      return;
+    }
 
     if (typeof window.loadUserProfileByUid === "function") {
       window.loadUserProfileByUid(uid);
@@ -7111,7 +7150,7 @@ const EditPostModule = (() => {
     }
 
     if (typeof window.openProfilePage === "function") {
-      window.openProfilePage(uid);
+      window.openProfilePage(uid, { name, photo });
       return;
     }
 
@@ -7133,6 +7172,7 @@ const EditPostModule = (() => {
 
     if (typeof window.gotoPage === "function") {
       window.gotoPage("profile");
+      return;
     }
 
     console.log("Open profile:", uid);
@@ -7166,9 +7206,11 @@ const EditPostModule = (() => {
     list.querySelectorAll(".follow-user-row").forEach((row) => {
       if (row.dataset.bound === "1") return;
       row.dataset.bound = "1";
+      row.style.cursor = "pointer";
 
       row.addEventListener("click", () => {
         const uid = row.dataset.uid;
+        if (!uid) return;
         openUserProfile(uid);
       });
     });
@@ -7267,7 +7309,7 @@ const EditPostModule = (() => {
 
     if (backBtn && !backBtn.dataset.bound) {
       backBtn.dataset.bound = "1";
-      backBtn.onclick = closeFollowPageUI;
+      backBtn.onclick = () => closeFollowPageUI(false);
     }
 
     if (followersTabBtn && !followersTabBtn.dataset.bound) {
@@ -7321,9 +7363,25 @@ const EditPostModule = (() => {
     };
   }
 
+  function bindMobileBackSupport() {
+    if (window.__followPagePopstateBound) return;
+    window.__followPagePopstateBound = true;
+
+    window.addEventListener("popstate", () => {
+      const page = document.getElementById("followPage");
+      if (!page) return;
+
+      const isOpen = !page.classList.contains("hidden");
+      if (isOpen) {
+        closeFollowPageUI(true);
+      }
+    });
+  }
+
   function initFollowPageModule() {
     bindFollowPageEvents();
     patchSetProfileActionsForUid();
+    bindMobileBackSupport();
   }
 
   if (document.readyState === "loading") {
