@@ -7618,3 +7618,77 @@ const EditPostModule = (() => {
     sendCommentNotification
   };
 })();
+
+//notification count//
+
+(() => {
+if (window.NotificationBadgeLoaded) return;
+window.NotificationBadgeLoaded = true;
+let BADGE_UNSUB = null;
+function updateBadge(count){
+  const badge = document.getElementById("notifBadge");
+  if (!badge) return;
+
+  if (count <= 0){
+    badge.style.display = "none";
+    return;
+  }
+
+  badge.style.display = "block";
+  if (count > 9){
+    badge.textContent = "9+";
+  } else {
+    badge.textContent = count;
+  }
+}
+
+function startBadgeListener(){
+
+  if (!auth.currentUser) return;
+
+  if (BADGE_UNSUB) BADGE_UNSUB();
+
+  BADGE_UNSUB = db.collection("notifications")
+    .where("toUserId","==",auth.currentUser.uid)
+    .where("seen","==",false)
+    .onSnapshot((snap)=>{
+
+      const count = snap.size;
+      updateBadge(count);
+
+    },(err)=>{
+      console.error("Badge listener error:",err);
+    });
+
+}
+async function markAllNotificationsSeen(){
+  if (!auth.currentUser) return;
+  try{
+    const snap = await db.collection("notifications")
+      .where("toUserId","==",auth.currentUser.uid)
+      .where("seen","==",false)
+      .get();
+    if (snap.empty) return;
+    const batch = db.batch();
+    snap.forEach(doc=>{
+      batch.update(doc.ref,{seen:true});
+    });
+    await batch.commit();
+  }catch(err){
+    console.error("Mark seen error:",err);
+  }
+}
+document.addEventListener("click",(e)=>{
+
+  const bell = e.target.closest(".notif-icon");
+  if (!bell) return;
+
+  markAllNotificationsSeen();
+});
+auth.onAuthStateChanged((user)=>{
+
+  if (user){
+    startBadgeListener();
+  }
+});
+})();
