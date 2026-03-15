@@ -3984,6 +3984,7 @@ body.reels-open{
   line-height: 1.3;
 }
 
+
 /* Messages */
 .msg-row{
   display: flex;
@@ -4003,7 +4004,6 @@ body.reels-open{
 .msg-row.me .msg-bubble{
   background: rgba(0,0,0,.08);
 }
-
 /* ===== Input bar (mobile fixed + safe area) ===== */
 .mchat-inputbar{
   flex: 0 0 auto;
@@ -5388,4 +5388,49 @@ to{transform:rotate(360deg)}
   border-radius:50px;
   padding:2px 6px;
   display:none;
+}
+
+/*chat system*/
+.msg-row{
+  display:flex;
+  margin:1px 0 !important;  
+  padding:0 !important;
+}
+
+
+.msg-bubble{
+  padding:6px 10px;
+  border-radius:16px;
+  max-width:240px;
+  margin:0 !important;
+}
+
+
+.media-bubble{
+  padding:2px !important;
+  margin:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  border:none !important;
+}
+
+.chat-media-img,
+.chat-media-video{
+  display:block;
+  max-width:220px;
+  max-height:260px;
+  border-radius:16px;
+  object-fit:cover;
+}
+.msg-caption{
+  margin-top:2px;
+  font-size:14px;
+  line-height:1.3;
+}
+.msg-bubble:has(.chat-media-img),
+.msg-bubble:has(.chat-media-video){
+  background:transparent !important;
+  box-shadow:none !important;
+  border:none !important;
+  padding:2px !important;
 }
