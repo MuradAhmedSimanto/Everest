@@ -4451,437 +4451,6 @@ function setNavbarVisible(yes){
 
 })();
 
-//chat box//
-// ================= CHAT MODULE (CLEAN + INTRO ALWAYS + VERIFIED BADGE) =================
-(() => {
-  const chatThreadPage   = document.getElementById("chatThreadPage");
-  const chatBackBtn      = document.getElementById("chatBackBtn");
-  const chatHeadName     = document.getElementById("chatHeadName");
-  const chatHeadAvatar   = document.getElementById("chatHeadAvatar");
-  const chatHeadVerified = document.getElementById("chatHeadVerified");
-
-  const chatMessages = document.getElementById("chatMessages");
-  const chatInput    = document.getElementById("chatInput");
-  const chatSendBtn  = document.getElementById("chatSendBtn");
-
-  const FALLBACK_AVATAR = "https://i.imgur.com/6VBx3io.png";
-
-  if (!chatThreadPage || !chatBackBtn || !chatHeadName || !chatHeadAvatar || !chatMessages || !chatInput || !chatSendBtn) {
-    console.warn("CHAT UI elements missing. Check IDs in HTML.");
-    return;
-  }
-
-  // ---------- state ----------
-  let OPEN_UID = null;
-  let CONV_ID  = null;
-  let UNSUB    = null;
-  let TOKEN    = 0;
-  let SENDING  = false;
-
-  // Cached verified state for the currently opened user
-  let OPEN_VERIFIED = false;
-
-  // ---------- helpers ----------
-  const esc = (s = "") => String(s).replace(/[<>]/g, "");
-  const convIdFor = (a, b) => [a, b].sort().join("_");
-  const SVT = () => firebase.firestore.FieldValue.serverTimestamp();
-  const INC = (n) => firebase.firestore.FieldValue.increment(n);
-
-  function showChat() {
-    chatThreadPage.style.display = "flex";
-    chatThreadPage.style.flexDirection = "column";
-  }
-
-  function hideChat() {
-    chatThreadPage.style.display = "none";
-  }
-
-  function stop() {
-    if (typeof UNSUB === "function") UNSUB();
-    UNSUB = null;
-  }
-
-  function setHeaderVerified(isVerified) {
-    OPEN_VERIFIED = !!isVerified;
-    if (!chatHeadVerified) return;
-    chatHeadVerified.style.display = isVerified ? "inline-flex" : "none";
-  }
-
-  function getVerifiedSVG() {
-    return `
-      <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
-        <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-  }
-
-  function ensureIntroNode() {
-    let intro = document.getElementById("chatIntro");
-    if (intro) return intro;
-
-    intro = document.createElement("div");
-    intro.id = "chatIntro";
-    intro.className = "mchat-intro";
-    intro.innerHTML = `
-      <img id="chatIntroAvatar" class="mchat-intro-avatar" src="${FALLBACK_AVATAR}">
-      <div class="mchat-intro-name-line">
-        <div id="chatIntroName" class="mchat-intro-name">User</div>
-
-        <span id="chatIntroVerified"
-              class="verified-badge"
-              style="display:none;"
-              title="Verified">
-          ${getVerifiedSVG()}
-        </span>
-      </div>
-
-      <button class="mchat-view-profile" type="button">View profile</button>
-
-      <div class="mchat-privacy">
-        This conversation is fully private and secure.
-        Only the participants in this chat have access to the messages and calls.
-      </div>
-    `;
-    return intro;
-  }
-
-  // Always paint the center intro (profile + secure + view profile + verified)
-  function paintIntro(name, photo, isVerified = false) {
-    const node = ensureIntroNode();
-
-    const nmEl = node.querySelector("#chatIntroName");
-    const avEl = node.querySelector("#chatIntroAvatar");
-    const vbEl = node.querySelector("#chatIntroVerified");
-
-    if (nmEl) nmEl.textContent = (name || "User").trim() || "User";
-    if (avEl) avEl.src = photo || FALLBACK_AVATAR;
-    if (vbEl) vbEl.style.display = isVerified ? "inline-flex" : "none";
-
-    if (chatMessages.firstChild !== node) {
-      chatMessages.insertBefore(node, chatMessages.firstChild);
-    }
-  }
-
-  function paintLoadingRows() {
-    const wrap = document.createElement("div");
-    wrap.id = "chatLoadingRows";
-    wrap.style.padding = "12px";
-    wrap.style.opacity = ".7";
-    wrap.innerHTML = `
-      <div style="height:12px;width:60%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
-      <div style="height:12px;width:40%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
-      <div style="height:12px;width:70%;background:#e9eaee;border-radius:8px;margin:10px 0;"></div>
-    `;
-    chatMessages.appendChild(wrap);
-  }
-
-  function clearLoadingRows() {
-    const el = document.getElementById("chatLoadingRows");
-    if (el) el.remove();
-  }
-
-  function renderBubble(isMe, text) {
-    return `
-      <div class="msg-row ${isMe ? "me" : ""}">
-        <div class="msg-bubble">${esc(text || "")}</div>
-      </div>
-    `;
-  }
-
-  function scrollBottom() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  async function paintHeader(otherUid, prefill, token) {
-    const nm = (prefill?.name || "User").trim() || "User";
-    const ph = prefill?.photo || FALLBACK_AVATAR;
-
-    // Instant header
-    chatHeadName.textContent = nm;
-    chatHeadAvatar.src = ph;
-
-    // Default hide badge until fetched
-    setHeaderVerified(false);
-
-    // Keep intro in sync immediately
-    paintIntro(nm, ph, false);
-
-    try {
-      const snap = await db.collection("users").doc(otherUid).get();
-      if (!snap.exists) return;
-      if (TOKEN !== token) return;
-      if (OPEN_UID !== otherUid) return;
-
-      const u = snap.data() || {};
-      const full =
-        [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
-        u.name ||
-        "User";
-
-      const photo = u.profilePic || u.photoURL || FALLBACK_AVATAR;
-      const isV = (u.verified === true);
-
-      chatHeadName.textContent = full;
-      chatHeadAvatar.src = photo;
-
-      // ✅ VERIFIED BADGE (HEADER + INTRO)
-      setHeaderVerified(isV);
-      paintIntro(full, photo, isV);
-    } catch (e) {
-      console.error("header fetch error:", e);
-    }
-  }
-
-  async function ensureConversation(convId, meUid, otherUid) {
-    const ref = db.collection("conversations").doc(convId);
-    const snap = await ref.get();
-    if (snap.exists) return;
-
-    await ref.set({
-      participants: [meUid, otherUid],
-      updatedAt: SVT(),
-      lastMessage: { text: "", senderId: "", createdAt: 0 },
-      unreadCountMap: { [meUid]: 0, [otherUid]: 0 }
-    });
-  }
-
-  async function resetMyUnread(meUid) {
-    if (!CONV_ID) return;
-    try {
-      await db.collection("conversations").doc(CONV_ID).set({
-        [`unreadCountMap.${meUid}`]: 0
-      }, { merge: true });
-    } catch (e) {
-      console.warn("unread reset failed:", e?.code || e);
-    }
-  }
-
-  function listenMessages(meUid, otherUid, token) {
-    const convRef = db.collection("conversations").doc(CONV_ID);
-
-    UNSUB = convRef.collection("messages")
-      .orderBy("createdAt", "asc")
-      .limit(300)
-      .onSnapshot((snap) => {
-        if (TOKEN !== token) return;
-        if (OPEN_UID !== otherUid) return;
-
-        const nm = chatHeadName.textContent || "User";
-        const ph = chatHeadAvatar.src || FALLBACK_AVATAR;
-        const isV = OPEN_VERIFIED;
-
-        chatMessages.innerHTML = "";
-        paintIntro(nm, ph, isV);
-
-        if (snap.empty) return;
-
-        snap.forEach(d => {
-          const m = d.data() || {};
-          chatMessages.insertAdjacentHTML(
-            "beforeend",
-            renderBubble(m.senderId === meUid, m.text || "")
-          );
-        });
-
-        scrollBottom();
-      }, (err) => {
-        console.error("messages listener error:", err);
-
-        const nm = chatHeadName.textContent || "User";
-        const ph = chatHeadAvatar.src || FALLBACK_AVATAR;
-        const isV = OPEN_VERIFIED;
-
-        chatMessages.innerHTML = "";
-        paintIntro(nm, ph, isV);
-        chatMessages.insertAdjacentHTML(
-          "beforeend",
-          `<div style="padding:14px;color:#c00;">Failed to load messages</div>`
-        );
-      });
-  }
-
-  async function openChat(otherUid, prefill = {}) {
-    if (!auth.currentUser) {
-      if (typeof promptSignup === "function") promptSignup("Please signup to message");
-      return;
-    }
-
-    const meUid = auth.currentUser.uid;
-    if (!otherUid || otherUid === meUid) return;
-
-    const token = ++TOKEN;
-
-    stop();
-    OPEN_UID = otherUid;
-    CONV_ID  = convIdFor(meUid, otherUid);
-
-    showChat();
-    chatInput.value = "";
-
-    const nm0 = (prefill?.name || "User").trim() || "User";
-    const ph0 = prefill?.photo || FALLBACK_AVATAR;
-
-    // Reset state per open
-    OPEN_VERIFIED = false;
-
-    chatMessages.innerHTML = "";
-    paintIntro(nm0, ph0, false);
-    paintLoadingRows();
-
-    // default hide badge until fetched
-    setHeaderVerified(false);
-
-    paintHeader(otherUid, prefill, token);
-
-    try {
-      await ensureConversation(CONV_ID, meUid, otherUid);
-      if (TOKEN !== token) return;
-
-      await resetMyUnread(meUid);
-
-      clearLoadingRows();
-      listenMessages(meUid, otherUid, token);
-    } catch (e) {
-      console.error("open chat error:", e);
-      clearLoadingRows();
-
-      const nm = chatHeadName.textContent || nm0;
-      const ph = chatHeadAvatar.src || ph0;
-
-      chatMessages.innerHTML = "";
-      paintIntro(nm, ph, OPEN_VERIFIED);
-      chatMessages.insertAdjacentHTML(
-        "beforeend",
-        `<div style="padding:14px;color:#c00;"></div>`
-      );
-    }
-  }
-
-
-
-// ================= SEND + EVENTS (REPLACE THIS WHOLE BLOCK) =================
-
-function updateSendButton() {
-  const hasText = (chatInput.value || "").trim().length > 0;
-
-  if (hasText) {
-    chatSendBtn.classList.add("enabled");
-    chatSendBtn.disabled = false;
-  } else {
-    chatSendBtn.classList.remove("enabled");
-    chatSendBtn.disabled = true;
-  }
-}
-
-async function send() {
-  if (!auth.currentUser) return;
-  if (!CONV_ID || !OPEN_UID) return;
-
-  const text = (chatInput.value || "").trim();
-  if (!text) return;
-
-  if (SENDING) return;
-  SENDING = true;
-
-  const meUid = auth.currentUser.uid;
-
-  // clear input + update UI instantly
-  chatInput.value = "";
-  updateSendButton();
-
-  const convRef = db.collection("conversations").doc(CONV_ID);
-  const msgRef  = convRef.collection("messages").doc();
-  const batch   = db.batch();
-
-  const ts = SVT();
-
-  batch.set(msgRef, {
-    senderId: meUid,
-    receiverId: OPEN_UID,
-    text,
-    createdAt: ts,
-    type: "text"
-  });
-
-  batch.set(convRef, {
-    participants: [meUid, OPEN_UID],
-    updatedAt: ts,
-    lastMessage: { text, senderId: meUid, createdAt: ts },
-    [`unreadCountMap.${OPEN_UID}`]: INC(1),
-    [`unreadCountMap.${meUid}`]: 0
-  }, { merge: true });
-
-  try {
-    await batch.commit();
-  } catch (e) {
-    console.error("SEND ERROR:", e);
-    alert(e?.code ? `${e.code}: ${e.message}` : "Failed to send");
-
-    // if send failed, restore text back (optional but nicer)
-    chatInput.value = text;
-    updateSendButton();
-  } finally {
-    SENDING = false;
-  }
-}
-
-// ---------- events ----------
-chatSendBtn.addEventListener("click", send);
-
-// ✅ this is what makes the button turn red while typing
-chatInput.addEventListener("input", updateSendButton);
-
-chatInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    send();
-  }
-});
-
-chatBackBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  stop();
-
-  OPEN_UID = null;
-  CONV_ID = null;
-  OPEN_VERIFIED = false;
-
-  chatHeadName.textContent = "User";
-  chatHeadAvatar.src = FALLBACK_AVATAR;
-  setHeaderVerified(false);
-
-  chatMessages.innerHTML = "";
-  chatInput.value = "";
-  updateSendButton();
-
-  hideChat();
-});
-
-document.addEventListener("click", (e) => {
-  const item = e.target.closest(".chat-item[data-uid]");
-  if (!item) return;
-
-  const uid = item.dataset.uid;
-  if (!uid) return;
-
-  const name  = (item.querySelector(".chat-name-text")?.textContent || "").trim() || "User";
-  const photo = item.querySelector("img.chat-avatar")?.getAttribute("src") || FALLBACK_AVATAR;
-
-  openChat(uid, { name, photo });
-
-  // reset button state when opening chat
-  chatInput.value = "";
-  updateSendButton();
-});
-
-window.__openChat = openChat;
-
-// initial state on load
-updateSendButton();
-
-hideChat();
-})();
 
 //shere section//
 // ===== SHARE (Native Share Sheet) =====
@@ -7691,4 +7260,664 @@ auth.onAuthStateChanged((user)=>{
     startBadgeListener();
   }
 });
+})();
+
+
+//chat system 
+/* ================= ULTRA FAST SUPABASE CHAT MODULE (FULL REPLACE) ================= */
+(() => {
+  if (window.__SUPABASE_CHAT_READY__) return;
+  window.__SUPABASE_CHAT_READY__ = true;
+
+  // ========= SUPABASE CONFIG =========
+  const SUPABASE_URL = "https://nowunwkcuzitbhctdclt.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_30kK_iOdYj7QHAnYeVCALA_PiTKx-At";
+
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error("Supabase script not loaded");
+    return;
+  }
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ========= UI =========
+  const chatThreadPage   = document.getElementById("chatThreadPage");
+  const chatBackBtn      = document.getElementById("chatBackBtn");
+  const chatHeadName     = document.getElementById("chatHeadName");
+  const chatHeadAvatar   = document.getElementById("chatHeadAvatar");
+  const chatHeadVerified = document.getElementById("chatHeadVerified");
+
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput    = document.getElementById("chatInput");
+  const chatSendBtn  = document.getElementById("chatSendBtn");
+
+  const galleryBtn = document.querySelector(".gallery-btn");
+  const cameraBtn  = document.querySelector(".camera-btn");
+
+  const FALLBACK_AVATAR = "https://i.imgur.com/6VBx3io.png";
+
+  if (!chatThreadPage || !chatBackBtn || !chatHeadName || !chatHeadAvatar || !chatMessages || !chatInput || !chatSendBtn) {
+    console.warn("Chat UI elements missing");
+    return;
+  }
+
+  // ========= STATE =========
+  let OPEN_UID = null;
+  let OPEN_CONV_ID = null;
+  let REALTIME_CHANNEL = null;
+  let SENDING = false;
+  let MESSAGE_IDS = new Set();
+
+  // ========= FILE INPUTS =========
+  let chatGalleryInput = document.getElementById("chatGalleryInput");
+  if (!chatGalleryInput) {
+    chatGalleryInput = document.createElement("input");
+    chatGalleryInput.type = "file";
+    chatGalleryInput.id = "chatGalleryInput";
+    chatGalleryInput.accept = "image/*,video/*";
+    chatGalleryInput.hidden = true;
+    document.body.appendChild(chatGalleryInput);
+  }
+
+  let chatCameraInput = document.getElementById("chatCameraInput");
+  if (!chatCameraInput) {
+    chatCameraInput = document.createElement("input");
+    chatCameraInput.type = "file";
+    chatCameraInput.id = "chatCameraInput";
+    chatCameraInput.accept = "image/*,video/*";
+    chatCameraInput.setAttribute("capture", "environment");
+    chatCameraInput.hidden = true;
+    document.body.appendChild(chatCameraInput);
+  }
+
+  // ========= HELPERS =========
+  const esc = (s = "") =>
+    String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  function getMyUid() {
+    try {
+      if (typeof auth !== "undefined" && auth?.currentUser?.uid) return auth.currentUser.uid;
+      if (window.auth?.currentUser?.uid) return window.auth.currentUser.uid;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function convIdFor(a, b) {
+    return [String(a || ""), String(b || "")].sort().join("__");
+  }
+
+  function showChat() {
+    chatThreadPage.style.display = "flex";
+    chatThreadPage.style.flexDirection = "column";
+  }
+
+  function hideChat() {
+    chatThreadPage.style.display = "none";
+  }
+
+  function scrollBottom() {
+    requestAnimationFrame(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+
+  function stopRealtime() {
+    if (REALTIME_CHANNEL) {
+      try { sb.removeChannel(REALTIME_CHANNEL); } catch (e) {}
+      REALTIME_CHANNEL = null;
+    }
+  }
+
+  function setHeaderVerified(isVerified) {
+    if (!chatHeadVerified) return;
+    chatHeadVerified.style.display = isVerified ? "inline-flex" : "none";
+  }
+
+  function getVerifiedSVG() {
+    return `
+      <svg class="verified-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l2.09 2.09 2.96-.39 1.2 2.73 2.73 1.2-.39 2.96L22 12l-2.09 2.09.39 2.96-2.73 1.2-1.2 2.73-2.96-.39L12 22l-2.09-2.09-2.96.39-1.2-2.73-2.73-1.2.39-2.96L2 12l2.09-2.09-.39-2.96 2.73-1.2 1.2-2.73 2.96.39L12 2z" fill="#ff1f1f"/>
+        <path d="M9.3 12.6l1.9 1.9 4.2-4.3" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+  }
+
+  function ensureIntroNode() {
+    let intro = document.getElementById("chatIntro");
+    if (intro) return intro;
+
+    intro = document.createElement("div");
+    intro.id = "chatIntro";
+    intro.className = "mchat-intro";
+    intro.innerHTML = `
+      <img id="chatIntroAvatar" class="mchat-intro-avatar" src="${FALLBACK_AVATAR}">
+      <div class="mchat-intro-name-line">
+        <div id="chatIntroName" class="mchat-intro-name">User</div>
+        <span id="chatIntroVerified" class="verified-badge" style="display:none;" title="Verified">
+          ${getVerifiedSVG()}
+        </span>
+      </div>
+      <button class="mchat-view-profile" type="button">View profile</button>
+      <div class="mchat-privacy">
+        This conversation is fully private and secure.
+        Only the participants in this chat have access to the messages and calls.
+      </div>
+    `;
+    return intro;
+  }
+
+  function paintIntro(name, photo, isVerified = false) {
+    const node = ensureIntroNode();
+    const nmEl = node.querySelector("#chatIntroName");
+    const avEl = node.querySelector("#chatIntroAvatar");
+    const vbEl = node.querySelector("#chatIntroVerified");
+
+    if (nmEl) nmEl.textContent = (name || "User").trim() || "User";
+    if (avEl) avEl.src = photo || FALLBACK_AVATAR;
+    if (vbEl) vbEl.style.display = isVerified ? "inline-flex" : "none";
+
+    if (chatMessages.firstChild !== node) {
+      chatMessages.insertBefore(node, chatMessages.firstChild);
+    }
+  }
+
+  function clearMessagesKeepIntro() {
+    MESSAGE_IDS.clear();
+    const intro = ensureIntroNode();
+    chatMessages.innerHTML = "";
+    chatMessages.appendChild(intro);
+  }
+
+  function updateSendButton() {
+    const hasText = (chatInput.value || "").trim().length > 0;
+    chatSendBtn.disabled = !hasText && !SENDING;
+    chatSendBtn.classList.toggle("enabled", hasText);
+  }
+
+  function setSendingUI(isSending, label = "➤") {
+    SENDING = isSending;
+    chatSendBtn.disabled = isSending || !(chatInput.value || "").trim().length;
+    chatSendBtn.textContent = isSending ? "..." : label;
+    galleryBtn && (galleryBtn.style.pointerEvents = isSending ? "none" : "auto");
+    cameraBtn && (cameraBtn.style.pointerEvents = isSending ? "none" : "auto");
+  }
+
+  function renderBubble(isMe, msg) {
+    const type = msg?.type || "text";
+    const text = msg?.text || "";
+    const mediaUrl = msg?.media_url || "";
+
+    if (type === "image") {
+      return `
+        <div class="msg-row ${isMe ? "me" : ""}" data-mid="${esc(msg.id || "")}">
+          <div class="msg-bubble media-bubble">
+            <img
+              src="${esc(mediaUrl)}"
+              class="chat-media-img"
+              alt="image"
+              loading="lazy"
+              decoding="async"
+            >
+            ${text ? `<div class="msg-caption">${esc(text)}</div>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    if (type === "video") {
+      return `
+        <div class="msg-row ${isMe ? "me" : ""}" data-mid="${esc(msg.id || "")}">
+          <div class="msg-bubble media-bubble">
+            <video
+              class="chat-media-video"
+              controls
+              playsinline
+              preload="metadata"
+            >
+              <source src="${esc(mediaUrl)}">
+            </video>
+            ${text ? `<div class="msg-caption">${esc(text)}</div>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="msg-row ${isMe ? "me" : ""}" data-mid="${esc(msg.id || "")}">
+        <div class="msg-bubble">${esc(text)}</div>
+      </div>
+    `;
+  }
+
+  function appendMessage(msg) {
+    const mid = msg?.id || "";
+    if (mid && MESSAGE_IDS.has(mid)) return;
+    if (mid) MESSAGE_IDS.add(mid);
+
+    const myUid = getMyUid();
+    chatMessages.insertAdjacentHTML(
+      "beforeend",
+      renderBubble(msg.sender_id === myUid, msg)
+    );
+    scrollBottom();
+  }
+
+  async function getUserMeta(uid, prefill = {}) {
+    let fullName = prefill.name || "User";
+    let photo = prefill.photo || FALLBACK_AVATAR;
+    let verified = false;
+
+    try {
+      if (window.db) {
+        const snap = await window.db.collection("users").doc(uid).get();
+        if (snap.exists) {
+          const d = snap.data() || {};
+          fullName = [d.firstName, d.lastName].filter(Boolean).join(" ").trim() || fullName;
+          photo = d.profilePic || photo;
+          verified = d.verified === true;
+        }
+      }
+    } catch (e) {
+      console.warn("getUserMeta error:", e);
+    }
+
+    return { fullName, photo, verified };
+  }
+
+  async function ensureConversationRow(convId, meUid, otherUid) {
+    const { data, error } = await sb
+      .from("conversations")
+      .select("id")
+      .eq("id", convId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data) return;
+
+    const { error: insertError } = await sb
+      .from("conversations")
+      .insert([{
+        id: convId,
+        user1: meUid,
+        user2: otherUid
+      }]);
+
+    if (insertError) throw insertError;
+  }
+
+  async function loadMessages(convId) {
+    clearMessagesKeepIntro();
+
+    const { data, error } = await sb
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", convId)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+
+    const frag = document.createDocumentFragment();
+    const myUid = getMyUid();
+
+    (data || []).forEach((msg) => {
+      if (msg?.id) MESSAGE_IDS.add(msg.id);
+      const wrap = document.createElement("div");
+      wrap.innerHTML = renderBubble(msg.sender_id === myUid, msg);
+      if (wrap.firstElementChild) frag.appendChild(wrap.firstElementChild);
+    });
+
+    chatMessages.appendChild(frag);
+    scrollBottom();
+  }
+
+  function subscribeRealtime(convId) {
+    stopRealtime();
+
+    REALTIME_CHANNEL = sb
+      .channel("messages_" + convId)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${convId}`
+        },
+        (payload) => {
+          appendMessage(payload.new);
+        }
+      )
+      .subscribe();
+  }
+
+  async function openChat(otherUid, prefill = {}) {
+    const meUid = getMyUid();
+
+    if (!meUid) {
+      if (typeof promptSignup === "function") promptSignup("Please signup to message");
+      else alert("Please login first");
+      return;
+    }
+
+    if (!otherUid || otherUid === meUid) return;
+
+    OPEN_UID = otherUid;
+    OPEN_CONV_ID = convIdFor(meUid, otherUid);
+
+    showChat();
+    chatInput.value = "";
+    updateSendButton();
+
+    try {
+      const meta = await getUserMeta(otherUid, prefill);
+
+      chatHeadName.textContent = meta.fullName;
+      chatHeadAvatar.src = meta.photo || FALLBACK_AVATAR;
+      setHeaderVerified(meta.verified);
+
+      chatMessages.innerHTML = "";
+      paintIntro(meta.fullName, meta.photo, meta.verified);
+
+      await ensureConversationRow(OPEN_CONV_ID, meUid, otherUid);
+      await loadMessages(OPEN_CONV_ID);
+      subscribeRealtime(OPEN_CONV_ID);
+    } catch (e) {
+      console.error("openChat error:", e);
+      alert("Chat open failed: " + (e?.message || "Unknown error"));
+    }
+  }
+
+  function safeFileName(name = "file") {
+    return String(name)
+      .normalize("NFKD")
+      .replace(/[^\w.\-]+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "") || "file";
+  }
+
+  async function compressImage(file, maxWidth = 1280, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        img.onload = () => {
+          let { width, height } = img;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject(new Error("Canvas not supported"));
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return reject(new Error("Image compression failed"));
+              const compressed = new File(
+                [blob],
+                safeFileName(file.name.replace(/\.\w+$/, "")) + ".jpg",
+                { type: "image/jpeg" }
+              );
+              resolve(compressed);
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+
+        img.onerror = () => reject(new Error("Image load failed"));
+        img.src = reader.result;
+      };
+
+      reader.onerror = () => reject(new Error("File read failed"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadMedia(file, convId) {
+    const path = `${convId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeFileName(file.name || "file")}`;
+
+    const { error: uploadError } = await sb
+      .storage
+      .from("chat-media")
+      .upload(path, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = sb
+      .storage
+      .from("chat-media")
+      .getPublicUrl(path);
+
+    if (!data?.publicUrl) {
+      throw new Error("Public URL not generated");
+    }
+
+    return data.publicUrl;
+  }
+
+  async function sendTextMessage() {
+    const meUid = getMyUid();
+    if (!meUid || !OPEN_UID || !OPEN_CONV_ID) return;
+
+    const text = (chatInput.value || "").trim();
+    if (!text || SENDING) return;
+
+    setSendingUI(true);
+
+    const originalText = text;
+    chatInput.value = "";
+    updateSendButton();
+
+    try {
+      const { error } = await sb
+        .from("messages")
+        .insert([{
+          conversation_id: OPEN_CONV_ID,
+          sender_id: meUid,
+          receiver_id: OPEN_UID,
+          type: "text",
+          text: originalText,
+          media_url: null
+        }]);
+
+      if (error) throw error;
+    } catch (e) {
+      console.error("Text send error:", e);
+      alert("Message send failed: " + (e?.message || "Unknown error"));
+      chatInput.value = originalText;
+      updateSendButton();
+    } finally {
+      setSendingUI(false);
+      updateSendButton();
+    }
+  }
+
+  async function sendMediaMessage(file) {
+    const meUid = getMyUid();
+    if (!meUid || !OPEN_UID || !OPEN_CONV_ID || !file) return;
+    if (SENDING) return;
+
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      alert("Only image or video allowed");
+      return;
+    }
+
+    const sizeMB = file.size / (1024 * 1024);
+
+    if (isImage && sizeMB > 8) {
+      alert("Image too large. Max 8MB allowed");
+      return;
+    }
+
+    if (isVideo && sizeMB > 20) {
+      alert("Video too large. Max 20MB allowed");
+      return;
+    }
+
+    setSendingUI(true);
+
+    try {
+      let uploadFile = file;
+
+      if (isImage) {
+        uploadFile = await compressImage(file, 1280, 0.72);
+      }
+
+      const mediaUrl = await uploadMedia(uploadFile, OPEN_CONV_ID);
+
+      const { error } = await sb
+        .from("messages")
+        .insert([{
+          conversation_id: OPEN_CONV_ID,
+          sender_id: meUid,
+          receiver_id: OPEN_UID,
+          type: isVideo ? "video" : "image",
+          text: "",
+          media_url: mediaUrl
+        }]);
+
+      if (error) throw error;
+    } catch (e) {
+      console.error("Media send error:", e);
+      alert("Media send failed: " + (e?.message || "Unknown error"));
+    } finally {
+      chatGalleryInput.value = "";
+      chatCameraInput.value = "";
+      setSendingUI(false);
+      updateSendButton();
+    }
+  }
+
+  // ========= EVENTS =========
+  chatSendBtn.addEventListener("click", sendTextMessage);
+
+  chatInput.addEventListener("input", updateSendButton);
+
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendTextMessage();
+    }
+  });
+
+  chatBackBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    stopRealtime();
+
+    OPEN_UID = null;
+    OPEN_CONV_ID = null;
+    MESSAGE_IDS.clear();
+
+    chatHeadName.textContent = "User";
+    chatHeadAvatar.src = FALLBACK_AVATAR;
+    setHeaderVerified(false);
+
+    chatMessages.innerHTML = "";
+    chatInput.value = "";
+    updateSendButton();
+
+    hideChat();
+  });
+
+  galleryBtn?.addEventListener("click", () => {
+    const meUid = getMyUid();
+    if (!meUid) {
+      if (typeof promptSignup === "function") promptSignup("Please signup to send media");
+      else alert("Please login first");
+      return;
+    }
+
+    if (!OPEN_UID) {
+      alert("Open a chat first");
+      return;
+    }
+
+    chatGalleryInput.click();
+  });
+
+  cameraBtn?.addEventListener("click", () => {
+    const meUid = getMyUid();
+    if (!meUid) {
+      if (typeof promptSignup === "function") promptSignup("Please signup to send media");
+      else alert("Please login first");
+      return;
+    }
+
+    if (!OPEN_UID) {
+      alert("Open a chat first");
+      return;
+    }
+
+    chatCameraInput.click();
+  });
+
+  chatGalleryInput.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (file) await sendMediaMessage(file);
+  });
+
+  chatCameraInput.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (file) await sendMediaMessage(file);
+  });
+
+  document.addEventListener("click", async (e) => {
+    const item = e.target.closest(".chat-item[data-uid]");
+    if (!item) return;
+
+    const uid = item.dataset.uid;
+    if (!uid) return;
+
+    const name = (item.querySelector(".chat-name-text")?.textContent || "").trim() || "User";
+    const photo = item.querySelector("img.chat-avatar")?.getAttribute("src") || FALLBACK_AVATAR;
+
+    await openChat(uid, { name, photo });
+  });
+
+  document.addEventListener("click", (e) => {
+    const img = e.target.closest(".chat-media-img");
+    if (!img) return;
+    window.open(img.src, "_blank");
+  });
+
+  document.addEventListener("click", (e) => {
+    const viewBtn = e.target.closest(".mchat-view-profile");
+    if (!viewBtn || !OPEN_UID) return;
+
+    if (typeof openUserProfile === "function") {
+      openUserProfile(OPEN_UID, {
+        name: chatHeadName.textContent || "User",
+        photo: chatHeadAvatar.src || FALLBACK_AVATAR
+      });
+    }
+  });
+
+  window.__openChat = openChat;
+
+  updateSendButton();
+  hideChat();
+
+  console.log("Ultra fast Supabase chat module ready");
 })();
